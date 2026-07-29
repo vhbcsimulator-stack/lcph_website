@@ -23,9 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
-# Admin folder (excluded as requested)
-admin/
-admin
+# Admin root folder (excluded as requested)
+/admin/
+/admin
 
 # Environment variables (keep secrets out of source control)
 .env

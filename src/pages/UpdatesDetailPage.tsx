@@ -100,7 +100,7 @@ export const UpdatesDetailPage: React.FC = () => {
 
           <EditableText
             value={update.title}
-            onSave={(val) => updateUpdateField(update.id, 'title', val)}
+            onSave={(val: string) => updateUpdateField(update.id, 'title', val)}
             tag="h1"
             className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface font-bold leading-tight block"
           />
@@ -110,7 +110,7 @@ export const UpdatesDetailPage: React.FC = () => {
             <span>Published on </span>
             <EditableText
               value={update.date}
-              onSave={(val) => updateUpdateField(update.id, 'date', val)}
+              onSave={(val: string) => updateUpdateField(update.id, 'date', val)}
               tag="span"
               className="font-semibold text-on-surface"
             />
@@ -120,9 +120,9 @@ export const UpdatesDetailPage: React.FC = () => {
         <div className="aspect-[16/9] rounded-xl overflow-hidden shadow-md border border-outline-variant/20 relative">
           <EditableImage
             value={update.image}
-            onSave={(val) => updateUpdateField(update.id, 'image', val)}
+            onSave={(val: string) => updateUpdateField(update.id, 'image', val)}
           >
-            {(src) => <img src={src} alt={update.title} className="w-full h-full object-cover" />}
+            {(src: string) => <img src={src} alt={update.title} className="w-full h-full object-cover" />}
           </EditableImage>
         </div>
 
@@ -130,7 +130,7 @@ export const UpdatesDetailPage: React.FC = () => {
           <h2 className="font-headline-sm text-headline-sm text-primary font-bold">Engineering Progress Report</h2>
           <EditableText
             value={update.content}
-            onSave={(val) => updateUpdateField(update.id, 'content', val)}
+            onSave={(val: string) => updateUpdateField(update.id, 'content', val)}
             tag="p"
             multiline={true}
             className="font-body-md text-body-md text-on-surface-variant leading-relaxed block"

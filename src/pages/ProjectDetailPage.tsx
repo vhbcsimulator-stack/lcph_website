@@ -233,7 +233,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <MapPin className="mr-2 w-5 h-5 text-primary-fixed" />
                   <EditableText
                     value={project.location}
-                    onSave={(val) => updateProjectField(project.id, 'location', val)}
+                    onSave={(val: string) => updateProjectField(project.id, 'location', val)}
                     tag="span"
                   />
                 </p>
@@ -246,13 +246,13 @@ export const ProjectDetailPage: React.FC = () => {
             >
               <EditableImage
                 value={project.gallery[1 % Math.max(project.gallery.length, 1)] || project.image}
-                onSave={(val) => {
+                onSave={(val: string) => {
                   const updated = [...project.gallery];
                   updated[1] = val;
                   updateProjectField(project.id, 'gallery', updated);
                 }}
               >
-                {(src) => (
+                {(src: string) => (
                   <div
                     onClick={() => openLightbox(1 % project.gallery.length)}
                     className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -269,13 +269,13 @@ export const ProjectDetailPage: React.FC = () => {
             >
               <EditableImage
                 value={project.gallery[2 % Math.max(project.gallery.length, 1)] || project.image}
-                onSave={(val) => {
+                onSave={(val: string) => {
                   const updated = [...project.gallery];
                   updated[2] = val;
                   updateProjectField(project.id, 'gallery', updated);
                 }}
               >
-                {(src) => (
+                {(src: string) => (
                   <div
                     onClick={() => openLightbox(2 % project.gallery.length)}
                     className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
@@ -312,7 +312,7 @@ export const ProjectDetailPage: React.FC = () => {
               
               <EditableText
                 value={project.longDescription}
-                onSave={(val) => updateProjectField(project.id, 'longDescription', val)}
+                onSave={(val: string) => updateProjectField(project.id, 'longDescription', val)}
                 className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed"
                 tag="p"
                 multiline={true}
@@ -328,7 +328,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Lot Sizes</p>
                   <EditableText
                     value={project.specs.lotSizes}
-                    onSave={(val) => updateProjectField(project.id, 'specs', { ...project.specs, lotSizes: val })}
+                    onSave={(val: string) => updateProjectField(project.id, 'specs', { ...project.specs, lotSizes: val })}
                     className="font-headline-sm text-headline-sm text-on-background font-bold"
                     tag="p"
                   />
@@ -337,7 +337,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Status</p>
                   <EditableText
                     value={project.status}
-                    onSave={(val) => updateProjectField(project.id, 'status', val)}
+                    onSave={(val: string) => updateProjectField(project.id, 'status', val as any)}
                     className="font-headline-sm text-headline-sm text-primary font-bold animate-pulse"
                     tag="p"
                   />
@@ -346,7 +346,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Turnover</p>
                   <EditableText
                     value={project.specs.totalArea}
-                    onSave={(val) => updateProjectField(project.id, 'specs', { ...project.specs, totalArea: val })}
+                    onSave={(val: string) => updateProjectField(project.id, 'specs', { ...project.specs, totalArea: val })}
                     className="font-headline-sm text-headline-sm text-on-background font-bold"
                     tag="p"
                   />
