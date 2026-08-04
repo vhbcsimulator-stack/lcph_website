@@ -10,6 +10,7 @@ interface AnimatedPageProps {
 export const AnimatedPage: React.FC<AnimatedPageProps> = ({ children, className = "" }) => {
   return (
     <motion.div
+      data-page-motion="custom"
       variants={pageTransition}
       initial="initial"
       animate="animate"

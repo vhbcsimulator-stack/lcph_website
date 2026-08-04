@@ -2,7 +2,8 @@ import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { newsData } from '../data/newsData';
-import { Calendar, Clock, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock } from 'lucide-react';
+import { EditableText } from '../components/admin/EditableText';
 
 export const NewsDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -35,7 +36,7 @@ export const NewsDetailPage: React.FC = () => {
               <span>{article.readTime}</span>
             </span>
             <span>•</span>
-            <span>By {article.author}</span>
+            <span><EditableText contentKey="news_detail_byline" value="By" tag="span" inline /> {article.author}</span>
           </div>
         </div>
 
@@ -53,7 +54,7 @@ export const NewsDetailPage: React.FC = () => {
         <div className="pt-sm border-t border-outline-variant/30">
           <Link to="/news" className="inline-flex items-center gap-2 text-label-lg font-label-lg text-primary hover:underline cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to News & Events</span>
+            <EditableText contentKey="news_detail_back" value="Back to News &amp; Events" tag="span" inline />
           </Link>
         </div>
       </div>

@@ -2,18 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { MapPin, CheckCircle, MessageSquare, Plus, Trash2, X, ArrowRight } from 'lucide-react';
 import { Lightbox } from '../components/ui/Lightbox';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { ArrowRight, CheckCircle, MapPin, MessageSquare, Plus, Trash2, X } from 'lucide-react';
 
 export const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { projects, loading, updateProjectField, deleteProject, isAdmin } = useAdmin();
+  const { projects, loading, updateProjectField, deleteProject, isAdmin, pageContent } = useAdmin();
   const project = projects.find(p => p.slug === slug || p.id === slug);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -169,10 +169,19 @@ export const ProjectDetailPage: React.FC = () => {
   if (!project) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-4 px-4">
-        <h2 className="text-2xl font-bold text-primary">Project Not Found</h2>
-        <p className="text-on-surface-variant max-w-md">The project you are looking for does not exist or has been removed.</p>
+        <h2 className="text-2xl font-bold text-primary">
+          <EditableText contentKey="project_detail_missing_title" value="Project Not Found" tag="span" inline />
+        </h2>
+        <p className="text-on-surface-variant max-w-md">
+          <EditableText
+            contentKey="project_detail_missing_text"
+            value="The project you are looking for does not exist or has been removed."
+            tag="span"
+            inline
+          />
+        </p>
         <Link to="/projects" className="bg-primary text-on-primary font-bold text-sm px-6 py-2.5 rounded-lg hover:bg-primary-container">
-          Back to Projects
+          <EditableText contentKey="project_detail_back" value="Back to Projects" tag="span" inline />
         </Link>
       </div>
     );
@@ -216,10 +225,16 @@ export const ProjectDetailPage: React.FC = () => {
                   ></div>
                 )}
               </EditableImage>
-              <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent opacity-60"></div>
-              <div className="absolute bottom-md left-md text-white pr-md">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent opacity-60"></div>
+              {/* z-40 keeps this copy above the image editor's hover overlay (z-30) so it stays clickable */}
+              <div className="absolute bottom-md left-md z-40 text-white pr-md">
                 <span className="bg-primary text-on-primary font-label-lg text-label-lg px-3 py-1 rounded-full mb-xs inline-block shadow-sm font-bold">
-                  {project.status}
+                  <EditableText
+                    value={project.status}
+                    onSave={(val: string) => updateProjectField(project.id, 'status', val as any)}
+                    tag="span"
+                    inline
+                  />
                 </span>
                 
                 <EditableText
@@ -230,7 +245,7 @@ export const ProjectDetailPage: React.FC = () => {
                 />
 
                 <p className="font-body-lg text-body-lg text-surface-variant flex items-center mt-2">
-                  <MapPin className="mr-2 w-5 h-5 text-primary-fixed" />
+                  <MapPin className="w-5 h-5 mr-2 text-primary-fixed" />
                   <EditableText
                     value={project.location}
                     onSave={(val: string) => updateProjectField(project.id, 'location', val)}
@@ -284,8 +299,9 @@ export const ProjectDetailPage: React.FC = () => {
                 )}
               </EditableImage>
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
-                <span className="text-white font-label-lg text-label-lg flex items-center bg-on-background/50 px-4 py-2 rounded-full backdrop-blur-sm">
-                  View Gallery ({project.gallery.length})
+                <span className="pointer-events-auto z-40 text-white font-label-lg text-label-lg flex items-center bg-on-background/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                  <EditableText contentKey="project_detail_gallery_cta" value="View Gallery" tag="span" inline />
+                  {' '}({project.gallery.length})
                 </span>
               </div>
             </div>
@@ -295,10 +311,10 @@ export const ProjectDetailPage: React.FC = () => {
         {/* Sticky Sub-Navigation */}
         <div className="w-full bg-surface-container-lowest border-y border-outline-variant/30 sticky top-[72px] z-40 shadow-sm">
           <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop flex overflow-x-auto">
-            <a href="#overview" className="font-label-lg text-label-lg text-primary border-b-2 border-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors">Overview</a>
-            <a href="#amenities" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors">Amenities</a>
-            <a href="#masterplan" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors">Walkthrough Video</a>
-            <a href="#gallery" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors">Gallery</a>
+            <a href="#overview" className="font-label-lg text-label-lg text-primary border-b-2 border-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_overview" value="Overview" tag="span" inline /></a>
+            <a href="#amenities" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_amenities" value="Amenities" tag="span" inline /></a>
+            <a href="#masterplan" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_video" value="Walkthrough Video" tag="span" inline /></a>
+            <a href="#gallery" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_gallery" value="Gallery" tag="span" inline /></a>
           </div>
         </div>
 
@@ -308,7 +324,7 @@ export const ProjectDetailPage: React.FC = () => {
           <div className="lg:col-span-8 space-y-xl">
             {/* Overview */}
             <section id="overview" className="scroll-mt-[140px] space-y-md">
-              <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">Discover Serenity</h2>
+              <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_overview_title" value="Discover Serenity" tag="span" inline /></h2>
               
               <EditableText
                 value={project.longDescription}
@@ -321,11 +337,18 @@ export const ProjectDetailPage: React.FC = () => {
               {/* Quick Stats Glassmorphism Card */}
               <div className="bg-surface-container-low/50 backdrop-blur-sm border border-outline-variant/30 rounded-xl p-md grid grid-cols-2 md:grid-cols-4 gap-md shadow-sm">
                 <div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Property Type</p>
-                  <p className="font-headline-sm text-headline-sm text-on-background font-bold">{project.category} Estate</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider"><EditableText contentKey="project_detail_stat_type" value="Property Type" tag="span" inline /></p>
+                  {/* One field: the category is what gets edited, "Estate" rides along as a suffix */}
+                  <EditableText
+                    value={project.category}
+                    onSave={(val: string) => updateProjectField(project.id, 'category', val as any)}
+                    suffix={pageContent['project_detail_stat_type_suffix'] ?? 'Estate'}
+                    className="font-headline-sm text-headline-sm text-on-background font-bold"
+                    tag="p"
+                  />
                 </div>
                 <div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Lot Sizes</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider"><EditableText contentKey="project_detail_stat_lot_sizes" value="Lot Sizes" tag="span" inline /></p>
                   <EditableText
                     value={project.specs.lotSizes}
                     onSave={(val: string) => updateProjectField(project.id, 'specs', { ...project.specs, lotSizes: val })}
@@ -334,7 +357,7 @@ export const ProjectDetailPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Status</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider"><EditableText contentKey="project_detail_stat_status" value="Status" tag="span" inline /></p>
                   <EditableText
                     value={project.status}
                     onSave={(val: string) => updateProjectField(project.id, 'status', val as any)}
@@ -343,7 +366,7 @@ export const ProjectDetailPage: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider">Turnover</p>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-1 uppercase tracking-wider"><EditableText contentKey="project_detail_stat_turnover" value="Turnover" tag="span" inline /></p>
                   <EditableText
                     value={project.specs.totalArea}
                     onSave={(val: string) => updateProjectField(project.id, 'specs', { ...project.specs, totalArea: val })}
@@ -356,7 +379,7 @@ export const ProjectDetailPage: React.FC = () => {
 
             {/* Amenities Section */}
             <section id="amenities" className="scroll-mt-[140px] space-y-md">
-              <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">Exclusive Amenities</h2>
+              <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_amenities_title" value="Exclusive Amenities" tag="span" inline /></h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
                 {project.amenities.slice(0, 4).map((amenity, idx) => (
                   <div key={idx} className="flex items-start p-sm rounded-lg hover:bg-surface-container-low border border-transparent hover:border-outline-variant/20 transition-all duration-200">
@@ -364,10 +387,23 @@ export const ProjectDetailPage: React.FC = () => {
                       <CheckCircle className="w-5 h-5 text-on-primary-container" />
                     </div>
                     <div>
-                      <h3 className="font-headline-sm text-headline-sm text-on-background font-bold mb-1">{amenity}</h3>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">
-                        High-quality township features curated exclusively for LCPH homeowners.
-                      </p>
+                      <EditableText
+                        value={amenity}
+                        onSave={(val: string) => {
+                          const updated = [...project.amenities];
+                          updated[idx] = val;
+                          updateProjectField(project.id, 'amenities', updated);
+                        }}
+                        className="font-headline-sm text-headline-sm text-on-background font-bold mb-1"
+                        tag="h3"
+                      />
+                      <EditableText
+                        contentKey="project_detail_amenity_blurb"
+                        value="High-quality township features curated exclusively for LCPH homeowners."
+                        className="font-body-sm text-body-sm text-on-surface-variant"
+                        tag="p"
+                        multiline={true}
+                      />
                     </div>
                   </div>
                 ))}
@@ -378,7 +414,7 @@ export const ProjectDetailPage: React.FC = () => {
                   to={`/amenities?project=${project.id}`}
                   className="inline-flex items-center gap-2 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container font-bold text-sm px-5 py-2.5 rounded-lg transition-all shadow-sm group cursor-pointer"
                 >
-                  <span>View More Amenities</span>
+                  <EditableText contentKey="project_detail_more_amenities" value="View More Amenities" tag="span" inline />
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -387,7 +423,7 @@ export const ProjectDetailPage: React.FC = () => {
             {/* Walkthrough Video */}
             <section id="masterplan" className="scroll-mt-[140px] space-y-md">
               <div className="flex justify-between items-center">
-                <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">Walkthrough Video</h2>
+                <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_video_title" value="Walkthrough Video" tag="span" inline /></h2>
                 {isAdmin && (
                   <button
                     onClick={() => setVideoModalOpen(true)}
@@ -470,8 +506,8 @@ export const ProjectDetailPage: React.FC = () => {
                   )
                 ) : (
                   <div className="text-on-surface-variant font-body-md text-center p-6">
-                    <p className="font-bold text-lg mb-1 text-white">No Video Available</p>
-                    <p className="text-xs text-white/60">Walkthrough video will be uploaded soon.</p>
+                    <p className="font-bold text-lg mb-1 text-white"><EditableText contentKey="project_detail_video_empty_title" value="No Video Available" tag="span" inline /></p>
+                    <p className="text-xs text-white/60"><EditableText contentKey="project_detail_video_empty_text" value="Walkthrough video will be uploaded soon." tag="span" inline /></p>
                   </div>
                 )}
               </div>
@@ -479,7 +515,7 @@ export const ProjectDetailPage: React.FC = () => {
             {/* Photo Gallery Section */}
             <section id="gallery" className="scroll-mt-[140px] space-y-md">
               <div className="flex items-end justify-between">
-                <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold">Photo Gallery</h2>
+                <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_gallery_title" value="Photo Gallery" tag="span" inline /></h2>
                 <span className="text-sm text-on-surface-variant">{project.gallery.length} photo{project.gallery.length !== 1 ? 's' : ''}</span>
               </div>
 
@@ -577,16 +613,27 @@ export const ProjectDetailPage: React.FC = () => {
           <div className="lg:col-span-4 relative">
             <div className="sticky top-[140px] bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md shadow-lg space-y-4">
               <h3 className="font-headline-md text-headline-md text-on-background font-bold">
-                Interested in {project.name}?
+                <EditableText contentKey="project_detail_widget_title" value="Interested in" tag="span" inline />{' '}
+                <EditableText
+                  value={project.name}
+                  onSave={(val: string) => updateProjectField(project.id, 'name', val)}
+                  tag="span"
+                  inline
+                />
+                ?
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Schedule an exclusive site visit or speak directly with our premium property consultants.
-              </p>
+              <EditableText
+                contentKey="project_detail_widget_text"
+                value="Schedule an exclusive site visit or speak directly with our premium property consultants."
+                className="font-body-sm text-body-sm text-on-surface-variant"
+                tag="p"
+                multiline={true}
+              />
 
               {formSubmitted ? (
                 <div className="p-6 bg-primary-container text-on-primary-container rounded-xl text-center space-y-3">
                   <CheckCircle className="w-10 h-10 mx-auto" />
-                  <h4 className="font-headline-sm text-headline-sm font-bold">Visit Scheduled!</h4>
+                  <h4 className="font-headline-sm text-headline-sm font-bold"><EditableText contentKey="project_detail_success_title" value="Visit Scheduled!" tag="span" inline /></h4>
                   <p className="font-body-sm text-body-sm opacity-90">
                     We have logged your request. A consultant will call you at {visitorPhone} to finalize the arrangements.
                   </p>
@@ -594,7 +641,7 @@ export const ProjectDetailPage: React.FC = () => {
               ) : (
                 <form onSubmit={handleBookVisit} className="space-y-4">
                   <div>
-                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">Full Name</label>
+                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1"><EditableText contentKey="project_detail_label_name" value="Full Name" tag="span" inline /></label>
                     <input 
                       type="text" 
                       required
@@ -605,7 +652,7 @@ export const ProjectDetailPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">Email Address</label>
+                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1"><EditableText contentKey="project_detail_label_email" value="Email Address" tag="span" inline /></label>
                     <input 
                       type="email" 
                       required
@@ -616,7 +663,7 @@ export const ProjectDetailPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">Phone Number</label>
+                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1"><EditableText contentKey="project_detail_label_phone" value="Phone Number" tag="span" inline /></label>
                     <input 
                       type="tel" 
                       required
@@ -627,7 +674,7 @@ export const ProjectDetailPage: React.FC = () => {
                     />
                   </div>
                   <div>
-                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">Preferred Date for Visit</label>
+                    <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1"><EditableText contentKey="project_detail_label_date" value="Preferred Date for Visit" tag="span" inline /></label>
                     <input 
                       type="date" 
                       required
@@ -640,7 +687,7 @@ export const ProjectDetailPage: React.FC = () => {
                     type="submit"
                     className="w-full bg-primary text-on-primary font-label-lg text-label-lg px-6 py-4 rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-md hover:shadow-lg active:scale-95 duration-100 mt-4 cursor-pointer"
                   >
-                    Book a Site Visit
+                    <EditableText contentKey="project_detail_book_cta" value="Book a Site Visit" tag="span" inline />
                   </button>
                   <div className="flex items-center justify-center mt-4">
                     <span className="w-full border-t border-outline-variant/30"></span>
@@ -651,8 +698,8 @@ export const ProjectDetailPage: React.FC = () => {
                     to="/contact"
                     className="w-full bg-transparent border-2 border-tertiary text-tertiary font-label-lg text-label-lg px-6 py-3 rounded-lg hover:bg-tertiary/5 transition-colors mt-4 flex items-center justify-center"
                   >
-                    <MessageSquare className="mr-2 w-5 h-5" />
-                    <span>Chat with an Agent</span>
+                    <MessageSquare className="w-5 h-5 mr-2" />
+                    <EditableText contentKey="project_detail_chat_cta" value="Chat with an Agent" tag="span" inline />
                   </Link>
                 </form>
               )}

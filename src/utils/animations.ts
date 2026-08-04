@@ -4,22 +4,22 @@ import type { Variants } from 'framer-motion';
 export const pageTransition: Variants = {
   initial: {
     opacity: 0,
-    y: 15,
+    y: 8,
   },
   animate: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.4,
-      ease: [0.25, 0.1, 0.25, 1.0], // cubic-bezier for smooth easing
+      duration: 0.36,
+      ease: [0.2, 0, 0, 1],
     },
   },
   exit: {
     opacity: 0,
-    y: -15,
+    y: -6,
     transition: {
-      duration: 0.3,
-      ease: [0.25, 0.1, 0.25, 1.0],
+      duration: 0.24,
+      ease: [0.4, 0, 1, 1],
     },
   },
 };
@@ -28,7 +28,7 @@ export const pageTransition: Variants = {
 export const fadeInUp = (duration = 0.5, delay = 0): Variants => ({
   hidden: {
     opacity: 0,
-    y: 30,
+    y: 18,
   },
   visible: {
     opacity: 1,
@@ -36,7 +36,7 @@ export const fadeInUp = (duration = 0.5, delay = 0): Variants => ({
     transition: {
       duration,
       delay,
-      ease: 'easeOut',
+      ease: [0.2, 0, 0, 1],
     },
   },
 });
@@ -45,7 +45,7 @@ export const fadeInUp = (duration = 0.5, delay = 0): Variants => ({
 export const fadeInLeft = (duration = 0.5, delay = 0): Variants => ({
   hidden: {
     opacity: 0,
-    x: -30,
+    x: -20,
   },
   visible: {
     opacity: 1,
@@ -53,7 +53,7 @@ export const fadeInLeft = (duration = 0.5, delay = 0): Variants => ({
     transition: {
       duration,
       delay,
-      ease: 'easeOut',
+      ease: [0.2, 0, 0, 1],
     },
   },
 });
@@ -62,7 +62,7 @@ export const fadeInLeft = (duration = 0.5, delay = 0): Variants => ({
 export const fadeInRight = (duration = 0.5, delay = 0): Variants => ({
   hidden: {
     opacity: 0,
-    x: 30,
+    x: 20,
   },
   visible: {
     opacity: 1,
@@ -70,7 +70,7 @@ export const fadeInRight = (duration = 0.5, delay = 0): Variants => ({
     transition: {
       duration,
       delay,
-      ease: 'easeOut',
+      ease: [0.2, 0, 0, 1],
     },
   },
 });
@@ -91,15 +91,15 @@ export const staggerContainer = (staggerChildren = 0.1, delayChildren = 0): Vari
 export const scaleUp = (duration = 0.4, delay = 0): Variants => ({
   hidden: {
     opacity: 0,
-    scale: 0.95,
+    y: 14,
   },
   visible: {
     opacity: 1,
-    scale: 1,
+    y: 0,
     transition: {
       duration,
       delay,
-      ease: 'easeOut',
+      ease: [0.2, 0, 0, 1],
     },
   },
 });
@@ -107,19 +107,19 @@ export const scaleUp = (duration = 0.4, delay = 0): Variants => ({
 // Accordion collapse/expand transition
 export const accordionTransition: Variants = {
   collapsed: {
-    height: 0,
     opacity: 0,
+    y: -4,
     transition: {
-      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
-      opacity: { duration: 0.2 },
+      duration: 0.16,
+      ease: [0.4, 0, 1, 1],
     },
   },
   open: {
-    height: 'auto',
     opacity: 1,
+    y: 0,
     transition: {
-      height: { duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] },
-      opacity: { duration: 0.25, delay: 0.05 },
+      duration: 0.22,
+      ease: [0.2, 0, 0, 1],
     },
   },
 };

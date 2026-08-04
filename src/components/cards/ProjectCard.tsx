@@ -1,11 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Project } from '../../types';
 import { useAdmin } from '../../context/AdminContext';
 import { EditableText } from '../admin/EditableText';
 import { EditableImage } from '../admin/EditableImage';
+import { ArrowRight, MapPin } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
@@ -18,24 +18,34 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
     <motion.div 
       whileHover={{ y: -6 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group h-full"
+      className="interactive-card bg-surface-container-lowest rounded-tr-[13rem] border border-outline-variant/20 overflow-hidden shadow-sm transition-all flex flex-col group h-full"
     >
-      <div className="relative aspect-[16/10] overflow-hidden">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-tr-[13rem]">
         <EditableImage value={project.image} onSave={(val) => updateProjectField(project.id, 'image', val)}>
           {(src) => (
             <img 
               src={src} 
               alt={project.name} 
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
             />
           )}
         </EditableImage>
-        <div className="absolute top-3 left-3 flex gap-2 z-10">
+        <div className="absolute bottom-3 left-3 z-40 flex gap-2">
           <span className="bg-primary-container text-on-primary-container text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-md">
-            {project.status}
+            <EditableText
+              value={project.status}
+              onSave={(val) => updateProjectField(project.id, 'status', val as Project['status'])}
+              tag="span"
+              inline
+            />
           </span>
           <span className="bg-secondary-container text-on-secondary-container text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-md">
-            {project.category}
+            <EditableText
+              value={project.category}
+              onSave={(val) => updateProjectField(project.id, 'category', val as Project['category'])}
+              tag="span"
+              inline
+            />
           </span>
         </div>
       </div>
@@ -78,7 +88,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         {/* Specs highlights */}
         <div className="grid grid-cols-2 gap-2 pt-3 border-t border-outline-variant/20 text-body-sm">
           <div>
-            <span className="text-on-surface-variant block opacity-85">Total Area</span>
+            <EditableText
+              contentKey="card_project_total_area_label"
+              value="Total Area"
+              className="text-on-surface-variant block opacity-85"
+              tag="span"
+            />
             <EditableText
               value={project.specs.totalArea}
               onSave={(val) => updateProjectField(project.id, 'specs', { ...project.specs, totalArea: val })}
@@ -87,7 +102,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             />
           </div>
           <div>
-            <span className="text-on-surface-variant block opacity-85">Lot Sizes</span>
+            <EditableText
+              contentKey="card_project_lot_sizes_label"
+              value="Lot Sizes"
+              className="text-on-surface-variant block opacity-85"
+              tag="span"
+            />
             <EditableText
               value={project.specs.lotSizes}
               onSave={(val) => updateProjectField(project.id, 'specs', { ...project.specs, lotSizes: val })}
@@ -99,10 +119,10 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
 
         <Link
           to={`/projects/${project.slug}`}
-          className="w-full mt-2 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-primary text-on-primary font-label-lg text-label-lg rounded hover:bg-primary-container hover:text-on-primary-container transition-all group-hover:shadow-md cursor-pointer"
+          className="home-cta w-full mt-2 inline-flex items-center justify-center gap-2 py-2.5 px-4 bg-primary text-on-primary font-label-lg text-label-lg rounded hover:bg-primary-container hover:text-on-primary-container group-hover:shadow-md cursor-pointer"
         >
-          <span>View Master Plan</span>
-          <ArrowRight className="w-4 h-4" />
+          <EditableText contentKey="card_project_cta" value="View Master Plan" tag="span" inline />
+          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
       </div>
     </motion.div>

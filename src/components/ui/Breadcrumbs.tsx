@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { EditableText } from '../admin/EditableText';
 
 interface BreadcrumbItem {
   label: string;
@@ -18,7 +19,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({ items }) => {
         <li>
           <Link to="/" className="hover:text-lcph-primary flex items-center gap-1 transition-colors">
             <Home className="w-3.5 h-3.5 text-slate-400" />
-            <span>Home</span>
+            <EditableText contentKey="breadcrumb_home" value="Home" tag="span" inline />
           </Link>
         </li>
         {items.map((item, idx) => (

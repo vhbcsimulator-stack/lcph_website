@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ProjectCard } from '../components/cards/ProjectCard';
-import { Filter, MapPin, Map, Star, ChevronDown } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import type { Project } from '../types';
+import { ChevronDown, Filter, MapPin, Star } from 'lucide-react';
 
 export const ProjectsPage: React.FC = () => {
   const { projects, isAdmin, updateProjectField } = useAdmin();
@@ -55,7 +56,9 @@ export const ProjectsPage: React.FC = () => {
 
           <div className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20 flex flex-col md:flex-row gap-sm items-end">
             <div className="w-full md:w-1/4 space-y-xs">
-              <label className="font-label-lg text-label-lg text-on-surface-variant block">Location</label>
+              <label className="font-label-lg text-label-lg text-on-surface-variant block">
+                <EditableText contentKey="projects_filter_location" value="Location" tag="span" inline />
+              </label>
               <select
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
@@ -69,7 +72,9 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             <div className="w-full md:w-1/4 space-y-xs">
-              <label className="font-label-lg text-label-lg text-on-surface-variant block">Status</label>
+              <label className="font-label-lg text-label-lg text-on-surface-variant block">
+                <EditableText contentKey="projects_filter_status" value="Status" tag="span" inline />
+              </label>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
@@ -82,7 +87,9 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             <div className="w-full md:w-1/4 space-y-xs">
-              <label className="font-label-lg text-label-lg text-on-surface-variant block">Type</label>
+              <label className="font-label-lg text-label-lg text-on-surface-variant block">
+                <EditableText contentKey="projects_filter_type" value="Type" tag="span" inline />
+              </label>
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
@@ -101,7 +108,7 @@ export const ProjectsPage: React.FC = () => {
                 className="w-full bg-primary text-on-primary font-label-lg text-label-lg px-6 py-3 rounded hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 cursor-pointer h-[48px]"
               >
                 <Filter className="w-4 h-4" />
-                <span>Apply Filters</span>
+                <EditableText contentKey="projects_filter_cta" value="Apply Filters" tag="span" inline />
               </button>
             </div>
           </div>
@@ -109,17 +116,26 @@ export const ProjectsPage: React.FC = () => {
 
         {/* Featured Project Asymmetric Bento Block */}
         {featuredProject && (
-          <section className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+          <section className="grid grid-cols-1 gap-5 md:grid-cols-12 md:grid-rows-2 md:auto-rows-[238px]">
             {/* Main featured card */}
-            <div className="md:col-span-8 relative rounded-2xl overflow-hidden shadow-lg h-[400px] md:h-[500px] group">
+            <div className="group relative h-full overflow-hidden rounded-xl shadow-lg md:col-span-8 md:row-span-2 md:h-100">
               <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                style={{ backgroundImage: `url('${featuredProject.image}')` }}
+                className="absolute inset-0 bg-cover bg-center bg-blend-multiply transition-transform duration-700 group-hover:scale-105"
+                style={{
+                  backgroundColor: 'rgba(2, 2, 2, 0.2)',
+                  backgroundImage: `url('${featuredProject.image}')`,
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 p-lg w-full text-white">
                 <span className="inline-block bg-primary text-on-primary font-label-lg text-label-lg px-3 py-1 rounded-full mb-3 shadow-sm">
-                  Featured • {featuredProject.status}
+                  <EditableText contentKey="projects_featured_badge" value="Featured" tag="span" inline /> •{' '}
+                  <EditableText
+                    value={featuredProject.status}
+                    onSave={(val) => updateProjectField(featuredProject.id, 'status', val as Project['status'])}
+                    tag="span"
+                    inline
+                  />
                 </span>
                 <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-white mb-2 font-bold">
                   {featuredProject.name}
@@ -132,7 +148,7 @@ export const ProjectsPage: React.FC = () => {
                   to={`/projects/${featuredProject.slug}`}
                   className="bg-surface text-primary font-label-lg text-label-lg px-6 py-3 rounded hover:bg-surface-container-low transition-colors inline-block"
                 >
-                  Explore Project
+                  <EditableText contentKey="projects_featured_cta" value="Explore Project" tag="span" inline />
                 </Link>
               </div>
 
@@ -195,27 +211,25 @@ export const ProjectsPage: React.FC = () => {
               )}
             </div>
 
-            {/* Side column */}
-            <div className="md:col-span-4 flex flex-col gap-gutter h-[400px] md:h-[500px]">
-              <div className="flex-1 bg-surface-container-lowest rounded-2xl p-md shadow-sm border border-outline-variant/20 flex flex-col justify-center">
-                <EditableText
-                  contentKey="projects_invest_title"
-                  className="font-headline-sm text-headline-sm text-primary mb-2 font-bold"
-                  tag="h3"
-                />
-                <EditableText
-                  contentKey="projects_invest_text"
-                  className="font-body-md text-body-md text-on-surface-variant mb-4 leading-relaxed"
-                  tag="p"
-                  multiline={true}
-                />
-              </div>
-              <div className="flex-1 relative rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20">
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url('${featuredProject.gallery?.[0] ?? featuredProject.image}')` }}
-                />
-              </div>
+            {/* Supporting bento tiles */}
+            <div className="flex min-h-[220px] flex-col justify-center rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-md shadow-sm md:col-span-4 md:min-h-0">
+              <EditableText
+                contentKey="projects_invest_title"
+                className="mb-2 font-headline-sm text-headline-sm font-bold text-primary"
+                tag="h3"
+              />
+              <EditableText
+                contentKey="projects_invest_text"
+                className="font-body-md text-body-md leading-relaxed text-on-surface-variant"
+                tag="p"
+                multiline={true}
+              />
+            </div>
+            <div className="relative min-h-[220px] overflow-hidden rounded-xl border border-outline-variant/20 shadow-sm md:col-span-4 md:min-h-0">
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105"
+                style={{ backgroundImage: `url('${featuredProject.gallery?.[0] ?? featuredProject.image}')` }}
+              />
             </div>
           </section>
         )}
@@ -223,38 +237,35 @@ export const ProjectsPage: React.FC = () => {
         {/* All Projects Grid */}
         <section className="space-y-md">
           <div className="flex justify-between items-end border-b border-outline-variant/30 pb-sm">
-            <h2 className="font-headline-md text-headline-md text-on-background font-bold">All Projects</h2>
+            <EditableText
+              contentKey="projects_grid_title"
+              value="All Projects"
+              className="font-headline-md text-headline-md text-on-background font-bold"
+              tag="h2"
+              inline
+            />
             <span className="font-body-sm text-body-sm text-on-surface-variant">
               Showing {filteredProjects.length} results
             </span>
           </div>
 
           {filteredProjects.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            <div className="flex flex-wrap justify-center gap-gutter">
               {filteredProjects.map(project => (
-                <ProjectCard key={project.id} project={project} />
+                <div key={project.id} className="w-full max-w-[410px] md:w-[calc(50%_-_12px)] lg:w-[calc(33.333%_-_16px)]">
+                  <ProjectCard project={project} />
+                </div>
               ))}
             </div>
           ) : (
             <div className="text-center py-12 text-on-surface-variant">
-              No projects found matching the selected filter criteria.
+              <EditableText
+                contentKey="projects_empty_text"
+                value="No projects found matching the selected filter criteria."
+                tag="p"
+              />
             </div>
           )}
-        </section>
-
-        {/* Interactive Map Placeholder */}
-        <section className="bg-surface-container-low rounded-2xl p-md border border-outline-variant/30 flex flex-col items-center justify-center h-96 relative overflow-hidden group cursor-pointer">
-          <div className="absolute inset-0 opacity-10 mix-blend-multiply bg-primary" />
-          <div className="z-10 text-center space-y-4 bg-surface/90 backdrop-blur-md p-lg rounded-xl shadow-sm border border-outline-variant/20 max-w-[448px] transition-transform duration-300 group-hover:-translate-y-2">
-            <Map className="w-12 h-12 text-primary mx-auto" />
-            <h3 className="font-headline-md text-headline-md text-primary font-bold">Interactive Project Map</h3>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Explore the geographical spread of our developments and nearby landmarks.
-            </p>
-            <button className="bg-primary text-on-primary font-label-lg text-label-lg px-6 py-2 rounded hover:bg-primary-container hover:text-on-primary-container transition-colors w-full cursor-pointer h-[44px]">
-              Open Map View
-            </button>
-          </div>
         </section>
       </div>
     </div>

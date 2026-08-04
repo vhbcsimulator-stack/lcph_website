@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAdmin } from '../../context/AdminContext';
-import { Image, UploadCloud, X } from 'lucide-react';
 import { compressImage } from '../../utils/image';
+import { Image, UploadCloud, X } from 'lucide-react';
 
 interface EditableImageProps {
   contentKey?: string; // used if editing static page images
@@ -100,7 +100,7 @@ export const EditableImage: React.FC<EditableImageProps> = ({
       {!isEditing && (
         <div 
           className={`absolute inset-0 bg-black/40 transition-opacity duration-200 z-30 ${
-            overlayClassName ? overlayClassName : 'p-4 flex items-start justify-end'
+            overlayClassName ? overlayClassName : 'p-4 flex items-center justify-center'
           } ${
             isHovered ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}

@@ -1,11 +1,11 @@
 import React, { useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { Calendar, Activity, ArrowLeft, X, UploadCloud } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
+import { Activity, ArrowLeft, Calendar, UploadCloud, X } from 'lucide-react';
 
 export const UpdatesDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -26,8 +26,8 @@ export const UpdatesDetailPage: React.FC = () => {
   if (!update) {
     return (
       <div className="min-h-[50vh] flex flex-col items-center justify-center text-center space-y-4">
-        <p className="text-on-surface-variant font-body-lg">Development update not found.</p>
-        <Link to="/updates" className="text-primary hover:underline font-semibold">Back to all updates</Link>
+        <p className="text-on-surface-variant font-body-lg"><EditableText contentKey="update_detail_missing" value="Development update not found." tag="span" inline /></p>
+        <Link to="/updates" className="text-primary hover:underline font-semibold"><EditableText contentKey="update_detail_missing_cta" value="Back to all updates" tag="span" inline /></Link>
       </div>
     );
   }
@@ -107,7 +107,7 @@ export const UpdatesDetailPage: React.FC = () => {
 
           <div className="flex items-center gap-2 text-body-sm text-body-sm text-on-surface-variant pt-1">
             <Calendar className="w-4 h-4 text-primary" />
-            <span>Published on </span>
+            <EditableText contentKey="update_detail_published" value="Published on" tag="span" inline />
             <EditableText
               value={update.date}
               onSave={(val: string) => updateUpdateField(update.id, 'date', val)}
@@ -127,7 +127,7 @@ export const UpdatesDetailPage: React.FC = () => {
         </div>
 
         <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/20 shadow-sm space-y-4">
-          <h2 className="font-headline-sm text-headline-sm text-primary font-bold">Engineering Progress Report</h2>
+          <h2 className="font-headline-sm text-headline-sm text-primary font-bold"><EditableText contentKey="update_detail_report_title" value="Engineering Progress Report" tag="span" inline /></h2>
           <EditableText
             value={update.content}
             onSave={(val: string) => updateUpdateField(update.id, 'content', val)}
@@ -139,7 +139,7 @@ export const UpdatesDetailPage: React.FC = () => {
 
         {/* Project Progress Gallery */}
         <div className="space-y-4 pt-sm">
-          <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Project Progress Gallery</h3>
+          <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold"><EditableText contentKey="update_detail_gallery_title" value="Project Progress Gallery" tag="span" inline /></h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {(update.gallery || []).map((imgUrl, idx) => (
               <div key={idx} className="aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/20 relative group/gallery shadow-sm bg-surface-container-low">
@@ -183,7 +183,7 @@ export const UpdatesDetailPage: React.FC = () => {
         <div className="pt-sm border-t border-outline-variant/30">
           <Link to="/updates" className="inline-flex items-center gap-2 text-label-lg font-label-lg text-primary hover:underline cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to All Updates</span>
+            <EditableText contentKey="update_detail_back" value="Back to All Updates" tag="span" inline />
           </Link>
         </div>
       </div>

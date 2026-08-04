@@ -1,7 +1,7 @@
 import React from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { Briefcase } from 'lucide-react';
 import { EditableText } from '../components/admin/EditableText';
+import { Briefcase } from 'lucide-react';
 
 export const CareersPage: React.FC = () => {
   return (

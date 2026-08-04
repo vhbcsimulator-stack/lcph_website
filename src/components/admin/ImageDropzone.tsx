@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
-import { UploadCloud, X, Image } from 'lucide-react';
 import { compressImage } from '../../utils/image';
+import { Image, UploadCloud, X } from 'lucide-react';
 
 interface ImageDropzoneProps {
   value: string; // base64 or URL

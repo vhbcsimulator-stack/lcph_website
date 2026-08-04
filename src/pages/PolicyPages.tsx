@@ -12,9 +12,9 @@ export const PrivacyPolicyPage: React.FC = () => (
     />
     <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/20 text-body-sm text-on-surface-variant space-y-4 leading-relaxed shadow-sm">
       <EditableText contentKey="policy_privacy_content_p1" tag="p" />
-      <h3 className="font-bold text-headline-sm text-sm text-on-surface">1. Data Collection</h3>
+      <EditableText contentKey="policy_privacy_h1" value="1. Data Collection" tag="h3" className="font-bold text-headline-sm text-sm text-on-surface" />
       <EditableText contentKey="policy_privacy_content_p2" tag="p" />
-      <h3 className="font-bold text-headline-sm text-sm text-on-surface">2. Data Usage & Protection</h3>
+      <EditableText contentKey="policy_privacy_h2" value="2. Data Usage &amp; Protection" tag="h3" className="font-bold text-headline-sm text-sm text-on-surface" />
       <EditableText contentKey="policy_privacy_content_p3" tag="p" />
     </div>
   </div>
@@ -30,7 +30,7 @@ export const TermsPage: React.FC = () => (
     />
     <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/20 text-body-sm text-on-surface-variant space-y-4 leading-relaxed shadow-sm">
       <EditableText contentKey="policy_terms_content_p1" tag="p" />
-      <h3 className="font-bold text-headline-sm text-sm text-on-surface">1. Property Renderings & Disclaimers</h3>
+      <EditableText contentKey="policy_terms_h1" value="1. Property Renderings &amp; Disclaimers" tag="h3" className="font-bold text-headline-sm text-sm text-on-surface" />
       <EditableText contentKey="policy_terms_content_p2" tag="p" />
     </div>
   </div>

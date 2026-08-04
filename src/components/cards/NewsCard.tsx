@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight } from 'lucide-react';
 import type { NewsArticle } from '../../types';
+import { EditableText } from '../admin/EditableText';
+import { ArrowRight, Calendar, Clock } from 'lucide-react';
 
 interface NewsCardProps {
   news: NewsArticle;
@@ -9,12 +10,12 @@ interface NewsCardProps {
 
 export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
   return (
-    <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col group">
+    <article className="interactive-card bg-surface-container-lowest rounded-xl border border-outline-variant/20 overflow-hidden shadow-sm transition-all duration-300 flex flex-col group">
       <div className="relative aspect-[16/9] overflow-hidden">
         <img 
           src={news.image} 
           alt={news.title} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          className="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
         />
         <span className="absolute top-3 left-3 bg-secondary-container text-on-secondary-container text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded backdrop-blur-md">
           {news.category}
@@ -46,13 +47,13 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
 
         <Link
           to={`/news/${news.slug}`}
-          className="inline-flex items-center gap-1.5 text-label-lg font-label-lg text-primary hover:underline pt-2 border-t border-outline-variant/20 cursor-pointer"
+          className="group/link inline-flex items-center gap-1.5 text-label-lg font-label-lg text-primary hover:underline pt-2 border-t border-outline-variant/20 cursor-pointer"
         >
-          <span>Read Full Article</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <EditableText contentKey="card_news_cta" value="Read Full Article" tag="span" inline />
+          <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover/link:translate-x-1" />
         </Link>
       </div>
-    </div>
+    </article>
   );
 };
 

@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    /* --admin-offset is the height of the admin toolbar; 0 on the public site. */
+    scroll-padding-top: calc(112px + var(--admin-offset, 0px));
+  }
+
   :root {
     --color-primary: #004321;
     --color-primary-container: #0d5c32;
@@ -103,7 +109,7 @@
   --spacing-xl: 80px;
   --spacing-base: 4px;
 
-  --radius-DEFAULT: 0.125rem;
+  --radius-DEFAULT: 0.2em;
   --radius-lg: 0.25rem;
   --radius-xl: 0.5rem;
   --radius-full: 0.75rem;
@@ -115,6 +121,162 @@
 @utility container-custom {
   width: min(100% - 2rem, 1280px);
   margin-inline: auto;
+}
+
+/* Homepage interactions share one crisp, tactile motion language. */
+.home-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition: transform 280ms cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 280ms ease, background-color 220ms ease, border-color 220ms ease,
+    color 220ms ease;
+}
+.home-cta::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  background: linear-gradient(110deg, transparent 24%, rgb(255 255 255 / 0.1) 48%, transparent 72%);
+  transform: translateX(-120%);
+  transition: transform 600ms cubic-bezier(0.2, 0, 0, 1);
+}
+.home-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -14px rgb(0 33 14 / 0.55);
+}
+.home-cta:hover::before {
+  transform: translateX(120%);
+}
+.home-cta:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.site-reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 540ms cubic-bezier(0.2, 0, 0, 1) var(--reveal-delay, 0ms),
+    transform 540ms cubic-bezier(0.2, 0, 0, 1) var(--reveal-delay, 0ms);
+}
+.site-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.skeleton-bone {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-surface-container-high) 72%, white);
+}
+.skeleton-bone::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background: linear-gradient(100deg, transparent 18%, rgb(255 255 255 / 0.72) 48%, transparent 78%);
+  transform: translateX(-110%);
+  animation: skeleton-shimmer 1.45s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer {
+  to { transform: translateX(110%); }
+}
+
+.simple-page-enter {
+  animation: simple-page-enter 620ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+@keyframes simple-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.interactive-card {
+  will-change: transform;
+  transition: transform 320ms cubic-bezier(0.2, 0, 0, 1),
+    border-color 260ms ease, box-shadow 320ms ease;
+}
+.interactive-card:hover {
+  transform: translateY(-3px);
+  border-color: rgb(0 67 33 / 0.25);
+  box-shadow: 0 22px 42px -24px rgb(0 45 22 / 0.55);
+}
+
+.interactive-panel {
+  transition: transform 300ms cubic-bezier(0.2, 0, 0, 1),
+    border-color 240ms ease, box-shadow 300ms ease, background-color 240ms ease;
+}
+.interactive-panel:hover {
+  transform: translateY(-2px);
+  border-color: rgb(0 67 33 / 0.24);
+  box-shadow: 0 18px 38px -26px rgb(0 45 22 / 0.55);
+}
+.interactive-panel:hover .interactive-icon {
+  transform: translateY(-1px) scale(1.04);
+  color: var(--color-primary);
+}
+.interactive-icon {
+  transition: transform 300ms cubic-bezier(0.2, 0, 0, 1), color 240ms ease,
+    background-color 240ms ease;
+}
+
+.site-page-motion :is(input, textarea, select) {
+  transition: border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+.site-page-motion :is(input, textarea, select):hover:not(:focus) {
+  border-color: rgb(0 67 33 / 0.42);
+}
+
+.site-page-motion :is(button, a)[class*='bg-primary'],
+.site-page-motion :is(button, a)[class*='border-tertiary'] {
+  transition: transform 260ms cubic-bezier(0.2, 0, 0, 1), box-shadow 260ms ease,
+    background-color 220ms ease, color 220ms ease, border-color 220ms ease;
+}
+.site-page-motion :is(button, a)[class*='bg-primary']:hover,
+.site-page-motion :is(button, a)[class*='border-tertiary']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px -16px rgb(0 45 22 / 0.7);
+}
+.site-page-motion :is(button, a)[class*='bg-primary']:active,
+.site-page-motion :is(button, a)[class*='border-tertiary']:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .home-cta,
+  .home-cta::before {
+    transition-duration: 0.01ms !important;
+  }
+  .home-cta:hover,
+  .home-cta:active,
+  .interactive-card:hover,
+  .interactive-panel:hover,
+  .site-page-motion :is(button, a):hover,
+  .site-page-motion :is(button, a):active {
+    transform: none;
+  }
+  .interactive-panel:hover .interactive-icon {
+    transform: none;
+  }
+  .site-reveal,
+  .site-reveal.is-revealed {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .skeleton-bone::after {
+    animation: none;
+  }
+  .simple-page-enter {
+    animation: none;
+  }
 }
 
 /* Custom Typography Utilities from Stitch */

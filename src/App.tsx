@@ -2,7 +2,11 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AnnouncementBar } from './components/layout/AnnouncementBar';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
+import { PageEffects } from './components/layout/PageEffects';
 import { ScrollToTop } from './components/ui/ScrollToTop';
+import { SmoothScroll } from './components/ui/SmoothScroll';
+import { PageSkeleton } from './components/ui/PageSkeleton';
+import { useAdmin } from './context/AdminContext';
 import { AdminProvider } from './context/AdminContext';
 
 import { HomePage } from './pages/HomePage';
@@ -23,15 +27,20 @@ import { PartnerPage } from './pages/PartnerPage';
 import { PrivacyPolicyPage, TermsPage, CookiePolicyPage } from './pages/PolicyPages';
 import { NotFoundPage } from './pages/NotFoundPage';
 
-export function App() {
+const SiteContent = () => {
+  const { loading } = useAdmin();
+
+  if (loading) return <PageSkeleton />;
+
   return (
-    <AdminProvider isAdmin={false}>
-      <Router>
+    <Router>
+      <SmoothScroll />
       <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-surface">
         <AnnouncementBar />
         <Header />
         <main className="flex-1">
+          <PageEffects>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -53,10 +62,18 @@ export function App() {
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </PageEffects>
         </main>
         <Footer />
       </div>
-      </Router>
+    </Router>
+  );
+};
+
+export function App() {
+  return (
+    <AdminProvider isAdmin={false}>
+      <SiteContent />
     </AdminProvider>
   );
 }

@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
 
 interface LightboxProps {
   isOpen: boolean;
@@ -22,6 +22,39 @@ export const Lightbox: React.FC<LightboxProps> = ({
   onJump,
   title,
 }) => {
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const dragOrigin = useRef({ pointerX: 0, pointerY: 0, imageX: 0, imageY: 0 });
+  const imageAreaRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const resetZoom = useCallback(() => {
+    setZoom(1);
+    setPosition({ x: 0, y: 0 });
+  }, []);
+
+  const changeZoom = useCallback((nextZoom: number) => {
+    const clamped = Math.min(4, Math.max(1, nextZoom));
+    setZoom(clamped);
+    if (clamped === 1) setPosition({ x: 0, y: 0 });
+  }, []);
+
+  useEffect(() => resetZoom(), [currentIndex, isOpen, resetZoom]);
+
+  useEffect(() => {
+    const imageArea = imageAreaRef.current;
+    if (!isOpen || !imageArea) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      changeZoom(zoom + (event.deltaY < 0 ? 0.25 : -0.25));
+    };
+
+    imageArea.addEventListener('wheel', handleWheel, { passive: false });
+    return () => imageArea.removeEventListener('wheel', handleWheel);
+  }, [changeZoom, isOpen, zoom]);
+
   // Keyboard navigation
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
@@ -29,8 +62,11 @@ export const Lightbox: React.FC<LightboxProps> = ({
       if (e.key === 'ArrowLeft') onPrev();
       else if (e.key === 'ArrowRight') onNext();
       else if (e.key === 'Escape') onClose();
+      else if (e.key === '+' || e.key === '=') changeZoom(zoom + 0.5);
+      else if (e.key === '-') changeZoom(zoom - 0.5);
+      else if (e.key === '0') resetZoom();
     },
-    [isOpen, onPrev, onNext, onClose]
+    [isOpen, onPrev, onNext, onClose, changeZoom, resetZoom, zoom]
   );
 
   useEffect(() => {
@@ -52,6 +88,7 @@ export const Lightbox: React.FC<LightboxProps> = ({
 
   return (
     <div
+      data-lenis-prevent
       className="fixed inset-0 z-[300] bg-black/95 flex flex-col backdrop-blur-sm"
       onClick={onClose}
     >
@@ -68,6 +105,18 @@ export const Lightbox: React.FC<LightboxProps> = ({
           <span />
         )}
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 rounded-full bg-white/10 p-1">
+            <button type="button" onClick={() => changeZoom(zoom - 0.5)} disabled={zoom <= 1} className="cursor-pointer rounded-full p-1.5 text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" aria-label="Zoom out">
+              <ZoomOut className="w-4 h-4" />
+            </button>
+            <span className="w-11 text-center text-xs font-semibold tabular-nums text-white/70">{Math.round(zoom * 100)}%</span>
+            <button type="button" onClick={() => changeZoom(zoom + 0.5)} disabled={zoom >= 4} className="cursor-pointer rounded-full p-1.5 text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" aria-label="Zoom in">
+              <ZoomIn className="w-4 h-4" />
+            </button>
+            <button type="button" onClick={resetZoom} disabled={zoom === 1} className="cursor-pointer rounded-full p-1.5 text-white/75 transition-colors hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-30" aria-label="Reset zoom">
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
           <span className="text-white/50 text-sm tabular-nums">
             {currentIndex + 1} / {images.length}
           </span>
@@ -83,7 +132,9 @@ export const Lightbox: React.FC<LightboxProps> = ({
 
       {/* Main image area */}
       <div
-        className="flex-1 flex items-center justify-center relative min-h-0 px-16"
+        ref={imageAreaRef}
+        data-lenis-prevent-wheel
+        className="flex-1 flex items-center justify-center relative min-h-0 overflow-hidden px-16"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Prev button */}
@@ -102,9 +153,30 @@ export const Lightbox: React.FC<LightboxProps> = ({
           key={currentIndex}
           src={images[currentIndex]}
           alt={`${title ? title + ' – ' : ''}Photo ${currentIndex + 1}`}
-          className="max-w-full max-h-full object-contain rounded-lg shadow-2xl select-none animate-in fade-in zoom-in-95 duration-200"
-          style={{ maxHeight: 'calc(100vh - 180px)' }}
+          className={`max-w-full max-h-full object-contain rounded-lg shadow-2xl select-none animate-in fade-in duration-200 ${zoom > 1 ? isDragging ? 'cursor-grabbing' : 'cursor-grab' : 'cursor-zoom-in'}`}
+          style={{
+            maxHeight: 'calc(100vh - 180px)',
+            transform: `translate3d(${position.x}px, ${position.y}px, 0) scale(${zoom})`,
+            transition: isDragging ? 'none' : 'transform 180ms cubic-bezier(0.2, 0, 0, 1)',
+            touchAction: 'none',
+          }}
           draggable={false}
+          onDoubleClick={() => zoom === 1 ? changeZoom(2) : resetZoom()}
+          onPointerDown={(e) => {
+            if (zoom <= 1) return;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            dragOrigin.current = { pointerX: e.clientX, pointerY: e.clientY, imageX: position.x, imageY: position.y };
+            setIsDragging(true);
+          }}
+          onPointerMove={(e) => {
+            if (!isDragging) return;
+            setPosition({
+              x: dragOrigin.current.imageX + e.clientX - dragOrigin.current.pointerX,
+              y: dragOrigin.current.imageY + e.clientY - dragOrigin.current.pointerY,
+            });
+          }}
+          onPointerUp={() => setIsDragging(false)}
+          onPointerCancel={() => setIsDragging(false)}
         />
 
         {/* Next button */}

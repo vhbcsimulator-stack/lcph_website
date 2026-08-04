@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { AmenityCard } from '../components/cards/AmenityCard';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
-import { Filter, X } from 'lucide-react';
 import type { Amenity } from '../types';
+import { Filter, Layers3, SlidersHorizontal, X } from 'lucide-react';
 
 export const AmenitiesPage: React.FC = () => {
   const { amenities, projects } = useAdmin();
@@ -14,6 +15,7 @@ export const AmenitiesPage: React.FC = () => {
   const initialProject = searchParams.get('project') || 'All';
   const [selectedProject, setSelectedProject] = useState<string>(initialProject);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const prefersReducedMotion = useReducedMotion();
 
   // Keep state in sync with URL search params (e.g. navigation or direct links)
   useEffect(() => {
@@ -82,39 +84,50 @@ export const AmenitiesPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-xl py-sm">
-      <div className="container-custom space-y-md">
+    <motion.div
+      data-page-motion="custom"
+      className={`overflow-hidden pb-xl ${prefersReducedMotion ? '' : 'simple-page-enter'}`}
+    >
+      <div className="relative border-b border-outline-variant/20 bg-gradient-to-br from-primary/10 via-surface-container-low to-secondary-fixed/30">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/8 blur-3xl" />
+        <div className="container-custom relative pb-12 pt-sm md:pb-16">
         <Breadcrumbs items={[{ label: 'Amenities' }]} />
 
         {/* Page Header */}
-        <div className="space-y-xs">
+        <div className="grid items-end gap-8 pt-8 md:grid-cols-[1fr_auto] md:pt-12">
+          <div className="max-w-3xl">
           <EditableText
             contentKey="amenities_hero_title"
             value="Discover Our Amenities"
-            className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-bold"
+            className="font-headline-xl-mobile text-headline-xl-mobile font-bold capitalize tracking-tight text-primary md:font-headline-xl md:text-headline-xl"
             tag="h1"
           />
           <EditableText
             contentKey="amenities_hero_text"
             value="Experience a world of leisure and convenience with our curated selection of world-class estate amenities."
-            className="font-body-lg text-body-lg text-on-surface-variant max-w-3xl leading-relaxed"
+            className="mt-3 max-w-2xl font-body-lg text-body-lg leading-relaxed text-on-surface-variant"
             tag="p"
           />
+          </div>
         </div>
+        </div>
+      </div>
+
+      <div className="container-custom space-y-8 pt-10 md:pt-12">
 
         {/* Filter Bar: Project Filter & Category Tabs */}
-        <div className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20 space-y-md">
+        <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-[0_16px_40px_-32px_rgba(0,67,33,0.5)] md:p-6">
           <div className="flex flex-col md:flex-row gap-sm items-start md:items-center justify-between">
             {/* Project Dropdown Filter */}
             <div className="w-full md:w-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
-              <label className="font-label-lg text-label-lg text-on-surface-variant shrink-0 font-bold flex items-center gap-1.5">
-                <Filter className="w-4 h-4 text-primary" />
-                <span>Filter by Project:</span>
+              <label className="flex shrink-0 items-center gap-2 font-label-lg text-[12px] font-bold uppercase tracking-wider text-on-surface-variant">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/8"><Filter className="w-4 h-4 text-primary" /></span>
+                <EditableText contentKey="amenities_filter_label" value="Filter by Project:" tag="span" inline />
               </label>
               <select
                 value={selectedProject}
                 onChange={(e) => handleProjectChange(e.target.value)}
-                className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-2.5 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none cursor-pointer w-full sm:w-72 font-semibold"
+                className="w-full cursor-pointer rounded-xl border border-outline-variant/50 bg-surface-container-low px-4 py-3 font-body-md font-semibold text-on-surface outline-none transition-all focus:border-primary focus:ring-4 focus:ring-primary/10 sm:w-72 appearance-none"
               >
                 <option value="All">All Projects</option>
                 {projects.map(proj => (
@@ -127,11 +140,11 @@ export const AmenitiesPage: React.FC = () => {
 
             {/* Active Filter Pill */}
             {selectedProject !== 'All' && selectedProjectObj && (
-              <div className="flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold px-3.5 py-1.5 rounded-full border border-primary/20">
+              <div className="flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3.5 py-2 text-xs font-bold text-primary">
                 <span>Filtered for: {selectedProjectObj.name}</span>
                 <button
                   onClick={() => handleProjectChange('All')}
-                  className="hover:bg-primary/20 p-0.5 rounded-full text-primary transition-colors cursor-pointer"
+                  className="cursor-pointer rounded-full p-0.5 text-primary transition-all hover:rotate-90 hover:bg-primary/20"
                   title="Clear Project Filter"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -141,15 +154,16 @@ export const AmenitiesPage: React.FC = () => {
           </div>
 
           {/* Category Filter Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 border-t border-outline-variant/20 pt-md">
+          <div className="mt-5 flex items-center gap-2 overflow-x-auto border-t border-outline-variant/20 pt-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <SlidersHorizontal className="w-4 h-4 mr-1 shrink-0 text-primary" />
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-lg font-label-lg text-label-lg whitespace-nowrap transition-all cursor-pointer ${
+                className={`cursor-pointer whitespace-nowrap rounded-full border px-4 py-2 font-label-lg text-[11px] font-bold uppercase tracking-wider transition-all ${
                   selectedCategory === cat
-                    ? 'bg-primary text-on-primary shadow-sm font-bold'
-                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
+                    ? 'border-primary bg-primary text-on-primary shadow-md'
+                    : 'border-transparent bg-surface-container-low text-on-surface-variant hover:-translate-y-0.5 hover:border-primary/25 hover:text-primary'
                 }`}
               >
                 {cat}
@@ -158,27 +172,64 @@ export const AmenitiesPage: React.FC = () => {
           </div>
         </div>
 
+        <div className="flex flex-wrap items-end justify-between gap-3 px-1">
+          <div>
+            <EditableText
+              contentKey="amenities_list_badge"
+              value="Curated facilities"
+              className="block text-[11px] font-bold uppercase tracking-[0.15em] text-primary"
+              tag="span"
+            />
+            <h2 className="mt-1 font-headline-md text-headline-md font-bold text-on-surface">
+              {selectedProjectObj ? selectedProjectObj.name : selectedCategory === 'All' ? 'All amenities' : selectedCategory}
+            </h2>
+          </div>
+          <p className="text-body-sm text-on-surface-variant"><strong className="text-on-surface">{filteredAmenities.length}</strong> {filteredAmenities.length === 1 ? 'amenity' : 'amenities'} found</p>
+        </div>
+
         {/* Amenities Grid */}
         {filteredAmenities.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
-            {filteredAmenities.map(amenity => (
-              <AmenityCard key={amenity.id} amenity={amenity} />
-            ))}
-          </div>
+          <motion.div layout className="grid grid-cols-1 gap-gutter sm:grid-cols-2 lg:grid-cols-3">
+            <AnimatePresence mode="popLayout" initial={false}>
+              {filteredAmenities.map((amenity, index) => (
+                <motion.div
+                  layout
+                  key={amenity.id}
+                  initial={prefersReducedMotion ? false : { opacity: 0, y: 16, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={prefersReducedMotion ? undefined : { opacity: 0, y: -10, scale: 0.98 }}
+                  transition={{ duration: 0.32, delay: prefersReducedMotion ? 0 : Math.min(index, 5) * 0.04 }}
+                >
+                  <AmenityCard amenity={amenity} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         ) : (
-          <div className="text-center py-16 bg-surface-container-lowest rounded-xl border border-outline-variant/20 space-y-2">
-            <p className="text-on-surface font-bold">No amenities found.</p>
-            <p className="text-sm text-on-surface-variant">Try selecting a different project or category filter.</p>
+          <div className="space-y-3 rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-6 py-16 text-center">
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/8 text-primary"><Layers3 className="w-5 h-5" /></span>
+            <EditableText
+              contentKey="amenities_empty_title"
+              value="No amenities found"
+              className="block font-headline-sm text-headline-sm font-bold text-on-surface"
+              tag="p"
+            />
+            <EditableText
+              contentKey="amenities_empty_text"
+              value="Try selecting a different project or category."
+              className="block text-sm text-on-surface-variant"
+              tag="p"
+            />
             <button
               onClick={() => { handleProjectChange('All'); setSelectedCategory('All'); }}
-              className="mt-2 bg-primary text-on-primary font-bold text-xs px-4 py-2 rounded-lg hover:bg-primary-container hover:text-on-primary-container transition-colors cursor-pointer"
+              className="home-cta mt-3 cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-on-primary hover:bg-primary-container hover:text-on-primary-container"
             >
-              Reset Filters
+              <EditableText contentKey="amenities_empty_cta" value="Reset Filters" tag="span" inline />
             </button>
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
