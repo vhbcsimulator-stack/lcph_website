@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableEmbed } from '../components/admin/EditableEmbed';
 import { CheckCircle, Clock, Mail, MapPin, Phone } from 'lucide-react';
 
 export const ContactPage: React.FC = () => {
@@ -173,15 +174,14 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
       </div>
-               <section data-reveal className="w-full h-96 relative overflow-hidden border-t border-b border-outline-variant/30">
-           <iframe
-            src='https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3853.1134835949197!2d120.6810847761108!3d15.041838066119714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3396f766478da7d5%3A0x37161103f245a3f9!2sLCPH%20REALTY%20INC.%20%E2%80%9CLeisure%20Community%20PH%E2%80%9D!5e0!3m2!1sen!2sph!4v1785566513008!5m2!1sen!2sph'
-            className="w-full h-full border-0"  
-            loading="lazy"
-            referrerPolicy="strict-origin-when-cross-origin"
-            title="VHBC Office location map"
-          ></iframe>
-           </section>
+      <section data-reveal className="w-full h-96 relative overflow-hidden border-t border-b border-outline-variant/30">
+        <EditableEmbed
+          contentKey="contact_map_embed"
+          value="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3853.1134835949197!2d120.6810847761108!3d15.041838066119714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3396f766478da7d5%3A0x37161103f245a3f9!2sLCPH%20REALTY%20INC.%20%E2%80%9CLeisure%20Community%20PH%E2%80%9D!5e0!3m2!1sen!2sph!4v1785566513008!5m2!1sen!2sph"
+          className="w-full h-full border-0"
+          title="LCPH office location map"
+        />
+      </section>
     </div>
   );
 };

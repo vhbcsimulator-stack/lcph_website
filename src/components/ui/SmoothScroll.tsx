@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
+import { setSmoothScroller } from '../../utils/scroll';
 
 /** Provides inertial wheel scrolling without altering native touch behavior. */
 export const SmoothScroll = () => {
@@ -16,6 +17,8 @@ export const SmoothScroll = () => {
       wheelMultiplier: 1.5,
     });
 
+    setSmoothScroller(lenis);
+
     let frameId = 0;
     const frame = (time: number) => {
       lenis.raf(time);
@@ -25,6 +28,7 @@ export const SmoothScroll = () => {
 
     return () => {
       cancelAnimationFrame(frameId);
+      setSmoothScroller(null);
       lenis.destroy();
     };
   }, []);

@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
-import type { Project, Property, Amenity, DevelopmentUpdate } from '../types';
+import type { Project, Property, Amenity, DevelopmentUpdate, NewsArticle, GalleryItem } from '../types';
+import { newsData } from './newsData';
+import { galleryData } from './galleryData';
 
 // ─── Default page content (used as seed/fallback) ────────────────────────────
 export const defaultPageContent: Record<string, string> = {
@@ -89,13 +91,45 @@ export const defaultPageContent: Record<string, string> = {
   'careers_text': 'We are currently restructuring our talent recruitment system to support our expanding township developments. Stay tuned for future opportunities to shape the landscape of luxury and leisure with LCPH Realty Inc.',
 
   // Partner Page
+  'partner_hero_image': '/src/assets/lcngate.png',
+  'partner_eyebrow': 'Partner Program',
   'partner_title': 'Partner With Lakeshore Community Philippines',
   'partner_subtitle': 'Broker Accreditation, Corporate Sales Partnerships, Supplier & Contractor Registration.',
+  'partner_cta_primary': 'Apply for Accreditation',
+  'partner_cta_secondary': 'Talk to Broker Relations',
   'partner_form_title': 'Broker & Partner Application Form',
+  'partner_form_note': 'All fields are required. Your details are used solely to process your accreditation.',
   'partner_benefits_title': 'Broker Benefits',
   'partner_benefit1': 'Competitive & Timely Commission Structures',
   'partner_benefit2': 'Dedicated Broker Relations Officer',
   'partner_benefit3': 'Access to VIP Client Golf-Cart Site Tours',
+
+  // Partner Page — partnership categories.
+  // The tracks themselves live in the partner_tracks_json key, written by the page when an admin
+  // adds or removes one; their starting copy is DEFAULT_TRACKS in PartnerPage.tsx.
+  'partner_categories_badge': 'Who We Partner With',
+  'partner_categories_title': 'Choose Your Partnership Track',
+
+  // Partner Page — accreditation process
+  'partner_process_title': 'How Accreditation Works',
+  'partner_step1_title': 'Submit Your Application',
+  'partner_step1_desc': 'Send the form with your licence or registration details.',
+  'partner_step2_title': 'Document Verification',
+  'partner_step2_desc': 'Our Broker Network Relations desk reviews your credentials.',
+  'partner_step3_title': 'Accreditation & Onboarding',
+  'partner_step3_desc': 'Receive your terms, sales kit and a dedicated relations officer.',
+
+  // Partner Page — form field placeholders
+  'partner_placeholder_name': 'e.g. Juan Dela Cruz / Apex Realty',
+  'partner_placeholder_license': 'PRC Reg. No.',
+  'partner_placeholder_email': 'broker@agency.com',
+  'partner_placeholder_mobile': '+63 917 000 0000',
+
+  // Partner Page — sidebar help card
+  'partner_help_title': 'Questions Before Applying?',
+  'partner_help_text': 'Our Broker Network Relations desk can walk you through commission terms and requirements.',
+  'partner_help_cta': 'Contact the Team',
+  'partner_success_reset': 'Submit Another Application',
 
   // Gallery Page
   'gallery_title': 'Photo & Render Gallery',
@@ -116,11 +150,8 @@ export const defaultPageContent: Record<string, string> = {
   // Policy Pages
   'policy_privacy_title': 'Privacy Policy',
   'policy_privacy_content_p1': 'Lakeshore Community Philippines (LCPH), a subsidiary of VHBC, is committed to protecting the privacy of prospective lot buyers, site visitors, and clients.',
-  'policy_privacy_content_p2': 'We collect personal information voluntarily submitted via inquiry forms, site visit bookings, and broker accreditation applications (such as full name, email, mobile phone number, and lot preferences).',
-  'policy_privacy_content_p3': 'Your data is used strictly by accredited LCPH property specialists for lot availability updates, tour confirmations, and contract documentation in compliance with Republic Act No. 10173 (Data Privacy Act of 2012).',
   'policy_terms_title': 'Terms of Use',
   'policy_terms_content_p1': 'Welcome to the official website of Lakeshore Community Philippines (LCPH). By using this platform, you agree to these terms.',
-  'policy_terms_content_p2': 'All lot dimensions, architectural renders, amenity visualizations, and maps are presented for illustrative purposes ("Artist\'s Perspective"). Verified lot titles, exact boundary points, and contract terms are specified in the official Contract to Sell (CTS).',
   'policy_cookies_title': 'Cookie Policy',
   'policy_cookies_content_p1': 'This website uses essential session cookies to enhance navigation, remember search filters, and ensure secure form submissions.',
 
@@ -133,17 +164,6 @@ export const defaultPageContent: Record<string, string> = {
   'card_update_badge_label': 'Completed',
   'card_update_cta': 'Read Full Update Report',
   'card_update_progress_label': 'Overall Status',
-  'footer_company_heading': 'Company',
-  'footer_copyright': 'LCPH Realty Inc. All rights reserved.',
-  'footer_legal_heading': 'Legal',
-  'footer_link_careers': 'Careers',
-  'footer_link_cookies': 'Cookie Policy',
-  'footer_link_gallery': 'Gallery',
-  'footer_link_news': 'News',
-  'footer_link_privacy': 'Privacy Policy',
-  'footer_link_terms': 'Terms of Service',
-  'footer_tagline': 'Building communities where leisure meets luxury. A subsidiary of VHBC dedicated to premium real estate development in the Philippines.',
-  'header_cta_label': 'Inquire Now',
 
   // Homepage
   'home_amenities_cta': 'Explore All Amenities',
@@ -292,6 +312,7 @@ export const defaultPageContent: Record<string, string> = {
   'update_detail_missing': 'Development update not found.',
   'update_detail_missing_cta': 'Back to all updates',
   'update_detail_published': 'Published on',
+  'update_detail_progress_label': 'Overall Progress',
   'update_detail_report_title': 'Engineering Progress Report',
 
   // News detail page
@@ -358,9 +379,6 @@ export const defaultPageContent: Record<string, string> = {
   'property_widget_title': 'Inquire About',
 
   // Policy pages
-  'policy_privacy_h1': '1. Data Collection',
-  'policy_privacy_h2': '2. Data Usage & Protection',
-  'policy_terms_h1': '1. Property Renderings & Disclaimers',
 
   // Other
   'announcement_text': 'Discover your dream home at Lakeshore. New phases now pre-selling!',
@@ -371,6 +389,9 @@ export const defaultPageContent: Record<string, string> = {
 
   // Project detail page
   'project_detail_stat_type_suffix': 'Estate',
+
+  // Other
+  'contact_map_embed': 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3853.1134835949197!2d120.6810847761108!3d15.041838066119714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3396f766478da7d5%3A0x37161103f245a3f9!2sLCPH%20REALTY%20INC.%20%E2%80%9CLeisure%20Community%20PH%E2%80%9D!5e0!3m2!1sen!2sph!4v1785566513008!5m2!1sen!2sph',
 };
 
 // ─── Field mapping helpers ────────────────────────────────────────────────────
@@ -597,6 +618,104 @@ export async function saveUpdates(updates: DevelopmentUpdate[]): Promise<void> {
   const rows = updates.map(updateToRow);
   const { error } = await supabase.from('development_updates').upsert(rows, { onConflict: 'id' });
   if (error) { console.error('saveUpdates:', error.message); throw new Error(error.message); }
+}
+
+// ─── News ─────────────────────────────────────────────────────────────────────
+
+function mapNews(row: any): NewsArticle {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    date: row.date,
+    category: row.category,
+    author: row.author,
+    readTime: row.read_time,
+    excerpt: row.excerpt,
+    content: row.content,
+    image: row.image,
+    featured: row.featured,
+  };
+}
+
+function newsToRow(n: NewsArticle) {
+  return {
+    id: n.id,
+    slug: n.slug,
+    title: n.title,
+    date: n.date,
+    category: n.category,
+    author: n.author,
+    read_time: n.readTime,
+    excerpt: n.excerpt,
+    content: n.content,
+    image: n.image,
+    featured: n.featured ?? false,
+  };
+}
+
+/** Falls back to the bundled articles when the table is missing (migration not run yet). */
+export async function getNews(): Promise<NewsArticle[]> {
+  const { data, error } = await supabase
+    .from('news')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) { console.error('getNews:', error.message); return [...newsData]; }
+  return (data ?? []).length ? (data ?? []).map(mapNews) : [...newsData];
+}
+
+export async function saveNews(items: NewsArticle[]): Promise<void> {
+  const { error } = await supabase.from('news').upsert(items.map(newsToRow), { onConflict: 'id' });
+  if (error) { console.error('saveNews:', error.message); throw new Error(error.message); }
+}
+
+export async function deleteNewsById(id: string): Promise<void> {
+  const { error } = await supabase.from('news').delete().eq('id', id);
+  if (error) { console.error('deleteNewsById:', error.message); throw new Error(error.message); }
+}
+
+// ─── Gallery ──────────────────────────────────────────────────────────────────
+
+function mapGallery(row: any): GalleryItem {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    mediaType: row.media_type,
+    url: row.url,
+    thumbnail: row.thumbnail,
+  };
+}
+
+function galleryToRow(g: GalleryItem) {
+  return {
+    id: g.id,
+    title: g.title,
+    category: g.category,
+    media_type: g.mediaType,
+    url: g.url,
+    thumbnail: g.thumbnail,
+  };
+}
+
+/** Falls back to the bundled gallery when the table is missing (migration not run yet). */
+export async function getGallery(): Promise<GalleryItem[]> {
+  const { data, error } = await supabase
+    .from('gallery')
+    .select('*')
+    .order('created_at', { ascending: true });
+  if (error) { console.error('getGallery:', error.message); return [...galleryData]; }
+  return (data ?? []).length ? (data ?? []).map(mapGallery) : [...galleryData];
+}
+
+export async function saveGallery(items: GalleryItem[]): Promise<void> {
+  const { error } = await supabase.from('gallery').upsert(items.map(galleryToRow), { onConflict: 'id' });
+  if (error) { console.error('saveGallery:', error.message); throw new Error(error.message); }
+}
+
+export async function deleteGalleryById(id: string): Promise<void> {
+  const { error } = await supabase.from('gallery').delete().eq('id', id);
+  if (error) { console.error('deleteGalleryById:', error.message); throw new Error(error.message); }
 }
 
 // ─── Page Content ─────────────────────────────────────────────────────────────

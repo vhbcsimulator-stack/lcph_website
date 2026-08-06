@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { galleryData } from '../data/galleryData';
+import { useAdmin } from '../context/AdminContext';
+import { EditableImage } from '../components/admin/EditableImage';
+import { AddItemButton, DeleteItemButton } from '../components/admin/AddItemButton';
 import { Lightbox } from '../components/ui/Lightbox';
 import { EditableText } from '../components/admin/EditableText';
 import { Image, Maximize2 } from 'lucide-react';
 
 export const GalleryPage: React.FC = () => {
+  const { gallery: galleryData, addGalleryItem, updateGalleryField, deleteGalleryItem } = useAdmin();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -23,6 +26,26 @@ export const GalleryPage: React.FC = () => {
   const openLightbox = (idx: number) => {
     setLightboxIndex(idx);
     setLightboxOpen(true);
+  };
+
+  /** Adds a placeholder tile the admin then edits in place. */
+  const handleAddImage = () => {
+    const stamp = Date.now();
+    const placeholder = 'https://placehold.co/1200x900/004321/ffffff?text=LCPH+Gallery';
+    addGalleryItem({
+      id: `gal-${stamp}`,
+      title: 'New gallery image',
+      category: selectedCategory === 'All' ? 'Aerial Views' : (selectedCategory as any),
+      mediaType: 'image',
+      url: placeholder,
+      thumbnail: placeholder,
+    });
+  };
+
+  /** The tile shows the thumbnail and the lightbox shows the full image, so both move together. */
+  const saveImage = (id: string, url: string) => {
+    updateGalleryField(id, 'url', url);
+    updateGalleryField(id, 'thumbnail', url);
   };
 
   return (
@@ -69,7 +92,10 @@ export const GalleryPage: React.FC = () => {
             </button>
           ))}
           </div>
-          <p className="hidden shrink-0 text-body-sm text-on-surface-variant sm:block"><strong className="text-on-surface">{filteredItems.length}</strong> {filteredItems.length === 1 ? 'image' : 'images'}</p>
+          <div className="flex shrink-0 items-center gap-3">
+            <p className="hidden text-body-sm text-on-surface-variant sm:block"><strong className="text-on-surface">{filteredItems.length}</strong> {filteredItems.length === 1 ? 'image' : 'images'}</p>
+            <AddItemButton label="Add Image" onClick={handleAddImage} />
+          </div>
         </div>
 
         {/* Gallery Grid */}
@@ -90,34 +116,52 @@ export const GalleryPage: React.FC = () => {
                 : idx === 2
                   ? 'lg:col-span-5 lg:row-span-1'
                   : 'lg:col-span-4 lg:row-span-1';
+            // A div rather than a button, so the admin controls inside stay valid HTML
             return (
-            <motion.button
-              type="button"
+            <motion.div
+              role="button"
+              tabIndex={0}
               key={item.id}
               onClick={() => openLightbox(idx)}
               whileHover={prefersReducedMotion ? undefined : { y: -3 }}
               transition={{ duration: 0.24, ease: [0.2, 0, 0, 1] }}
               className={`group relative aspect-[4/3] cursor-pointer overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-low text-left shadow-sm lg:aspect-auto ${editorialClass}`}
             >
-              <img 
-                src={item.thumbnail} 
-                alt={item.title} 
-                className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-95" />
+              <EditableImage value={item.thumbnail} onSave={(val) => saveImage(item.id, val)}>
+                {(src) => (
+                  <img
+                    src={src}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.045]"
+                  />
+                )}
+              </EditableImage>
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/5 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-95" />
 
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-5 text-white md:p-6">
+              <DeleteItemButton onClick={() => deleteGalleryItem(item.id)} title="Delete image" />
+
+              <div className="absolute inset-x-0 bottom-0 z-40 flex items-end justify-between gap-4 p-5 text-white md:p-6">
                 <div>
                   <span className="mb-2 block text-[10px] font-bold uppercase tracking-[0.16em] text-primary-fixed">
-                    {item.category}
+                    <EditableText
+                      value={item.category}
+                      onSave={(val) => updateGalleryField(item.id, 'category', val as typeof item.category)}
+                      tag="span"
+                      inline
+                    />
                   </span>
-                  <h3 className={`line-clamp-2 font-headline-sm font-bold text-white ${idx === 0 ? 'text-headline-md md:text-[26px]' : 'text-base'}`}>{item.title}</h3>
+                  <EditableText
+                    value={item.title}
+                    onSave={(val) => updateGalleryField(item.id, 'title', val)}
+                    className={`line-clamp-2 font-headline-sm font-bold text-white ${idx === 0 ? 'text-headline-md md:text-[26px]' : 'text-base'}`}
+                    tag="h3"
+                  />
                 </div>
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 bg-black/20 backdrop-blur-sm transition-all duration-300 group-hover:border-white group-hover:bg-white group-hover:text-primary">
                   <Maximize2 className="w-4 h-4 text-white group-hover:text-primary shrink-0" />
                 </span>
               </div>
-            </motion.button>
+            </motion.div>
           );})}
           </motion.div>
         </AnimatePresence>

@@ -88,8 +88,8 @@ export const AmenitiesPage: React.FC = () => {
       data-page-motion="custom"
       className={`overflow-hidden pb-xl ${prefersReducedMotion ? '' : 'simple-page-enter'}`}
     >
-      <div className="relative border-b border-outline-variant/20 bg-gradient-to-br from-primary/10 via-surface-container-low to-secondary-fixed/30">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/8 blur-3xl" />
+      <div className="relative border-b border-outline-variant/20">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full" />
         <div className="container-custom relative pb-12 pt-sm md:pb-16">
         <Breadcrumbs items={[{ label: 'Amenities' }]} />
 
@@ -180,7 +180,7 @@ export const AmenitiesPage: React.FC = () => {
               className="block text-[11px] font-bold uppercase tracking-[0.15em] text-primary"
               tag="span"
             />
-            <h2 className="mt-1 font-headline-md text-headline-md font-bold text-on-surface">
+            <h2 className="mt-1 font-headline-md text-headline-md font-bold text-primary">
               {selectedProjectObj ? selectedProjectObj.name : selectedCategory === 'All' ? 'All amenities' : selectedCategory}
             </h2>
           </div>
@@ -207,7 +207,7 @@ export const AmenitiesPage: React.FC = () => {
           </motion.div>
         ) : (
           <div className="space-y-3 rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-6 py-16 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/8 text-primary"><Layers3 className="w-5 h-5" /></span>
+            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/8 text-primary opacity-90"><Layers3 className="w-5 h-5" /></span>
             <EditableText
               contentKey="amenities_empty_title"
               value="No amenities found"

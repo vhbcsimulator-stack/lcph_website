@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
-import { newsData } from '../data/newsData';
+import { useAdmin } from '../context/AdminContext';
+import { AddItemButton } from '../components/admin/AddItemButton';
+import { EditableImage } from '../components/admin/EditableImage';
 import { NewsCard } from '../components/cards/NewsCard';
 import { EditableText } from '../components/admin/EditableText';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 
 export const NewsPage: React.FC = () => {
+  const { news: newsData, addNews, updateNewsField } = useAdmin();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const prefersReducedMotion = useReducedMotion();
 
@@ -18,6 +21,24 @@ export const NewsPage: React.FC = () => {
   );
   const featuredArticle = selectedCategory === 'All' ? newsData.find((item) => item.featured) : undefined;
   const articles = featuredArticle ? filteredNews.filter((item) => item.id !== featuredArticle.id) : filteredNews;
+
+  /** Creates a blank article the admin then fills in inline on the card. */
+  const handleAddArticle = () => {
+    const stamp = Date.now();
+    addNews({
+      id: `news-${stamp}`,
+      slug: `new-article-${stamp}`,
+      title: 'New Article Title',
+      date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+      category: selectedCategory === 'All' ? 'Announcements' : (selectedCategory as any),
+      author: 'LCPH Corporate Communications',
+      readTime: '3 min read',
+      excerpt: 'Short summary shown on the news card.',
+      content: 'Write the full article here.',
+      image: 'https://placehold.co/1200x675/004321/ffffff?text=LCPH+News',
+      featured: false,
+    });
+  };
 
   return (
     <div className="overflow-hidden pb-xl">
@@ -62,9 +83,12 @@ export const NewsPage: React.FC = () => {
             </button>
           ))}
           </div>
-          <p className="hidden shrink-0 text-body-sm text-on-surface-variant sm:block">
-            <span className="font-bold text-on-surface">{filteredNews.length}</span> {filteredNews.length === 1 ? 'story' : 'stories'}
-          </p>
+          <div className="flex shrink-0 items-center gap-3">
+            <p className="hidden text-body-sm text-on-surface-variant sm:block">
+              <span className="font-bold text-on-surface">{filteredNews.length}</span> {filteredNews.length === 1 ? 'story' : 'stories'}
+            </p>
+            <AddItemButton label="Add Article" onClick={handleAddArticle} />
+          </div>
         </div>
 
         <AnimatePresence mode="wait" initial={false}>
@@ -79,11 +103,18 @@ export const NewsPage: React.FC = () => {
             {featuredArticle && (
               <article className="group grid overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-lowest shadow-[0_20px_50px_-34px_rgba(0,67,33,0.55)] lg:grid-cols-[1.15fr_0.85fr]">
                 <Link to={`/news/${featuredArticle.slug}`} className="relative min-h-[300px] overflow-hidden lg:min-h-[420px]">
-                  <img
-                    src={featuredArticle.image}
-                    alt={featuredArticle.title}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                  />
+                  <EditableImage
+                    value={featuredArticle.image}
+                    onSave={(val) => updateNewsField(featuredArticle.id, 'image', val)}
+                  >
+                    {(src) => (
+                      <img
+                        src={src}
+                        alt={featuredArticle.title}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                      />
+                    )}
+                  </EditableImage>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent lg:bg-gradient-to-r lg:from-transparent lg:to-black/10" />
                   <span className="absolute left-5 top-5 rounded-full bg-primary-fixed px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.16em] text-on-primary-fixed shadow-sm">
                     <EditableText contentKey="news_featured_badge" value="Featured story" tag="span" inline />
@@ -92,17 +123,17 @@ export const NewsPage: React.FC = () => {
 
                 <div className="flex flex-col justify-center p-7 md:p-10 lg:p-12">
                   <span className="mb-4 w-fit rounded-full bg-secondary-container/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
-                    {featuredArticle.category}
+                    <EditableText value={featuredArticle.category} onSave={(val) => updateNewsField(featuredArticle.id, 'category', val)} tag="span" inline />
                   </span>
                   <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-on-surface-variant">
-                    <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" />{featuredArticle.date}</span>
+                    <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" /><EditableText value={featuredArticle.date} onSave={(val) => updateNewsField(featuredArticle.id, 'date', val)} tag="span" inline /></span>
                     <span className="h-1 w-1 rounded-full bg-outline-variant" />
-                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-primary" />{featuredArticle.readTime}</span>
+                    <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-primary" /><EditableText value={featuredArticle.readTime} onSave={(val) => updateNewsField(featuredArticle.id, 'readTime', val)} tag="span" inline /></span>
                   </div>
                   <h2 className="font-headline-md text-headline-md font-bold leading-snug text-on-surface transition-colors group-hover:text-primary md:text-[30px]">
-                    {featuredArticle.title}
+                    <EditableText value={featuredArticle.title} onSave={(val) => updateNewsField(featuredArticle.id, 'title', val)} tag="span" inline />
                   </h2>
-                  <p className="mt-4 font-body-md text-body-md leading-relaxed text-on-surface-variant">{featuredArticle.excerpt}</p>
+                  <p className="mt-4 font-body-md text-body-md leading-relaxed text-on-surface-variant"><EditableText value={featuredArticle.excerpt} onSave={(val) => updateNewsField(featuredArticle.id, 'excerpt', val)} tag="span" inline /></p>
                   <Link to={`/news/${featuredArticle.slug}`} className="home-cta group/link mt-7 inline-flex w-fit items-center gap-2 rounded-lg bg-primary px-5 py-3 text-xs font-bold uppercase tracking-wider text-on-primary hover:bg-primary-container">
                     <EditableText contentKey="news_featured_cta" value="Read featured story" tag="span" inline />
                     <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/link:translate-x-1" />

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { faqAnswerKey, faqQuestionKey, resolveFaqs } from '../data/faqContent';
 import { ProjectCard } from '../components/cards/ProjectCard';
 import { AmenityCard } from '../components/cards/AmenityCard';
@@ -23,14 +23,42 @@ const SECTION_HEADING = `font-headline-lg-mobile md:font-headline-lg text-headli
 
 const SECTION_SHELL = 'w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop';
 
+/**
+ * Pixels of scrolling the hero parallax is spread across. Higher = the effect plays out over a
+ * longer scroll (slower, more gradual); lower = it resolves sooner.
+ */
+const HERO_SCROLL_RANGE = 11500;
+
 export const HomePage: React.FC = () => {
   const { projects, amenities, updates, pageContent } = useAdmin();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<string | number | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 700], [0, 100]);
-  const yBg = prefersReducedMotion ? 0 : parallaxY;
+
+  /**
+   * Layered hero parallax: each layer moves at a different rate so the scene gains depth.
+   * The image travels the furthest (and scales up slightly), the copy drifts the other way
+   * and fades, and a veil darkens the frame as the hero leaves the viewport.
+   *
+   * HERO_SCROLL_RANGE is the master knob: how many pixels of scrolling the effect is spread
+   * across. Raise it to stretch the parallax out (slower, longer), lower it to tighten it.
+   * The other layers finish at fractions of that range so they stay in step with each other.
+   */
+  const smoothScroll = useSpring(scrollY, { stiffness: 220, damping: 40, mass: 0.35 });
+  const bgY = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE], [0, 260]);
+  const bgScale = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE], [1, 1.18]);
+  const veilOpacity = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE * 0.8], [0, 0.55]);
+  const contentY = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE * 0.8], [0, -90]);
+  const contentOpacity = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE * 0.6], [1, 0]);
+  const cueOpacity = useTransform(smoothScroll, [0, HERO_SCROLL_RANGE * 0.28], [1, 0]);
+
+  const yBg = prefersReducedMotion ? 0 : bgY;
+  const scaleBg = prefersReducedMotion ? 1 : bgScale;
+  const yContent = prefersReducedMotion ? 0 : contentY;
+  const opacityContent = prefersReducedMotion ? 1 : contentOpacity;
+  const opacityVeil = prefersReducedMotion ? 0 : veilOpacity;
+  const opacityCue = prefersReducedMotion ? 1 : cueOpacity;
 
   const faqs = useMemo(() => resolveFaqs(pageContent), [pageContent]);
 
@@ -51,7 +79,10 @@ export const HomePage: React.FC = () => {
       {/* 1. HERO SECTION */}
       <section className="relative flex min-h-[560px] w-full items-center justify-center overflow-hidden bg-surface-variant sm:h-[600px] lg:h-[900px]">
         {/* Background Image Overlay with Parallax */}
-        <motion.div style={{ y: yBg }} className="absolute -top-[10%] inset-0 z-0 h-[120%]">
+        <motion.div
+          style={{ y: yBg, scale: scaleBg }}
+          className="absolute -top-[20%] inset-0 z-0 h-[140%] will-change-transform"
+        >
           <EditableImage
             contentKey="home_hero_image"
             value="/src/assets/herolcn.png"
@@ -73,8 +104,18 @@ export const HomePage: React.FC = () => {
           </EditableImage>
         </motion.div>
 
+        {/* Veil layer — deepens the scene as the hero scrolls away */}
+        <motion.div
+          aria-hidden
+          style={{ opacity: opacityVeil }}
+          className="pointer-events-none absolute inset-0 z-10 bg-slate-950"
+        />
+
         {/* z-40 keeps the hero copy (and its edit affordances) above the image hover overlay */}
-        <div className={`${SECTION_SHELL} pointer-events-none relative z-40 flex h-full min-h-[560px] flex-col justify-center py-10 pb-20 sm:min-h-0 sm:py-0`}>
+        <motion.div
+          style={{ y: yContent, opacity: opacityContent }}
+          className={`${SECTION_SHELL} pointer-events-none relative z-40 flex h-full min-h-[560px] flex-col justify-center py-10 pb-20 will-change-transform sm:min-h-0 sm:py-0`}
+        >
           <motion.div
             variants={staggerContainer(0.12, 0.1)}
             initial="hidden"
@@ -126,23 +167,28 @@ export const HomePage: React.FC = () => {
               </Link>
             </motion.div>
           </motion.div>
-        </div>
+        </motion.div>
 
         {/* Scroll cue */}
-        <motion.button
-          type="button"
-          onClick={handleScrollCueClick}
-          aria-label="Scroll to featured project"
-          animate={prefersReducedMotion ? undefined : { opacity: [0.65, 1, 0.65] }}
-          transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
-          whileHover={prefersReducedMotion ? undefined : { scale: 1.1 }}
-          whileTap={{ scale: 0.94 }}
-          className="absolute bottom-4 left-1/2 z-40 -translate-x-1/2 cursor-pointer sm:bottom-6"
+        <motion.div
+          style={{ opacity: opacityCue }}
+          className="absolute bottom-4 left-1/2 z-40 -translate-x-1/2 sm:bottom-6"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/50 bg-white/15 backdrop-blur-sm transition-colors hover:bg-white/25">
-            <ChevronDown className="w-4 h-4 text-white" />
-          </span>
-        </motion.button>
+          <motion.button
+            type="button"
+            onClick={handleScrollCueClick}
+            aria-label="Scroll to featured project"
+            animate={prefersReducedMotion ? undefined : { y: [0, 6, 0], opacity: [0.65, 1, 0.65] }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+            whileHover={prefersReducedMotion ? undefined : { scale: 1.1 }}
+            whileTap={{ scale: 0.94 }}
+            className="cursor-pointer"
+          >
+            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/50 bg-white/15 backdrop-blur-sm transition-colors hover:bg-white/25">
+              <ChevronDown className="w-4 h-4 text-white" />
+            </span>
+          </motion.button>
+        </motion.div>
       </section>
 
       {/* 3. LCPH INTRODUCTION */}

@@ -240,7 +240,7 @@ export const ProjectsPage: React.FC = () => {
             <EditableText
               contentKey="projects_grid_title"
               value="All Projects"
-              className="font-headline-md text-headline-md text-on-background font-bold"
+              className="font-headline-md text-headline-md text-primary font-bold"
               tag="h2"
               inline
             />

@@ -13,8 +13,14 @@ import {
   saveProperties,
   getUpdates,
   saveUpdates,
+  getNews,
+  saveNews,
+  deleteNewsById,
+  getGallery,
+  saveGallery,
+  deleteGalleryById,
 } from '../data/db';
-import type { Project, Property, Amenity, DevelopmentUpdate } from '../types';
+import type { Project, Property, Amenity, DevelopmentUpdate, NewsArticle, GalleryItem } from '../types';
 
 /**
  * Edits are staged in memory and only written to Supabase when saveChanges() runs.
@@ -26,6 +32,8 @@ interface Snapshot {
   properties: Property[];
   amenities: Amenity[];
   updates: DevelopmentUpdate[];
+  news: NewsArticle[];
+  gallery: GalleryItem[];
 }
 
 const EMPTY_SNAPSHOT: Snapshot = {
@@ -34,6 +42,8 @@ const EMPTY_SNAPSHOT: Snapshot = {
   properties: [],
   amenities: [],
   updates: [],
+  news: [],
+  gallery: [],
 };
 
 /** How many undo steps to keep. */
@@ -98,6 +108,10 @@ interface ChangePlan {
   removedAmenityIds: string[];
   properties: Property[];
   updates: DevelopmentUpdate[];
+  news: NewsArticle[];
+  removedNewsIds: string[];
+  gallery: GalleryItem[];
+  removedGalleryIds: string[];
   total: number;
 }
 
@@ -122,8 +136,12 @@ function buildChangePlan(baseline: Snapshot, current: Snapshot): ChangePlan {
   const amenities = changedRows(baseline.amenities, current.amenities);
   const properties = changedRows(baseline.properties, current.properties);
   const updates = changedRows(baseline.updates, current.updates);
+  const news = changedRows(baseline.news, current.news);
+  const gallery = changedRows(baseline.gallery, current.gallery);
   const removedProjectIds = removedIds(baseline.projects, current.projects);
   const removedAmenityIds = removedIds(baseline.amenities, current.amenities);
+  const removedNewsIds = removedIds(baseline.news, current.news);
+  const removedGalleryIds = removedIds(baseline.gallery, current.gallery);
 
   return {
     contentKeys,
@@ -133,14 +151,22 @@ function buildChangePlan(baseline: Snapshot, current: Snapshot): ChangePlan {
     removedAmenityIds,
     properties,
     updates,
+    news,
+    removedNewsIds,
+    gallery,
+    removedGalleryIds,
     total:
       contentKeys.length +
       projects.length +
       amenities.length +
       properties.length +
       updates.length +
+      news.length +
+      gallery.length +
       removedProjectIds.length +
-      removedAmenityIds.length,
+      removedAmenityIds.length +
+      removedNewsIds.length +
+      removedGalleryIds.length,
   };
 }
 
@@ -158,6 +184,8 @@ interface AdminContextType {
   properties: Property[];
   amenities: Amenity[];
   updates: DevelopmentUpdate[];
+  news: NewsArticle[];
+  gallery: GalleryItem[];
   updateText: (key: string, value: string) => void;
   updateImage: (key: string, value: string) => void;
   updateProjectField: (id: string, field: keyof Project, value: any) => void;
@@ -169,6 +197,12 @@ interface AdminContextType {
   addAmenity: (amenity: Amenity) => void;
   deleteProject: (id: string) => void;
   deleteAmenity: (id: string) => void;
+  updateNewsField: (id: string, field: keyof NewsArticle, value: any) => void;
+  addNews: (article: NewsArticle) => void;
+  deleteNews: (id: string) => void;
+  updateGalleryField: (id: string, field: keyof GalleryItem, value: any) => void;
+  addGalleryItem: (item: GalleryItem) => void;
+  deleteGalleryItem: (id: string) => void;
   // ─── Draft / history controls ──────────────────────────────────────────────
   /** Number of pending changes waiting to be written to Supabase. */
   pendingCount: number;
@@ -194,6 +228,8 @@ export const AdminContext = createContext<AdminContextType>({
   properties: [],
   amenities: [],
   updates: [],
+  news: [],
+  gallery: [],
   updateText: noop,
   updateImage: noop,
   updateProjectField: noop,
@@ -205,6 +241,12 @@ export const AdminContext = createContext<AdminContextType>({
   addAmenity: noop,
   deleteProject: noop,
   deleteAmenity: noop,
+  updateNewsField: noop,
+  addNews: noop,
+  deleteNews: noop,
+  updateGalleryField: noop,
+  addGalleryItem: noop,
+  deleteGalleryItem: noop,
   pendingCount: 0,
   hasUnsavedChanges: false,
   canUndo: false,
@@ -216,17 +258,24 @@ export const AdminContext = createContext<AdminContextType>({
   discardChanges: noop,
 });
 
-export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: boolean }> = ({
+export const AdminProvider: React.FC<{
+  children: React.ReactNode;
+  isAdmin?: boolean;
+  /** Show the last saved snapshot and disable editing while keeping the draft in memory. */
+  previewSaved?: boolean;
+}> = ({
   children,
   isAdmin: propIsAdmin = false,
+  previewSaved = false,
 }) => {
-  const [isAdmin] = useState(() => propIsAdmin || localStorage.getItem('lcph_admin_logged_in') === 'true');
+  const isAdmin = propIsAdmin && !previewSaved;
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [state, dispatch] = useReducer(historyReducer, initialHistory);
 
   const snapshot = state.history[state.cursor];
-  const { pageContent, projects, properties, amenities, updates } = snapshot;
+  const visibleSnapshot = previewSaved ? state.baseline : snapshot;
+  const { pageContent, projects, properties, amenities, updates, news, gallery } = visibleSnapshot;
 
   const plan = useMemo(() => buildChangePlan(state.baseline, snapshot), [state.baseline, snapshot]);
   const hasUnsavedChanges = plan.total > 0;
@@ -237,16 +286,26 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
 
   // ─── Initial data load ──────────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
-    const [content, projs, props, ams, upds] = await Promise.all([
+    const [content, projs, props, ams, upds, articles, gal] = await Promise.all([
       getPageContent(),
       getProjects(),
       getProperties(),
       getAmenities(),
       getUpdates(),
+      getNews(),
+      getGallery(),
     ]);
     dispatch({
       type: 'load',
-      snapshot: { pageContent: content, projects: projs, properties: props, amenities: ams, updates: upds },
+      snapshot: {
+        pageContent: content,
+        projects: projs,
+        properties: props,
+        amenities: ams,
+        updates: upds,
+        news: articles,
+        gallery: gal,
+      },
     });
   }, []);
 
@@ -287,12 +346,24 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
       .on('postgres_changes', { event: '*', schema: 'public', table: 'page_content' }, reloadIfClean)
       .subscribe();
 
+    const newsCh = supabase
+      .channel('rt-news')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, reloadIfClean)
+      .subscribe();
+
+    const galleryCh = supabase
+      .channel('rt-gallery')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, reloadIfClean)
+      .subscribe();
+
     return () => {
       supabase.removeChannel(projectsCh);
       supabase.removeChannel(amenitiesCh);
       supabase.removeChannel(propertiesCh);
       supabase.removeChannel(updatesCh);
       supabase.removeChannel(contentCh);
+      supabase.removeChannel(newsCh);
+      supabase.removeChannel(galleryCh);
     };
   }, [loadAll]);
 
@@ -397,6 +468,50 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
     [commit],
   );
 
+  // ─── News ───────────────────────────────────────────────────────────────────
+
+  const updateNewsField = useCallback(
+    (id: string, field: keyof NewsArticle, value: any) => {
+      commit((current) => ({
+        ...current,
+        news: current.news.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+      }));
+    },
+    [commit],
+  );
+
+  const addNews = useCallback(
+    (article: NewsArticle) => commit((current) => ({ ...current, news: [article, ...current.news] })),
+    [commit],
+  );
+
+  const deleteNews = useCallback(
+    (id: string) => commit((current) => ({ ...current, news: current.news.filter((item) => item.id !== id) })),
+    [commit],
+  );
+
+  // ─── Gallery ────────────────────────────────────────────────────────────────
+
+  const updateGalleryField = useCallback(
+    (id: string, field: keyof GalleryItem, value: any) => {
+      commit((current) => ({
+        ...current,
+        gallery: current.gallery.map((item) => (item.id === id ? { ...item, [field]: value } : item)),
+      }));
+    },
+    [commit],
+  );
+
+  const addGalleryItem = useCallback(
+    (item: GalleryItem) => commit((current) => ({ ...current, gallery: [item, ...current.gallery] })),
+    [commit],
+  );
+
+  const deleteGalleryItem = useCallback(
+    (id: string) => commit((current) => ({ ...current, gallery: current.gallery.filter((item) => item.id !== id) })),
+    [commit],
+  );
+
   // ─── History + persistence ──────────────────────────────────────────────────
 
   const undo = useCallback(() => dispatch({ type: 'undo' }), []);
@@ -418,6 +533,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
       if (pending.amenities.length) await saveAmenities(pending.amenities);
       if (pending.properties.length) await saveProperties(pending.properties);
       if (pending.updates.length) await saveUpdates(pending.updates);
+      if (pending.news.length) await saveNews(pending.news);
+      if (pending.gallery.length) await saveGallery(pending.gallery);
+      for (const id of pending.removedNewsIds) await deleteNewsById(id);
+      for (const id of pending.removedGalleryIds) await deleteGalleryById(id);
       for (const id of pending.removedProjectIds) await deleteProjectById(id);
       for (const id of pending.removedAmenityIds) await deleteAmenityById(id);
 
@@ -442,6 +561,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
         properties,
         amenities,
         updates,
+        news,
+        gallery,
         updateText,
         updateImage,
         updateProjectField,
@@ -453,6 +574,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode; isAdmin?: bool
         addAmenity,
         deleteProject,
         deleteAmenity,
+        updateNewsField,
+        addNews,
+        deleteNews,
+        updateGalleryField,
+        addGalleryItem,
+        deleteGalleryItem,
         pendingCount: plan.total,
         hasUnsavedChanges,
         canUndo: state.cursor > 0,

@@ -1,7 +1,6 @@
 ﻿import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../../utils/scroll';
-import { EditableText } from '../admin/EditableText';
 import { ArrowRight, Menu, X } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -291,7 +290,7 @@ export const Header: React.FC = () => {
                   : 'bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container focus-visible:ring-primary/50'
               }`}
             >
-              <EditableText contentKey="header_cta_label" value="Inquire Now" tag="span" inline />
+              Inquire Now
               <ArrowRight className="w-4 h-4 shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             )}
@@ -353,7 +352,7 @@ export const Header: React.FC = () => {
                 onClick={handleNavClick('/contact')}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-3 text-center font-label-lg text-label-lg uppercase tracking-wider text-on-primary shadow-sm transition-colors hover:bg-primary-container hover:text-on-primary-container"
               >
-                <EditableText contentKey="header_cta_label" value="Inquire Now" tag="span" inline />
+                Inquire Now
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>

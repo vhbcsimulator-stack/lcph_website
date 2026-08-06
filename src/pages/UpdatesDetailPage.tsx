@@ -93,7 +93,10 @@ export const UpdatesDetailPage: React.FC = () => {
                   <span>% Overall</span>
                 </div>
               ) : (
-                <span>{update.progressPercentage}% Overall Progress</span>
+                <span>
+                  {update.progressPercentage}%{' '}
+                  <EditableText contentKey="update_detail_progress_label" value="Overall Progress" tag="span" inline />
+                </span>
               )}
             </span>
           </div>

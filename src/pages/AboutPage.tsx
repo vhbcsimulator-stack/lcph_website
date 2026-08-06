@@ -77,7 +77,7 @@ export const AboutPage: React.FC = () => {
           <motion.div variants={fadeInLeft(0.6)} className="space-y-5">
             <EditableText
               contentKey="about_story_title"
-              className="font-headline-lg text-[28px] font-semibold leading-tight text-on-background md:text-[32px]"
+              className="font-headline-lg text-[28px] font-semibold leading-tight text-primary md:text-[32px]"
               tag="h2"
             />
             <EditableText
@@ -125,7 +125,7 @@ export const AboutPage: React.FC = () => {
             <EditableText
               contentKey="about_principles_title"
               value="Core Principles"
-              className="block font-headline-lg text-[28px] font-medium text-on-background md:text-[32px]"
+              className="block font-headline-lg text-[28px] font-medium text-primary md:text-[32px]"
               tag="h2"
             />
           </div>
