@@ -27,8 +27,9 @@ export const EditableImage: React.FC<EditableImageProps> = ({
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Determine current image URL
-  const currentUrl = contentKey ? (pageContent[contentKey] || '') : (value || '');
+  // Stored value first, then the caller's default. A content key with nothing behind it still
+  // falls back to `value` — otherwise the default was silently unreachable.
+  const currentUrl = (contentKey ? pageContent[contentKey] : undefined) || value || '';
 
   const processFile = useCallback(async (file: File) => {
     setError('');
@@ -82,7 +83,18 @@ export const EditableImage: React.FC<EditableImageProps> = ({
     setError('');
   };
 
-  const renderNormal = children(currentUrl);
+  /**
+   * With no image at all, the consumer would render <img src="">, which makes the browser
+   * re-request the current page. A neutral placeholder stands in instead; admins still get the
+   * edit overlay on top of it.
+   */
+  const renderNormal = currentUrl ? (
+    children(currentUrl)
+  ) : (
+    <div className="flex h-full min-h-[120px] w-full items-center justify-center bg-surface-container">
+      <Image className="w-6 h-6 text-on-surface-variant/50" />
+    </div>
+  );
 
   if (!isAdmin) {
     return <>{renderNormal}</>;

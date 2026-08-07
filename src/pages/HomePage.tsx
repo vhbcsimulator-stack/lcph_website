@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { faqAnswerKey, faqQuestionKey, resolveFaqs } from '../data/faqContent';
 import { ProjectCard } from '../components/cards/ProjectCard';
-import { AmenityCard } from '../components/cards/AmenityCard';
+import { AmenitiesScroller } from '../components/home/AmenitiesScroller';
 import { UpdateCard } from '../components/cards/UpdateCard';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
@@ -74,8 +74,10 @@ export const HomePage: React.FC = () => {
     setFormSubmitted(true);
   };
 
+  // overflow-x-clip, not overflow-hidden: hidden would make this a scroll container and break
+  // the pinned amenities section's position: sticky.
   return (
-    <AnimatedPage className="overflow-hidden bg-surface">
+    <AnimatedPage className="overflow-x-clip bg-surface">
       {/* 1. HERO SECTION */}
       <section className="relative flex min-h-[560px] w-full items-center justify-center overflow-hidden bg-surface-variant sm:h-[600px] lg:h-[900px]">
         {/* Background Image Overlay with Parallax */}
@@ -341,15 +343,10 @@ export const HomePage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* 7. AMENITIES PREVIEW */}
-      <motion.section
-        variants={fadeInUp(0.6)}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className="py-16"
-      >
-        <div className={`${SECTION_SHELL} space-y-10`}>
+      {/* 7. AMENITIES PREVIEW — pins and scrolls sideways on desktop, swipe rail elsewhere */}
+      <AmenitiesScroller
+        amenities={amenities}
+        header={
           <div className="mx-auto max-w-[768px] space-y-3 text-center">
             <EditableText contentKey="home_amenities_badge" className={`block ${EYEBROW}`} tag="span" />
             <EditableText contentKey="home_amenities_title" className={`block ${SECTION_HEADING}`} tag="h2" />
@@ -359,26 +356,18 @@ export const HomePage: React.FC = () => {
               tag="p"
             />
           </div>
+        }
+      />
 
-          <motion.div variants={staggerContainer(0.08, 0.1)} className="mx-auto max-w-[1100px] space-y-6">
-            {amenities.slice(0, 4).map((amenity, index) => (
-              <motion.div key={amenity.id} variants={fadeInUp(0.4)}>
-                <AmenityCard amenity={amenity} variant="row" reverse={index % 2 === 1} />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <div className="pt-4 text-center">
-            <Link
-              to="/amenities"
-              className="home-cta group inline-flex items-center gap-2 rounded bg-primary px-8 py-3.5 font-label-lg text-label-lg uppercase tracking-wider text-on-primary shadow-sm hover:bg-primary-container"
-            >
-              <EditableText contentKey="home_amenities_cta" value="Explore All Amenities" tag="span" inline />
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-          </div>
-        </div>
-      </motion.section>
+      <div className={`${SECTION_SHELL} pb-16 text-center`}>
+        <Link
+          to="/amenities"
+          className="home-cta group inline-flex items-center gap-2 rounded bg-primary px-8 py-3.5 font-label-lg text-label-lg uppercase tracking-wider text-on-primary shadow-sm hover:bg-primary-container"
+        >
+          <EditableText contentKey="home_amenities_cta" value="Explore All Amenities" tag="span" inline />
+          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+        </Link>
+      </div>
 
       {/* 8. DEVELOPMENT PROGRESS UPDATES */}
       <motion.section

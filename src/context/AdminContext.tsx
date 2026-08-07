@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useReducer, useRef } from 'react';
+import { QueryClientProvider, useQueries, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { queryClient as sharedQueryClient, queryKeys } from '../lib/queryClient';
 import {
   getPageContent,
   updatePageContentValue,
@@ -54,6 +56,8 @@ interface HistoryState {
   cursor: number;
   /** Last state known to match the database. */
   baseline: Snapshot;
+  /** False until server data has been loaded into history — what `loading` is derived from. */
+  hydrated: boolean;
 }
 
 type HistoryAction =
@@ -68,12 +72,13 @@ const initialHistory: HistoryState = {
   history: [EMPTY_SNAPSHOT],
   cursor: 0,
   baseline: EMPTY_SNAPSHOT,
+  hydrated: false,
 };
 
 function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
   switch (action.type) {
     case 'load':
-      return { history: [action.snapshot], cursor: 0, baseline: action.snapshot };
+      return { history: [action.snapshot], cursor: 0, baseline: action.snapshot, hydrated: true };
 
     case 'commit': {
       // Anything after the cursor is a redo branch the new edit replaces.
@@ -92,7 +97,7 @@ function historyReducer(state: HistoryState, action: HistoryAction): HistoryStat
       return { ...state, baseline: state.history[state.cursor] };
 
     case 'discard':
-      return { history: [state.baseline], cursor: 0, baseline: state.baseline };
+      return { ...state, history: [state.baseline], cursor: 0, baseline: state.baseline };
 
     default:
       return state;
@@ -258,7 +263,18 @@ export const AdminContext = createContext<AdminContextType>({
   discardChanges: noop,
 });
 
-export const AdminProvider: React.FC<{
+/** Realtime table name → the query it invalidates. */
+const REALTIME_TABLES = [
+  { table: 'page_content', key: queryKeys.pageContent },
+  { table: 'projects', key: queryKeys.projects },
+  { table: 'properties', key: queryKeys.properties },
+  { table: 'amenities', key: queryKeys.amenities },
+  { table: 'development_updates', key: queryKeys.updates },
+  { table: 'news', key: queryKeys.news },
+  { table: 'gallery', key: queryKeys.gallery },
+] as const;
+
+const AdminProviderInner: React.FC<{
   children: React.ReactNode;
   isAdmin?: boolean;
   /** Show the last saved snapshot and disable editing while keeping the draft in memory. */
@@ -269,8 +285,8 @@ export const AdminProvider: React.FC<{
   previewSaved = false,
 }) => {
   const isAdmin = propIsAdmin && !previewSaved;
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(historyReducer, initialHistory);
 
   const snapshot = state.history[state.cursor];
@@ -284,88 +300,84 @@ export const AdminProvider: React.FC<{
   const dirtyRef = useRef(false);
   dirtyRef.current = hasUnsavedChanges;
 
-  // ─── Initial data load ──────────────────────────────────────────────────────
-  const loadAll = useCallback(async () => {
-    const [content, projs, props, ams, upds, articles, gal] = await Promise.all([
-      getPageContent(),
-      getProjects(),
-      getProperties(),
-      getAmenities(),
-      getUpdates(),
-      getNews(),
-      getGallery(),
-    ]);
-    dispatch({
-      type: 'load',
-      snapshot: {
-        pageContent: content,
-        projects: projs,
-        properties: props,
-        amenities: ams,
-        updates: upds,
-        news: articles,
-        gallery: gal,
-      },
-    });
-  }, []);
+  // ─── Data loading (TanStack Query) ──────────────────────────────────────────
+  // One query per table so a realtime event only refetches what actually changed.
+  const [contentQ, projectsQ, propertiesQ, amenitiesQ, updatesQ, newsQ, galleryQ] = useQueries({
+    queries: [
+      { queryKey: queryKeys.pageContent, queryFn: getPageContent },
+      { queryKey: queryKeys.projects, queryFn: getProjects },
+      { queryKey: queryKeys.properties, queryFn: getProperties },
+      { queryKey: queryKeys.amenities, queryFn: getAmenities },
+      { queryKey: queryKeys.updates, queryFn: getUpdates },
+      { queryKey: queryKeys.news, queryFn: getNews },
+      { queryKey: queryKeys.gallery, queryFn: getGallery },
+    ],
+  });
+
+  // The whole site renders from one snapshot, so nothing is published until every table has arrived.
+  const remoteSnapshot: Snapshot | null = useMemo(() => {
+    if (
+      !contentQ.data ||
+      !projectsQ.data ||
+      !propertiesQ.data ||
+      !amenitiesQ.data ||
+      !updatesQ.data ||
+      !newsQ.data ||
+      !galleryQ.data
+    ) {
+      return null;
+    }
+    return {
+      pageContent: contentQ.data,
+      projects: projectsQ.data,
+      properties: propertiesQ.data,
+      amenities: amenitiesQ.data,
+      updates: updatesQ.data,
+      news: newsQ.data,
+      gallery: galleryQ.data,
+    };
+  }, [
+    contentQ.data,
+    projectsQ.data,
+    propertiesQ.data,
+    amenitiesQ.data,
+    updatesQ.data,
+    newsQ.data,
+    galleryQ.data,
+  ]);
+
+  /**
+   * Derived from the reducer, not from the queries: query data lands one render before the
+   * effect below copies it into history, and reporting "loaded" during that gap paints the whole
+   * site once against an empty snapshot (blank text, empty image src).
+   */
+  const loading = !state.hydrated;
+
+  /**
+   * Fresh server data becomes the new baseline and clears history.
+   * Skipped while local edits are pending — a draft must never be overwritten.
+   */
+  useEffect(() => {
+    if (!remoteSnapshot || dirtyRef.current) return;
+    dispatch({ type: 'load', snapshot: remoteSnapshot });
+  }, [remoteSnapshot]);
 
   useEffect(() => {
-    loadAll().finally(() => setLoading(false));
-
-    /**
-     * A remote change refetches everything so the baseline stays truthful.
-     * Skipped while local edits are pending — a draft must never be overwritten.
-     */
-    const reloadIfClean = () => {
-      if (dirtyRef.current) return;
-      loadAll();
-    };
-
-    const projectsCh = supabase
-      .channel('rt-projects')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, reloadIfClean)
-      .subscribe();
-
-    const amenitiesCh = supabase
-      .channel('rt-amenities')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'amenities' }, reloadIfClean)
-      .subscribe();
-
-    const propertiesCh = supabase
-      .channel('rt-properties')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'properties' }, reloadIfClean)
-      .subscribe();
-
-    const updatesCh = supabase
-      .channel('rt-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'development_updates' }, reloadIfClean)
-      .subscribe();
-
-    const contentCh = supabase
-      .channel('rt-content')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'page_content' }, reloadIfClean)
-      .subscribe();
-
-    const newsCh = supabase
-      .channel('rt-news')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, reloadIfClean)
-      .subscribe();
-
-    const galleryCh = supabase
-      .channel('rt-gallery')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery' }, reloadIfClean)
-      .subscribe();
+    // A remote change marks that table stale; the refetch flows back through the effect above.
+    const channels = REALTIME_TABLES.map(({ table, key }) =>
+      supabase
+        .channel(`rt-${table}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+          if (dirtyRef.current) return;
+          queryClient.invalidateQueries({ queryKey: key });
+        })
+        .subscribe(),
+    );
 
     return () => {
-      supabase.removeChannel(projectsCh);
-      supabase.removeChannel(amenitiesCh);
-      supabase.removeChannel(propertiesCh);
-      supabase.removeChannel(updatesCh);
-      supabase.removeChannel(contentCh);
-      supabase.removeChannel(newsCh);
-      supabase.removeChannel(galleryCh);
+      channels.forEach((channel) => supabase.removeChannel(channel));
     };
-  }, [loadAll]);
+  }, [queryClient]);
 
   // ─── Staged mutations (memory only) ─────────────────────────────────────────
 
@@ -541,6 +553,9 @@ export const AdminProvider: React.FC<{
       for (const id of pending.removedAmenityIds) await deleteAmenityById(id);
 
       dispatch({ type: 'saved' });
+      // Draft is now clean, so refetching is safe and keeps the cache honest.
+      dirtyRef.current = false;
+      queryClient.invalidateQueries({ queryKey: queryKeys.all });
       return { ok: true, saved: pending.total };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error while saving.';
@@ -549,7 +564,7 @@ export const AdminProvider: React.FC<{
     } finally {
       setSaving(false);
     }
-  }, [state.baseline]);
+  }, [state.baseline, queryClient]);
 
   return (
     <AdminContext.Provider
@@ -595,6 +610,20 @@ export const AdminProvider: React.FC<{
     </AdminContext.Provider>
   );
 };
+
+/**
+ * Wraps the provider in its own QueryClientProvider so both the public site and
+ * the admin app get the cache without touching their entry points.
+ */
+export const AdminProvider: React.FC<{
+  children: React.ReactNode;
+  isAdmin?: boolean;
+  previewSaved?: boolean;
+}> = ({ children, ...props }) => (
+  <QueryClientProvider client={sharedQueryClient}>
+    <AdminProviderInner {...props}>{children}</AdminProviderInner>
+  </QueryClientProvider>
+);
 
 export const useAdmin = () => useContext(AdminContext);
 export default AdminProvider;
