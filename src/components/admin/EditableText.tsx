@@ -32,7 +32,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
 
   // Determine current value to display
   const currentValue = contentKey
-    ? (pageContent[contentKey] !== undefined ? pageContent[contentKey] : (value || ''))
+    ? (pageContent[contentKey] ?? '')
     : (value || '');
 
   useEffect(() => {

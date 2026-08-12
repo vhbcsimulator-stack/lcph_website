@@ -62,6 +62,8 @@ export interface DevelopmentUpdate {
   image: string;
   gallery: string[];
   featured?: boolean;
+  /** Label for the outlined chip on the card; falls back to a progress-derived one when blank. */
+  status?: string;
 }
 
 export interface NewsArticle {
@@ -91,7 +93,8 @@ export interface FAQItem {
   id: string;
   question: string;
   answer: string;
-  category: 'About LCPH' | 'Projects' | 'Properties' | 'Reservation' | 'Payment Terms' | 'Site Visits';
+  /** Free-form: admins can create their own. FAQ_CATEGORIES in data/faqContent holds the suggested set. */
+  category: string;
 }
 
 export interface CareerPosition {

@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import { EditableText } from './EditableText';
+import { EditableRichText } from './EditableRichText';
 import { Plus, Trash2 } from 'lucide-react';
 
 /** A section is an ordered list of these, so paragraphs and bullets can be interleaved freely. */
@@ -26,8 +27,8 @@ interface EditableSectionsProps {
  * Sections are stored as a JSON string so no schema change is needed.
  *
  * Two older shapes are still read: a single `description` string, and separate `descriptions` /
- * `bullets` arrays. Those are flattened into blocks in the order they used to render — every
- * paragraph first, then every bullet — so existing records come through looking unchanged.
+ * `bullets` arrays. Those are flattened into blocks in the order they used to render â€” every
+ * paragraph first, then every bullet â€” so existing records come through looking unchanged.
  */
 export const parseSections = (raw: string | undefined, fallback: ContentSection[]): ContentSection[] => {
   if (!raw) return fallback;
@@ -89,10 +90,10 @@ const groupBlocks = (blocks: SectionBlock[]) => {
  * A list of policy-style sections (heading plus interleaved paragraphs and bullets) that admins can
  * edit, add to and remove. Visitors just see the rendered content.
  */
-export const EditableSections: React.FC<EditableSectionsProps> = ({ contentKey, defaultSections }) => {
+export const EditableSections: React.FC<EditableSectionsProps> = ({ contentKey, defaultSections: _defaultSections }) => {
   const { isAdmin, pageContent, updateText } = useAdmin();
 
-  const sections = parseSections(pageContent[contentKey], defaultSections);
+  const sections = parseSections(pageContent[contentKey], []);
 
   const write = (next: ContentSection[]) => updateText(contentKey, JSON.stringify(next));
 
@@ -160,12 +161,11 @@ export const EditableSections: React.FC<EditableSectionsProps> = ({ contentKey, 
           {groupBlocks(section.blocks).map((group) =>
             group.kind === 'paragraph' ? (
               <div key={group.index} className="group/para flex items-start gap-2">
-                <EditableText
+                <EditableRichText
                   value={section.blocks[group.index].text}
                   onSave={(val) => setBlock(index, group.index, val)}
                   className="flex-1 text-body-sm leading-relaxed text-on-surface-variant"
-                  tag="p"
-                  multiline={true}
+                  compact
                 />
                 {isAdmin && (
                   <button

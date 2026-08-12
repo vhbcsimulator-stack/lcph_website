@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import { faqAnswerKey, faqQuestionKey, resolveFaqs } from '../data/faqContent';
@@ -7,6 +7,7 @@ import { AmenitiesScroller } from '../components/home/AmenitiesScroller';
 import { UpdateCard } from '../components/cards/UpdateCard';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { fadeInUp, fadeInLeft, fadeInRight, staggerContainer, scaleUp } from '../utils/animations';
@@ -106,7 +107,7 @@ export const HomePage: React.FC = () => {
           </EditableImage>
         </motion.div>
 
-        {/* Veil layer — deepens the scene as the hero scrolls away */}
+        {/* Veil layer â€” deepens the scene as the hero scrolls away */}
         <motion.div
           aria-hidden
           style={{ opacity: opacityVeil }}
@@ -141,12 +142,10 @@ export const HomePage: React.FC = () => {
             </motion.div>
 
             <motion.div variants={fadeInUp(0.5)} className="mb-7 max-w-[560px] sm:mb-lg">
-              <EditableText
+              <EditableRichText
                 contentKey="home_hero_subtitle"
-                value="Experience the perfect blend of nature, comfort, and investment potential in the heart of the Philippines."
                 className="font-body-lg text-[15px] leading-relaxed text-white/90 sm:text-body-lg"
-                tag="p"
-                multiline={true}
+                compact
               />
             </motion.div>
 
@@ -203,11 +202,10 @@ export const HomePage: React.FC = () => {
       >
         <EditableText contentKey="home_intro_badge" className={`mb-2 block ${EYEBROW}`} tag="span" />
         <EditableText contentKey="home_intro_title" className={`mb-md block ${SECTION_HEADING}`} tag="h2" />
-        <EditableText
+        <EditableRichText
           contentKey="home_intro_text"
           className={`mx-auto max-w-[768px] font-body-md text-body-md leading-relaxed text-on-surface-variant ${TITLE_CASE}`}
-          tag="p"
-          multiline={true}
+          compact
         />
       </motion.section>
 
@@ -266,11 +264,10 @@ export const HomePage: React.FC = () => {
               <EditableText contentKey="home_spotlight_location" className="font-semibold" tag="span" />
             </p>
 
-            <EditableText
+            <EditableRichText
               contentKey="home_spotlight_description"
               className={`mb-lg line-clamp-4 font-body-sm text-body-sm leading-relaxed text-on-surface-variant ${TITLE_CASE}`}
-              tag="p"
-              multiline={true}
+              compact
             />
 
             <ul className="mb-lg space-y-2">
@@ -303,7 +300,7 @@ export const HomePage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className="py-16"
+        className="section-band section-grid py-16"
       >
         <div className={`${SECTION_SHELL} space-y-10`}>
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
@@ -334,7 +331,7 @@ export const HomePage: React.FC = () => {
             variants={staggerContainer(0.1, 0.1)}
             className="mx-auto grid max-w-[960px] grid-cols-1 gap-gutter md:grid-cols-2"
           >
-            {projects.slice(0, 3).map((project) => (
+            {projects.slice(0, 2).map((project) => (
               <motion.div key={project.id} variants={scaleUp(0.5)}>
                 <ProjectCard project={project} />
               </motion.div>
@@ -343,7 +340,7 @@ export const HomePage: React.FC = () => {
         </div>
       </motion.section>
 
-      {/* 7. AMENITIES PREVIEW — pins and scrolls sideways on desktop, swipe rail elsewhere */}
+      {/* 7. AMENITIES PREVIEW â€” pins and scrolls sideways on desktop, swipe rail elsewhere */}
       <AmenitiesScroller
         amenities={amenities}
         header={
@@ -375,44 +372,46 @@ export const HomePage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className={`${SECTION_SHELL} space-y-10 py-16`}
+        className="section-band section-diagonal py-16"
       >
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div className="space-y-1">
-            <EditableText
-              contentKey="home_updates_badge"
-              value="Site Engineering"
-              className={`block ${EYEBROW}`}
-              tag="span"
-            />
-            <EditableText
-              contentKey="home_updates_title"
-              value="Recent Construction Progress"
-              className="block font-headline-sm text-headline-sm font-bold text-on-surface"
-              tag="h2"
-            />
-          </div>
-          <Link
-            to="/updates"
-            className="inline-flex items-center gap-2 font-label-lg text-[12px] font-bold uppercase tracking-wider text-primary hover:underline"
-          >
-            <EditableText contentKey="home_updates_cta" value="All Progress Reports" tag="span" inline />
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <motion.div variants={staggerContainer(0.12, 0.1)} className="grid grid-cols-1 gap-gutter md:grid-cols-2">
-          {updates.slice(0, 2).map((update) => (
-            <motion.div
-              key={update.id}
-              variants={fadeInUp(0.4)}
-              whileHover={prefersReducedMotion ? undefined : { y: -6 }}
-              transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+        <div className={`${SECTION_SHELL} space-y-10`}>
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div className="space-y-1">
+              <EditableText
+                contentKey="home_updates_badge"
+                value="Site Engineering"
+                className={`block ${EYEBROW}`}
+                tag="span"
+              />
+              <EditableText
+                contentKey="home_updates_title"
+                value="Recent Construction Progress"
+                className="block font-headline-sm text-headline-sm font-bold text-on-surface"
+                tag="h2"
+              />
+            </div>
+            <Link
+              to="/updates"
+              className="inline-flex items-center gap-2 font-label-lg text-[12px] font-bold uppercase tracking-wider text-primary hover:underline"
             >
-              <UpdateCard update={update} />
-            </motion.div>
-          ))}
-        </motion.div>
+              <EditableText contentKey="home_updates_cta" value="All Progress Reports" tag="span" inline />
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          <motion.div variants={staggerContainer(0.12, 0.1)} className="grid grid-cols-1 gap-gutter md:grid-cols-2">
+            {updates.slice(0, 2).map((update) => (
+              <motion.div
+                key={update.id}
+                variants={fadeInUp(0.4)}
+                whileHover={prefersReducedMotion ? undefined : { y: -6 }}
+                transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+              >
+                <UpdateCard update={update} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </motion.section>
 
       {/* 10. FREQUENTLY ASKED QUESTIONS */}
@@ -421,90 +420,91 @@ export const HomePage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className={`${SECTION_SHELL} space-y-8 py-16`}
+        className="section-band section-dots py-16"
       >
-        <div className="mx-auto max-w-[672px] space-y-2 text-center">
-          <EditableText
-            contentKey="home_faq_badge"
-            value="Buyer Guidance"
-            className={`block ${EYEBROW}`}
-            tag="span"
-          />
-          <EditableText
-            contentKey="home_faq_title"
-            value="Frequently Asked Questions"
-            className={`block ${SECTION_HEADING}`}
-            tag="h2"
-          />
-        </div>
-
-        <motion.div variants={staggerContainer(0.08, 0.1)} className="mx-auto max-w-[768px] space-y-3">
-          {faqs.map((faq) => {
-            const isOpen = openFaq === faq.id;
-            return (
-              <motion.div
-                key={faq.id}
-                variants={fadeInUp(0.4)}
-                whileHover={prefersReducedMotion ? undefined : { y: -2, borderColor: 'rgba(0, 67, 33, 0.28)' }}
-                transition={{ duration: 0.25 }}
-                className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm transition-shadow hover:shadow-md"
-              >
-                <button
-                  type="button"
-                  onClick={() => setOpenFaq(isOpen ? null : faq.id)}
-                  aria-expanded={isOpen}
-                  className="group flex w-full cursor-pointer items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-container-low"
-                >
-                  <HelpCircle className="w-5 h-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110" />
-                  <span className={`flex-1 font-headline-sm text-body-md font-semibold text-on-surface ${TITLE_CASE}`}>
-                    <EditableText
-                      contentKey={faqQuestionKey(faq.id)}
-                      value={faq.question}
-                      tag="span"
-                      inline
-                    />
-                  </span>
-                  <ChevronDown
-                    className={`w-4 h-4 shrink-0 text-on-surface-variant transition-transform duration-200 ${
-                      isOpen ? 'rotate-180' : ''
-                    }`} />
-                </button>
-                <AnimatePresence initial={false}>
-                  {isOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: [0.2, 0, 0, 1] }}
-                    >
-                      <EditableText
-                        contentKey={faqAnswerKey(faq.id)}
-                        value={faq.answer}
-                        className="px-5 pb-5 pl-13 font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
-                        tag="p"
-                        multiline={true}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-
-        <div className="pt-2 text-center">
-          <Link
-            to="/faqs"
-            className="inline-flex items-center gap-2 font-label-lg text-[12px] font-bold uppercase tracking-wider text-primary hover:underline"
-          >
+        <div className={`${SECTION_SHELL} space-y-8`}>
+          <div className="mx-auto max-w-[672px] space-y-2 text-center">
             <EditableText
-              contentKey="home_faq_cta"
-              value="View All Frequently Asked Questions"
+              contentKey="home_faq_badge"
+              value="Buyer Guidance"
+              className={`block ${EYEBROW}`}
               tag="span"
-              inline
             />
-            <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+            <EditableText
+              contentKey="home_faq_title"
+              value="Frequently Asked Questions"
+              className={`block ${SECTION_HEADING}`}
+              tag="h2"
+            />
+          </div>
+
+          <motion.div variants={staggerContainer(0.08, 0.1)} className="mx-auto max-w-[768px] space-y-3">
+            {faqs.map((faq) => {
+              const isOpen = openFaq === faq.id;
+              return (
+                <motion.div
+                  key={faq.id}
+                  variants={fadeInUp(0.4)}
+                  whileHover={prefersReducedMotion ? undefined : { y: -2, borderColor: 'rgba(0, 67, 33, 0.28)' }}
+                  transition={{ duration: 0.25 }}
+                  className="overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm transition-shadow hover:shadow-md"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : faq.id)}
+                    aria-expanded={isOpen}
+                    className="group flex w-full cursor-pointer items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-surface-container-low"
+                  >
+                    <HelpCircle className="w-5 h-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110" />
+                    <span className={`flex-1 font-headline-sm text-body-md font-semibold text-on-surface ${TITLE_CASE}`}>
+                      <EditableText
+                        contentKey={faqQuestionKey(faq.id)}
+                        value={faq.question}
+                        tag="span"
+                        inline
+                      />
+                    </span>
+                    <ChevronDown
+                      className={`w-4 h-4 shrink-0 text-on-surface-variant transition-transform duration-200 ${
+                        isOpen ? 'rotate-180' : ''
+                      }`} />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: prefersReducedMotion ? 0 : 0.2, ease: [0.2, 0, 0, 1] }}
+                      >
+                        <EditableRichText
+                          contentKey={faqAnswerKey(faq.id)}
+                          value={faq.answer}
+                          className="px-5 pb-5 pl-13 font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
+                          compact
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          <div className="pt-2 text-center">
+            <Link
+              to="/faqs"
+              className="inline-flex items-center gap-2 font-label-lg text-[12px] font-bold uppercase tracking-wider text-primary hover:underline"
+            >
+              <EditableText
+                contentKey="home_faq_cta"
+                value="View All Frequently Asked Questions"
+                tag="span"
+                inline
+              />
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </motion.section>
 
@@ -514,7 +514,7 @@ export const HomePage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className="bg-primary py-16 text-on-primary"
+        className="section-grid pattern-on-dark bg-primary py-16 text-on-primary"
       >
         <div className={SECTION_SHELL}>
           <div className="grid grid-cols-1 items-center gap-lg lg:grid-cols-2">
@@ -531,12 +531,10 @@ export const HomePage: React.FC = () => {
                 className={`block font-headline-lg text-headline-lg text-white ${TITLE_CASE}`}
                 tag="h2"
               />
-              <EditableText
+              <EditableRichText
                 contentKey="home_contact_desc"
-                value="Connect with our certified property specialists for custom sample computations, site tour arrangements, or master plan inquiries."
                 className="block font-body-md text-body-md leading-relaxed text-slate-200"
-                tag="p"
-                multiline={true}
+                compact
               />
 
               <div className="space-y-3 pt-2 font-body-sm text-body-sm text-slate-200">
@@ -590,12 +588,10 @@ export const HomePage: React.FC = () => {
                     className="block font-headline-sm text-headline-sm font-bold"
                     tag="h4"
                   />
-                  <EditableText
+                  <EditableRichText
                     contentKey="home_form_success_text"
-                    value="Your inquiry has been logged. An LCPH Property Specialist will reach out to you within 24 hours."
                     className="block font-body-sm text-body-sm opacity-90"
-                    tag="p"
-                    multiline={true}
+                    compact
                   />
                 </div>
               ) : (

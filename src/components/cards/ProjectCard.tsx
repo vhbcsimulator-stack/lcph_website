@@ -1,9 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Project } from '../../types';
 import { useAdmin } from '../../context/AdminContext';
 import { EditableText } from '../admin/EditableText';
+import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { ArrowRight, MapPin } from 'lucide-react';
 
@@ -76,12 +77,11 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             />"
           </p>
           
-          <EditableText
+          <EditableRichText
             value={project.description}
             onSave={(val) => updateProjectField(project.id, 'description', val)}
             className="text-body-sm text-body-sm text-on-surface-variant mt-3 line-clamp-2 leading-relaxed"
-            tag="p"
-            multiline={true}
+            compact
           />
         </div>
 

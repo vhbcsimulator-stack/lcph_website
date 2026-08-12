@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableEmbed } from '../components/admin/EditableEmbed';
 import { CheckCircle, Clock, Mail, MapPin, Phone } from 'lucide-react';
 
@@ -49,12 +50,10 @@ export const ContactPage: React.FC = () => {
                   className="block font-headline-sm text-headline-sm font-bold"
                   tag="h3"
                 />
-                <EditableText
+                <EditableRichText
                   contentKey="contact_success_text"
-                  value="Our customer team will contact you within 24 hours."
                   className="block font-body-sm text-body-sm opacity-90"
-                  tag="p"
-                  multiline={true}
+                  compact
                 />
               </div>
             ) : (
@@ -133,7 +132,7 @@ export const ContactPage: React.FC = () => {
 
           {/* Info panel */}
           <div className="h-full">
-            <div className="relative flex h-full min-h-[440px] flex-col overflow-hidden rounded-xl border border-primary-container bg-primary p-6 text-on-primary shadow-md md:p-8">
+            <div className="section-diagonal pattern-on-dark relative flex h-full min-h-[440px] flex-col overflow-hidden rounded-xl border border-primary-container bg-primary p-6 text-on-primary shadow-md md:p-8">
               <EditableText 
                 contentKey="contact_info_title"
                 tag="h3"
@@ -162,11 +161,10 @@ export const ContactPage: React.FC = () => {
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10 text-primary-fixed">
                     <Clock className="w-5 h-5 transition-transform group-hover:scale-110" />
                   </div>
-                  <EditableText 
+                  <EditableRichText
                     contentKey="contact_info_hours"
-                    tag="span"
-                    multiline={true}
-                    className="self-center whitespace-pre-line leading-relaxed text-on-primary"
+                    className="self-center leading-relaxed text-on-primary"
+                    compact
                   />
                 </div>
               </div>
@@ -174,7 +172,7 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <section data-reveal className="w-full h-96 relative overflow-hidden border-t border-b border-outline-variant/30">
+      <section data-reveal className="section-band w-full h-96 relative overflow-hidden">
         <EditableEmbed
           contentKey="contact_map_embed"
           value="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3853.1134835949197!2d120.6810847761108!3d15.041838066119714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3396f766478da7d5%3A0x37161103f245a3f9!2sLCPH%20REALTY%20INC.%20%E2%80%9CLeisure%20Community%20PH%E2%80%9D!5e0!3m2!1sen!2sph!4v1785566513008!5m2!1sen!2sph"

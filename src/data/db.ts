@@ -1,7 +1,5 @@
 import { supabase } from '../lib/supabase';
 import type { Project, Property, Amenity, DevelopmentUpdate, NewsArticle, GalleryItem } from '../types';
-import { newsData } from './newsData';
-import { galleryData } from './galleryData';
 
 // ─── Default page content (used as seed/fallback) ────────────────────────────
 export const defaultPageContent: Record<string, string> = {
@@ -522,6 +520,7 @@ function mapUpdate(row: any): DevelopmentUpdate {
     image: row.image,
     gallery: row.gallery ?? [],
     featured: row.featured,
+    status: row.status ?? '',
   };
 }
 
@@ -539,6 +538,8 @@ function updateToRow(u: DevelopmentUpdate) {
     image: u.image,
     gallery: u.gallery ?? [],
     featured: u.featured ?? false,
+    // The column is NOT NULL, so an empty label has to become the default rather than null.
+    status: u.status?.trim() || 'Under Construction',
   };
 }
 
@@ -620,6 +621,11 @@ export async function saveUpdates(updates: DevelopmentUpdate[]): Promise<void> {
   if (error) { console.error('saveUpdates:', error.message); throw new Error(error.message); }
 }
 
+export async function deleteUpdateById(id: string): Promise<void> {
+  const { error } = await supabase.from('development_updates').delete().eq('id', id);
+  if (error) { console.error('deleteUpdateById:', error.message); throw new Error(error.message); }
+}
+
 // ─── News ─────────────────────────────────────────────────────────────────────
 
 function mapNews(row: any): NewsArticle {
@@ -660,8 +666,8 @@ export async function getNews(): Promise<NewsArticle[]> {
     .from('news')
     .select('*')
     .order('created_at', { ascending: true });
-  if (error) { console.error('getNews:', error.message); return [...newsData]; }
-  return (data ?? []).length ? (data ?? []).map(mapNews) : [...newsData];
+  if (error) { console.error('getNews:', error.message); throw new Error(error.message); }
+  return (data ?? []).map(mapNews);
 }
 
 export async function saveNews(items: NewsArticle[]): Promise<void> {
@@ -704,8 +710,8 @@ export async function getGallery(): Promise<GalleryItem[]> {
     .from('gallery')
     .select('*')
     .order('created_at', { ascending: true });
-  if (error) { console.error('getGallery:', error.message); return [...galleryData]; }
-  return (data ?? []).length ? (data ?? []).map(mapGallery) : [...galleryData];
+  if (error) { console.error('getGallery:', error.message); throw new Error(error.message); }
+  return (data ?? []).map(mapGallery);
 }
 
 export async function saveGallery(items: GalleryItem[]): Promise<void> {
@@ -724,9 +730,8 @@ export async function getPageContent(): Promise<Record<string, string>> {
   const { data, error } = await supabase
     .from('page_content')
     .select('key, value');
-  if (error) { console.error('getPageContent:', error.message); return { ...defaultPageContent }; }
-  // Start with defaults, overlay with whatever is stored in DB
-  const result: Record<string, string> = { ...defaultPageContent };
+  if (error) { console.error('getPageContent:', error.message); throw new Error(error.message); }
+  const result: Record<string, string> = {};
   (data ?? []).forEach((row: any) => { result[row.key] = row.value; });
   return result;
 }

@@ -1,8 +1,9 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link } from 'react-router-dom';
 import type { NewsArticle } from '../../types';
 import { useAdmin } from '../../context/AdminContext';
 import { EditableText } from '../admin/EditableText';
+import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { DeleteItemButton } from '../admin/AddItemButton';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
@@ -49,7 +50,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
                 inline
               />
             </span>
-            <span>•</span>
+            <span>â€¢</span>
             <span className="flex items-center gap-1">
               <Clock className="w-4 h-4 text-outline" />
               <EditableText
@@ -68,12 +69,11 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
             tag="h3"
           />
 
-          <EditableText
+          <EditableRichText
             value={news.excerpt}
             onSave={(val) => updateNewsField(news.id, 'excerpt', val)}
             className="text-body-sm text-body-sm text-on-surface-variant mt-2 line-clamp-2 leading-relaxed"
-            tag="p"
-            multiline={true}
+            compact
           />
         </div>
 

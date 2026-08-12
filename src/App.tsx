@@ -28,7 +28,18 @@ import { PrivacyPolicyPage, TermsPage, CookiePolicyPage } from './pages/PolicyPa
 import { NotFoundPage } from './pages/NotFoundPage';
 
 const SiteContent = () => {
-  const { loading } = useAdmin();
+  const { loading, contentError } = useAdmin();
+
+  if (contentError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface px-6 text-center text-on-surface">
+        <div>
+          <h1 className="text-xl font-bold">Content could not be loaded</h1>
+          <p className="mt-2 text-on-surface-variant">Please refresh the page and try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) return <PageSkeleton />;
 

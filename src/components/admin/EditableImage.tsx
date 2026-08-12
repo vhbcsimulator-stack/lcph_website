@@ -27,9 +27,8 @@ export const EditableImage: React.FC<EditableImageProps> = ({
   const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Stored value first, then the caller's default. A content key with nothing behind it still
-  // falls back to `value` — otherwise the default was silently unreachable.
-  const currentUrl = (contentKey ? pageContent[contentKey] : undefined) || value || '';
+  // Static page images come only from page_content; `value` is for database-row images.
+  const currentUrl = contentKey ? (pageContent[contentKey] ?? '') : (value || '');
 
   const processFile = useCallback(async (file: File) => {
     setError('');

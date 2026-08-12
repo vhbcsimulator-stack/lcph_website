@@ -86,11 +86,12 @@ export const AmenitiesPage: React.FC = () => {
   return (
     <motion.div
       data-page-motion="custom"
-      className={`overflow-hidden pb-xl ${prefersReducedMotion ? '' : 'simple-page-enter'}`}
+      className={`overflow-hidden ${prefersReducedMotion ? '' : 'simple-page-enter'}`}
     >
-      <div className="relative border-b border-outline-variant/20">
+      {/* No bottom rule here: the tinted band below already separates the header from the list. */}
+      <div className="relative">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full" />
-        <div className="container-custom relative pb-12 pt-sm md:pb-16">
+        <div className="container-custom relative pb-5 pt-sm md:pb-5">
         <Breadcrumbs items={[{ label: 'Amenities' }]} />
 
         {/* Page Header */}
@@ -113,10 +114,11 @@ export const AmenitiesPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="container-custom space-y-8 pt-10 md:pt-12">
+      <div className="section-band section-grid pb-16 ">
+        <div className="container-custom space-y-8">
 
         {/* Filter Bar: Project Filter & Category Tabs */}
-        <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-[0_16px_40px_-32px_rgba(0,67,33,0.5)] md:p-6">
+        <div className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 md:p-6">
           <div className="flex flex-col md:flex-row gap-sm items-start md:items-center justify-between">
             {/* Project Dropdown Filter */}
             <div className="w-full md:w-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
@@ -228,6 +230,7 @@ export const AmenitiesPage: React.FC = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
     </motion.div>
   );

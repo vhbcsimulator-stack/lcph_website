@@ -1,8 +1,9 @@
-import React, { useRef, useState } from 'react';
+﻿import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import {
   ArrowRight,
@@ -29,7 +30,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
-/** Small green eyebrow label above a section heading — matches the homepage treatment. */
+/** Small green eyebrow label above a section heading â€” matches the homepage treatment. */
 const EYEBROW = 'font-label-lg text-[12px] font-bold uppercase tracking-[0.18em] text-primary';
 
 /** Field label shared by every input on the application form. */
@@ -41,7 +42,7 @@ const FIELD =
 
 /**
  * Icons an admin can pick for a partnership track. Only these are offered, so a stored icon name
- * always resolves to a real component — 'none' renders the card without an icon badge.
+ * always resolves to a real component â€” 'none' renders the card without an icon badge.
  */
 const TRACK_ICONS = {
   BadgeCheck,
@@ -107,7 +108,7 @@ const DEFAULT_TRACKS: PartnerTrack[] = [
 const TRACKS_KEY = 'partner_tracks_json';
 const BENEFITS_KEY = 'partner_benefits_json';
 
-/** Stored as a JSON string so no schema change is needed; bad or missing JSON falls back. */
+/** Stored as a JSON string so no schema change is needed. */
 const parseTracks = (raw: string | undefined): PartnerTrack[] => {
   if (!raw) return DEFAULT_TRACKS;
   try {
@@ -165,7 +166,7 @@ const BENEFIT_KEYS = ['partner_benefit1', 'partner_benefit2', 'partner_benefit3'
 
 /**
  * Input placeholders and <option> labels can't host an EditableText field, so they read from
- * page content directly — that keeps them editable from the admin like everything else on the page.
+ * page content directly â€” that keeps them editable from the admin like everything else on the page.
  */
 const PLACEHOLDERS = [
   { key: 'partner_placeholder_name', value: 'e.g. Juan Dela Cruz / Apex Realty' },
@@ -180,8 +181,7 @@ export const PartnerPage: React.FC = () => {
   const [category, setCategory] = useState<string>(DEFAULT_TRACKS[0].id);
   const formRef = useRef<HTMLDivElement>(null);
 
-  /** Falls back to the built-in copy until the key exists in page content. */
-  const copy = (key: string, fallback: string) => pageContent[key] ?? fallback;
+  const copy = (key: string, _fallback: string) => pageContent[key] ?? '';
   const placeholder = (index: number) => copy(PLACEHOLDERS[index].key, PLACEHOLDERS[index].value);
 
   const tracks = parseTracks(pageContent[TRACKS_KEY]);
@@ -241,7 +241,7 @@ export const PartnerPage: React.FC = () => {
       <div className="container-custom space-y-lg">
         <Breadcrumbs items={[{ label: 'Partner With Us' }]} />
 
-        {/* Hero band — mirrors the dark photo-and-gradient treatment used on the homepage */}
+        {/* Hero band â€” mirrors the dark photo-and-gradient treatment used on the homepage */}
         <section className="relative isolate overflow-hidden rounded-2xl bg-surface-variant shadow-md">
           <div className="absolute inset-0 z-0">
             <EditableImage
@@ -277,11 +277,10 @@ export const PartnerPage: React.FC = () => {
               tag="h1"
               className="block font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl font-bold text-white"
             />
-            <EditableText
+            <EditableRichText
               contentKey="partner_subtitle"
-              tag="p"
               className="block max-w-2xl font-body-lg text-body-lg leading-relaxed text-white/85"
-              multiline={true}
+              compact
             />
 
             <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap">
@@ -303,7 +302,11 @@ export const PartnerPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Partnership categories — double as a picker for the form's category field */}
+      </div>
+
+      {/* Partnership categories â€” double as a picker for the form's category field */}
+      <div className="section-band section-grid">
+        <div className="container-custom">
         <section className="space-y-6">
           <div className="space-y-1">
             <EditableText
@@ -377,15 +380,14 @@ export const PartnerPage: React.FC = () => {
                     className="block font-headline-sm text-body-lg font-bold text-on-surface"
                     tag="h3"
                   />
-                  <EditableText
+                  <EditableRichText
                     value={track.desc}
                     onSave={(val) => patchTrack(index, { desc: val })}
                     className="block font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
-                    tag="p"
-                    multiline={true}
+                    compact
                   />
 
-                  {/* Icon picker — 'None' drops the badge entirely */}
+                  {/* Icon picker â€” 'None' drops the badge entirely */}
                   {isAdmin && (
                     <label
                       className="mt-auto flex w-full items-center gap-2 pt-2 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant"
@@ -421,7 +423,10 @@ export const PartnerPage: React.FC = () => {
             )}
           </div>
         </section>
+        </div>
+      </div>
 
+      <div className="container-custom">
         <div className="grid grid-cols-1 items-start gap-gutter lg:grid-cols-3">
           {/* Application form */}
           <div ref={formRef} className="space-y-6 lg:col-span-2 lg:scroll-mt-24">
@@ -432,12 +437,10 @@ export const PartnerPage: React.FC = () => {
                   tag="h2"
                   className="block font-headline-sm text-headline-sm font-bold text-on-surface"
                 />
-                <EditableText
+                <EditableRichText
                   contentKey="partner_form_note"
-                  value="All fields are required. Your details are used solely to process your accreditation."
                   className="block font-body-sm text-body-sm text-on-surface-variant"
-                  tag="p"
-                  multiline={true}
+                  compact
                 />
               </div>
 
@@ -452,12 +455,10 @@ export const PartnerPage: React.FC = () => {
                     className="block font-headline-sm text-headline-sm font-bold"
                     tag="h3"
                   />
-                  <EditableText
+                  <EditableRichText
                     contentKey="partner_success_text"
-                    value="Our Broker Network Relations desk will contact you with accreditation terms."
                     className="block font-body-sm text-body-sm opacity-90"
-                    tag="p"
-                    multiline={true}
+                    compact
                   />
                   <button
                     type="button"
@@ -577,12 +578,11 @@ export const PartnerPage: React.FC = () => {
                           className="block font-headline-sm text-body-lg font-bold text-on-surface"
                           tag="h3"
                         />
-                        <EditableText
+                        <EditableRichText
                           contentKey={step.descKey}
                           value={step.desc}
                           className="block font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
-                          tag="p"
-                          multiline={true}
+                          compact
                         />
                       </div>
                     </li>
@@ -595,7 +595,7 @@ export const PartnerPage: React.FC = () => {
           {/* Sidebar */}
           <aside className="space-y-6">
             {/* Benefits sit on the dark primary panel used for the contact page info card */}
-            <div className="overflow-hidden rounded-xl border border-primary-container bg-primary p-6 text-on-primary shadow-md md:p-8">
+            <div className="section-diagonal pattern-on-dark overflow-hidden rounded-xl border border-primary-container bg-primary p-6 text-on-primary shadow-md md:p-8">
               <EditableText
                 contentKey="partner_benefits_title"
                 tag="h2"
@@ -650,12 +650,10 @@ export const PartnerPage: React.FC = () => {
                 className="block font-headline-sm text-body-lg font-bold text-on-surface"
                 tag="h2"
               />
-              <EditableText
+              <EditableRichText
                 contentKey="partner_help_text"
-                value="Our Broker Network Relations desk can walk you through commission terms and requirements."
                 className="block font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
               <div className="space-y-2 font-body-sm text-body-sm text-on-surface-variant">
                 <div className="flex items-center gap-3">

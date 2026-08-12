@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { Lightbox } from '../components/ui/Lightbox';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { Calendar, CheckCircle, MapPin, ZoomIn } from 'lucide-react';
 import type { Property } from '../types';
@@ -190,12 +191,10 @@ export const PropertyDetailPage: React.FC = () => {
                 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"
                 tag="h2"
               />
-              <EditableText
+              <EditableRichText
                 value={property.description}
                 onSave={(val) => updatePropertyField(property.id, 'description', val)}
                 className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed"
-                tag="p"
-                multiline={true}
               />
 
               {/* Specs Grid */}
@@ -249,7 +248,7 @@ export const PropertyDetailPage: React.FC = () => {
             </section>
 
             {/* Key Features */}
-            <section className="space-y-md">
+            <section className="section-band-inset section-dots space-y-md p-6 md:p-8">
               <EditableText
                 contentKey="property_features_title"
                 value="Key Features &amp; Selling Points"
@@ -304,12 +303,10 @@ export const PropertyDetailPage: React.FC = () => {
                   inline
                 />
               </h3>
-              <EditableText
+              <EditableRichText
                 contentKey="property_widget_text"
-                value="Request sample computation, lot map guidelines, or schedule a viewing."
                 className="font-body-sm text-body-sm text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
 
               {formSubmitted ? (

@@ -1,6 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { Briefcase } from 'lucide-react';
 
 export const CareersPage: React.FC = () => {
@@ -26,10 +27,8 @@ export const CareersPage: React.FC = () => {
             className="inline-block bg-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg px-4 py-1.5 rounded-full uppercase tracking-widest font-bold"
           />
 
-          <EditableText 
+          <EditableRichText
             contentKey="careers_text"
-            tag="p"
-            multiline={true}
             className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed"
           />
         </div>

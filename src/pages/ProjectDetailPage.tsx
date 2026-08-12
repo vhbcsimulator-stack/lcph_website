@@ -1,14 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { Lightbox } from '../components/ui/Lightbox';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { getHeaderOffset, scrollToElement } from '../utils/scroll';
 import { ArrowRight, CheckCircle, MapPin, MessageSquare, Plus, Trash2, X } from 'lucide-react';
+
+/** The sub-nav tabs, in page order â€” the scroll spy walks this list top to bottom. */
+const SECTION_TABS = [
+  { id: 'overview', contentKey: 'project_detail_tab_overview', label: 'Overview' },
+  { id: 'amenities', contentKey: 'project_detail_tab_amenities', label: 'Amenities' },
+  { id: 'masterplan', contentKey: 'project_detail_tab_video', label: 'Walkthrough Video' },
+  { id: 'gallery', contentKey: 'project_detail_tab_gallery', label: 'Gallery' },
+] as const;
 
 export const ProjectDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -31,6 +41,11 @@ export const ProjectDetailPage: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+
+  const [activeSection, setActiveSection] = useState<string>(SECTION_TABS[0].id);
+  const subNavRef = useRef<HTMLDivElement>(null);
+  /** Timestamp the scroll spy stays quiet until, so a clicked tab wins over the sections it passes. */
+  const spyLockUntilRef = useRef(0);
 
   useEffect(() => {
     if (project) {
@@ -76,6 +91,53 @@ export const ProjectDetailPage: React.FC = () => {
       observer.disconnect();
     };
   }, [project?.video, isManuallyPaused]);
+
+  /**
+   * Scroll spy for the sticky sub-nav: the active tab is the last section whose top has passed
+   * under the nav. A click sets the tab straight away and locks the spy until the animated scroll
+   * lands, so the underline doesn't skip through every section on the way there.
+   */
+  useEffect(() => {
+    const syncActiveSection = () => {
+      if (Date.now() < spyLockUntilRef.current) return;
+
+      const line = (subNavRef.current?.getBoundingClientRect().bottom ?? getHeaderOffset()) + 12;
+      let current: string = SECTION_TABS[0].id;
+
+      for (const tab of SECTION_TABS) {
+        const el = document.getElementById(tab.id);
+        if (el && el.getBoundingClientRect().top <= line) current = tab.id;
+      }
+
+      // A short last section may never reach the line, so hitting the bottom selects it outright.
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        current = SECTION_TABS[SECTION_TABS.length - 1].id;
+      }
+
+      setActiveSection(current);
+    };
+
+    syncActiveSection();
+    window.addEventListener('scroll', syncActiveSection, { passive: true });
+    window.addEventListener('resize', syncActiveSection);
+
+    return () => {
+      window.removeEventListener('scroll', syncActiveSection);
+      window.removeEventListener('resize', syncActiveSection);
+    };
+  }, [project?.id]);
+
+  const handleTabClick = (id: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    setActiveSection(id);
+    spyLockUntilRef.current = Date.now() + 1000;
+    scrollToElement(target, getHeaderOffset() + (subNavRef.current?.offsetHeight ?? 0) + 12);
+  };
 
   const togglePlayPause = () => {
     const iframe = videoContainerRef.current?.querySelector('iframe');
@@ -189,6 +251,16 @@ export const ProjectDetailPage: React.FC = () => {
 
   const youtubeEmbedUrl = project.video ? getYoutubeEmbedUrl(project.video) : null;
 
+  /**
+   * What the lightbox pages through. The cover lives in project.image, outside the gallery array,
+   * so it is prepended here â€” every index below is into this list, not into project.gallery.
+   * That keeps clicking a tile opening that same photo rather than the one that shares its index.
+   */
+  const lightboxImages = [project.image, ...project.gallery].filter(Boolean);
+  /** Index of a gallery photo within lightboxImages â€” the cover takes slot 0. */
+  const galleryLightboxIndex = (index: number) =>
+    project.gallery.length ? (index % project.gallery.length) + 1 : 0;
+
   return (
     <div className="space-y-xl py-sm">
       <div className="container-custom space-y-md">
@@ -269,7 +341,7 @@ export const ProjectDetailPage: React.FC = () => {
               >
                 {(src: string) => (
                   <div
-                    onClick={() => openLightbox(1 % project.gallery.length)}
+                    onClick={() => openLightbox(galleryLightboxIndex(1))}
                     className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{ backgroundImage: `url('${src}')` }}
                   ></div>
@@ -292,30 +364,66 @@ export const ProjectDetailPage: React.FC = () => {
               >
                 {(src: string) => (
                   <div
-                    onClick={() => openLightbox(2 % project.gallery.length)}
+                    onClick={() => openLightbox(galleryLightboxIndex(2))}
                     className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                     style={{ backgroundImage: `url('${src}')` }}
                   ></div>
                 )}
               </EditableImage>
               <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors flex items-center justify-center pointer-events-none">
-                <span className="pointer-events-auto z-40 text-white font-label-lg text-label-lg flex items-center bg-on-background/50 px-4 py-2 rounded-full backdrop-blur-sm">
+                {/*
+                  A real button: the badge sits above the tile and would otherwise swallow the
+                  click meant for it. It opens the gallery from the first photo rather than this
+                  tile's photo, since it is an entry point to the whole set.
+                */}
+                <button
+                  type="button"
+                  onClick={() => openLightbox(galleryLightboxIndex(0))}
+                  aria-label={`View all ${project.gallery.length} gallery photos`}
+                  className="pointer-events-auto z-40 cursor-pointer text-white font-label-lg text-label-lg flex items-center bg-on-background/50 px-4 py-2 rounded-full backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:bg-on-background/70"
+                >
                   <EditableText contentKey="project_detail_gallery_cta" value="View Gallery" tag="span" inline />
                   {' '}({project.gallery.length})
-                </span>
+                </button>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Sticky Sub-Navigation */}
-        <div className="w-full bg-surface-container-lowest border-y border-outline-variant/30 sticky top-[72px] z-40 shadow-sm">
-          <div className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop flex overflow-x-auto">
-            <a href="#overview" className="font-label-lg text-label-lg text-primary border-b-2 border-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_overview" value="Overview" tag="span" inline /></a>
-            <a href="#amenities" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_amenities" value="Amenities" tag="span" inline /></a>
-            <a href="#masterplan" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_video" value="Walkthrough Video" tag="span" inline /></a>
-            <a href="#gallery" className="font-label-lg text-label-lg text-on-surface-variant hover:text-primary py-4 px-6 whitespace-nowrap hover:bg-surface-container-low transition-colors"><EditableText contentKey="project_detail_tab_gallery" value="Gallery" tag="span" inline /></a>
-          </div>
+        {/*
+          Sticky Sub-Navigation.
+          top clears the site header at each breakpoint (72px, 112px from lg) plus the admin
+          toolbar, so the tabs park below it instead of sliding underneath. z-50 stays below the
+          header's z-70 and above in-page admin overlays.
+        */}
+        <div
+          ref={subNavRef}
+          className="sticky z-50 w-full border-y border-outline-variant/30 bg-surface-container-lowest shadow-sm top-[calc(72px+var(--admin-offset,0px))] lg:top-[calc(112px+var(--admin-offset,0px))]"
+        >
+          <nav aria-label="Project sections" className="max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop flex overflow-x-auto">
+            {SECTION_TABS.map((tab) => {
+              const isActive = activeSection === tab.id;
+              return (
+                <a
+                  key={tab.id}
+                  href={`#${tab.id}`}
+                  onClick={handleTabClick(tab.id)}
+                  aria-current={isActive ? 'true' : undefined}
+                  className={`relative font-label-lg text-label-lg py-4 px-6 whitespace-nowrap transition-colors hover:bg-surface-container-low ${
+                    isActive ? 'text-primary' : 'text-on-surface-variant hover:text-primary'
+                  }`}
+                >
+                  <EditableText contentKey={tab.contentKey} value={tab.label} tag="span" inline />
+                  <span
+                    aria-hidden
+                    className={`absolute inset-x-0 bottom-0 h-0.5 origin-left bg-primary transition-transform duration-300 ease-out ${
+                      isActive ? 'scale-x-100' : 'scale-x-0'
+                    }`}
+                  />
+                </a>
+              );
+            })}
+          </nav>
         </div>
 
         {/* Content Grid (Asymmetric layout: 8 cols left, 4 cols right) */}
@@ -323,15 +431,13 @@ export const ProjectDetailPage: React.FC = () => {
           {/* Left Column (8 cols) */}
           <div className="lg:col-span-8 space-y-xl">
             {/* Overview */}
-            <section id="overview" className="scroll-mt-[140px] space-y-md">
+            <section id="overview" className="scroll-mt-[136px] lg:scroll-mt-[176px] space-y-md">
               <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_overview_title" value="Discover Serenity" tag="span" inline /></h2>
               
-              <EditableText
+              <EditableRichText
                 value={project.longDescription}
                 onSave={(val: string) => updateProjectField(project.id, 'longDescription', val)}
                 className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed"
-                tag="p"
-                multiline={true}
               />
               
               {/* Quick Stats Glassmorphism Card */}
@@ -342,7 +448,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <EditableText
                     value={project.category}
                     onSave={(val: string) => updateProjectField(project.id, 'category', val as any)}
-                    suffix={pageContent['project_detail_stat_type_suffix'] ?? 'Estate'}
+                    suffix={pageContent['project_detail_stat_type_suffix'] ?? ''}
                     className="font-headline-sm text-headline-sm text-on-background font-bold"
                     tag="p"
                   />
@@ -378,7 +484,9 @@ export const ProjectDetailPage: React.FC = () => {
             </section>
 
             {/* Amenities Section */}
-            <section id="amenities" className="scroll-mt-[140px] space-y-md">
+            {/* Inset band, not a full-bleed one: this column sits inside the page container, and a
+                wrapping band would trap the sticky sub-nav above in its stacking context. */}
+            <section id="amenities" className="section-band-inset section-dots scroll-mt-[136px] lg:scroll-mt-[176px] space-y-md p-6 md:p-8">
               <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_amenities_title" value="Exclusive Amenities" tag="span" inline /></h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
                 {project.amenities.slice(0, 4).map((amenity, idx) => (
@@ -397,12 +505,10 @@ export const ProjectDetailPage: React.FC = () => {
                         className="font-headline-sm text-headline-sm text-on-background font-bold mb-1"
                         tag="h3"
                       />
-                      <EditableText
+                      <EditableRichText
                         contentKey="project_detail_amenity_blurb"
-                        value="High-quality township features curated exclusively for LCPH homeowners."
                         className="font-body-sm text-body-sm text-on-surface-variant"
-                        tag="p"
-                        multiline={true}
+                        compact
                       />
                     </div>
                   </div>
@@ -421,7 +527,7 @@ export const ProjectDetailPage: React.FC = () => {
             </section>
 
             {/* Walkthrough Video */}
-            <section id="masterplan" className="scroll-mt-[140px] space-y-md">
+            <section id="masterplan" className="scroll-mt-[136px] lg:scroll-mt-[176px] space-y-md">
               <div className="flex justify-between items-center">
                 <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_video_title" value="Walkthrough Video" tag="span" inline /></h2>
                 {isAdmin && (
@@ -513,7 +619,7 @@ export const ProjectDetailPage: React.FC = () => {
               </div>
             </section>
             {/* Photo Gallery Section */}
-            <section id="gallery" className="scroll-mt-[140px] space-y-md">
+            <section id="gallery" className="scroll-mt-[136px] lg:scroll-mt-[176px] space-y-md">
               <div className="flex items-end justify-between">
                 <h2 className="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary font-bold"><EditableText contentKey="project_detail_gallery_title" value="Photo Gallery" tag="span" inline /></h2>
                 <span className="text-sm text-on-surface-variant">{project.gallery.length} photo{project.gallery.length !== 1 ? 's' : ''}</span>
@@ -530,7 +636,7 @@ export const ProjectDetailPage: React.FC = () => {
                       src={img}
                       alt={`${project.name} gallery ${idx + 1}`}
                       className="w-full h-full object-cover cursor-pointer transition-transform duration-500 group-hover:scale-105"
-                      onClick={() => openLightbox(idx)}
+                      onClick={() => openLightbox(idx + 1)}
                     />
                     {/* Admin overlay: edit + delete */}
                     {isAdmin && (
@@ -577,7 +683,7 @@ export const ProjectDetailPage: React.FC = () => {
                   </div>
                 ))}
 
-                {/* Add Photo tile — admin only */}
+                {/* Add Photo tile â€” admin only */}
                 {isAdmin && (
                   <label className="relative group rounded-xl aspect-square border-2 border-dashed border-outline-variant/50 hover:border-primary/50 bg-surface-container-lowest hover:bg-primary/5 transition-all duration-200 flex flex-col items-center justify-center gap-2 cursor-pointer">
                     <div className="p-3 bg-surface-container-low rounded-full group-hover:bg-primary/10 transition-colors">
@@ -622,12 +728,10 @@ export const ProjectDetailPage: React.FC = () => {
                 />
                 ?
               </h3>
-              <EditableText
+              <EditableRichText
                 contentKey="project_detail_widget_text"
-                value="Schedule an exclusive site visit or speak directly with our premium property consultants."
                 className="font-body-sm text-body-sm text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
 
               {formSubmitted ? (
@@ -710,11 +814,11 @@ export const ProjectDetailPage: React.FC = () => {
 
       <Lightbox 
         isOpen={lightboxOpen} 
-        images={project.gallery} 
-        currentIndex={lightboxIndex} 
+        images={lightboxImages}
+        currentIndex={lightboxIndex}
         onClose={() => setLightboxOpen(false)}
-        onPrev={() => setLightboxIndex((prev) => (prev > 0 ? prev - 1 : project.gallery.length - 1))}
-        onNext={() => setLightboxIndex((prev) => (prev < project.gallery.length - 1 ? prev + 1 : 0))}
+        onPrev={() => setLightboxIndex((prev) => (prev > 0 ? prev - 1 : lightboxImages.length - 1))}
+        onNext={() => setLightboxIndex((prev) => (prev < lightboxImages.length - 1 ? prev + 1 : 0))}
         onJump={(idx) => setLightboxIndex(idx)}
         title={project.name}
       />

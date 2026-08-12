@@ -33,13 +33,13 @@ export const parseEmbedUrl = (input: string): string | null => {
 };
 
 /** A map/video embed whose URL an admin can replace by pasting Google's embed code. */
-export const EditableEmbed: React.FC<EditableEmbedProps> = ({ contentKey, value = '', title, className }) => {
+export const EditableEmbed: React.FC<EditableEmbedProps> = ({ contentKey, title, className }) => {
   const { isAdmin, pageContent, updateText } = useAdmin();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
 
-  const currentUrl = pageContent[contentKey] !== undefined ? pageContent[contentKey] : value;
+  const currentUrl = pageContent[contentKey] ?? '';
 
   const openEditor = () => {
     setDraft(currentUrl);

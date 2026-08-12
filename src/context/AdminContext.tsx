@@ -15,6 +15,7 @@ import {
   saveProperties,
   getUpdates,
   saveUpdates,
+  deleteUpdateById,
   getNews,
   saveNews,
   deleteNewsById,
@@ -113,6 +114,7 @@ interface ChangePlan {
   removedAmenityIds: string[];
   properties: Property[];
   updates: DevelopmentUpdate[];
+  removedUpdateIds: string[];
   news: NewsArticle[];
   removedNewsIds: string[];
   gallery: GalleryItem[];
@@ -145,6 +147,7 @@ function buildChangePlan(baseline: Snapshot, current: Snapshot): ChangePlan {
   const gallery = changedRows(baseline.gallery, current.gallery);
   const removedProjectIds = removedIds(baseline.projects, current.projects);
   const removedAmenityIds = removedIds(baseline.amenities, current.amenities);
+  const removedUpdateIds = removedIds(baseline.updates, current.updates);
   const removedNewsIds = removedIds(baseline.news, current.news);
   const removedGalleryIds = removedIds(baseline.gallery, current.gallery);
 
@@ -156,6 +159,7 @@ function buildChangePlan(baseline: Snapshot, current: Snapshot): ChangePlan {
     removedAmenityIds,
     properties,
     updates,
+    removedUpdateIds,
     news,
     removedNewsIds,
     gallery,
@@ -170,6 +174,7 @@ function buildChangePlan(baseline: Snapshot, current: Snapshot): ChangePlan {
       gallery.length +
       removedProjectIds.length +
       removedAmenityIds.length +
+      removedUpdateIds.length +
       removedNewsIds.length +
       removedGalleryIds.length,
   };
@@ -184,6 +189,7 @@ export interface SaveResult {
 interface AdminContextType {
   isAdmin: boolean;
   loading: boolean;
+  contentError: boolean;
   pageContent: Record<string, string>;
   projects: Project[];
   properties: Property[];
@@ -197,6 +203,8 @@ interface AdminContextType {
   updatePropertyField: (id: string, field: keyof Property, value: any) => void;
   updateAmenityField: (id: string, field: keyof Amenity, value: any) => void;
   updateUpdateField: (id: string, field: keyof DevelopmentUpdate, value: any) => void;
+  addUpdate: (update: DevelopmentUpdate) => void;
+  deleteUpdate: (id: string) => void;
   addProject: (project: Project) => void;
   addProperty: (property: Property) => void;
   addAmenity: (amenity: Amenity) => void;
@@ -228,6 +236,7 @@ const noop = () => {};
 export const AdminContext = createContext<AdminContextType>({
   isAdmin: false,
   loading: true,
+  contentError: false,
   pageContent: {},
   projects: [],
   properties: [],
@@ -241,6 +250,8 @@ export const AdminContext = createContext<AdminContextType>({
   updatePropertyField: noop,
   updateAmenityField: noop,
   updateUpdateField: noop,
+  addUpdate: noop,
+  deleteUpdate: noop,
   addProject: noop,
   addProperty: noop,
   addAmenity: noop,
@@ -313,6 +324,9 @@ const AdminProviderInner: React.FC<{
       { queryKey: queryKeys.gallery, queryFn: getGallery },
     ],
   });
+
+  const contentError = [contentQ, projectsQ, propertiesQ, amenitiesQ, updatesQ, newsQ, galleryQ]
+    .some((query) => query.isError);
 
   // The whole site renders from one snapshot, so nothing is published until every table has arrived.
   const remoteSnapshot: Snapshot | null = useMemo(() => {
@@ -442,6 +456,17 @@ const AdminProviderInner: React.FC<{
     [commit],
   );
 
+  // New updates go to the front so the admin sees what they just created without scrolling.
+  const addUpdate = useCallback(
+    (update: DevelopmentUpdate) => commit((current) => ({ ...current, updates: [update, ...current.updates] })),
+    [commit],
+  );
+
+  const deleteUpdate = useCallback(
+    (id: string) => commit((current) => ({ ...current, updates: current.updates.filter((item) => item.id !== id) })),
+    [commit],
+  );
+
   const addProject = useCallback(
     (project: Project) => commit((current) => ({ ...current, projects: [...current.projects, project] })),
     [commit],
@@ -547,6 +572,7 @@ const AdminProviderInner: React.FC<{
       if (pending.updates.length) await saveUpdates(pending.updates);
       if (pending.news.length) await saveNews(pending.news);
       if (pending.gallery.length) await saveGallery(pending.gallery);
+      for (const id of pending.removedUpdateIds) await deleteUpdateById(id);
       for (const id of pending.removedNewsIds) await deleteNewsById(id);
       for (const id of pending.removedGalleryIds) await deleteGalleryById(id);
       for (const id of pending.removedProjectIds) await deleteProjectById(id);
@@ -571,6 +597,7 @@ const AdminProviderInner: React.FC<{
       value={{
         isAdmin,
         loading,
+        contentError,
         pageContent,
         projects,
         properties,
@@ -584,6 +611,8 @@ const AdminProviderInner: React.FC<{
         updatePropertyField,
         updateAmenityField,
         updateUpdateField,
+        addUpdate,
+        deleteUpdate,
         addProject,
         addProperty,
         addAmenity,

@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
@@ -80,17 +81,13 @@ export const AboutPage: React.FC = () => {
               className="font-headline-lg text-[28px] font-semibold leading-tight text-primary md:text-[32px]"
               tag="h2"
             />
-            <EditableText
+            <EditableRichText
               contentKey="about_story_p1"
               className="font-body-sm text-[14px] leading-relaxed text-on-surface-variant"
-              tag="p"
-              multiline={true}
             />
-            <EditableText
+            <EditableRichText
               contentKey="about_story_p2"
               className="font-body-sm text-[14px] leading-relaxed text-on-surface-variant"
-              tag="p"
-              multiline={true}
             />
           </motion.div>
 
@@ -118,7 +115,7 @@ export const AboutPage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className="px-4 pb-20 pt-6 md:px-8"
+        className="section-band section-dots px-4 pb-20 pt-16 md:px-8"
       >
         <div className="mx-auto max-w-[1120px]">
           <div className="mb-10 text-center">
@@ -144,12 +141,10 @@ export const AboutPage: React.FC = () => {
                 className="mb-5 block font-headline-md text-[20px] font-medium uppercase text-on-background"
                 tag="h3"
               />
-              <EditableText
+              <EditableRichText
                 contentKey="about_mission_text"
-                value="To develop exceptional, nature-integrated properties that elevate the standard of living while preserving the ecological heritage of the land."
                 className="block font-body-sm text-[14px] leading-relaxed text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
             </motion.div>
             {/* Vision */}
@@ -163,12 +158,10 @@ export const AboutPage: React.FC = () => {
                 className="mb-5 block font-headline-md text-[20px] font-medium uppercase text-on-background"
                 tag="h3"
               />
-              <EditableText
+              <EditableRichText
                 contentKey="about_vision_text"
-                value="To be the premier developer recognized for creating timeless, sustainable communities that define premium heritage living."
                 className="block font-body-sm text-[14px] leading-relaxed text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
             </motion.div>
             {/* Values */}
@@ -205,9 +198,9 @@ export const AboutPage: React.FC = () => {
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.14, margin: '0px 0px -14% 0px' }}
-        className="px-4 md:px-8"
+        className="px-4 pt-16 md:px-8"
       >
-        <div className="mx-auto max-w-[1120px] space-y-3 bg-primary px-6 py-10 text-center text-on-primary md:py-12">
+        <div className="section-diagonal pattern-on-dark mx-auto max-w-[1120px] space-y-3 bg-primary px-6 py-10 text-center text-on-primary md:py-12">
           <EditableText
             contentKey="about_cta_title"
             value="Partner and Build Your Dream Home with LCPH"

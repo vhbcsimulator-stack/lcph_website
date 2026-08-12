@@ -1,16 +1,20 @@
-import React, { useRef } from 'react';
+﻿import React, { useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
+import { Lightbox } from '../components/ui/Lightbox';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
-import { Activity, ArrowLeft, Calendar, UploadCloud, X } from 'lucide-react';
+import { Activity, ArrowLeft, Calendar, UploadCloud, X, ZoomIn } from 'lucide-react';
 
 export const UpdatesDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { updates, loading, updateUpdateField, isAdmin, projects } = useAdmin();
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  /** Index of the gallery photo open in the lightbox; null when it is closed. */
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const update = updates.find(u => u.slug === slug || u.id === slug);
 
@@ -31,6 +35,8 @@ export const UpdatesDetailPage: React.FC = () => {
       </div>
     );
   }
+
+  const galleryImages = update.gallery || [];
 
   const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -131,29 +137,38 @@ export const UpdatesDetailPage: React.FC = () => {
 
         <div className="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/20 shadow-sm space-y-4">
           <h2 className="font-headline-sm text-headline-sm text-primary font-bold"><EditableText contentKey="update_detail_report_title" value="Engineering Progress Report" tag="span" inline /></h2>
-          <EditableText
+          <EditableRichText
             value={update.content}
             onSave={(val: string) => updateUpdateField(update.id, 'content', val)}
-            tag="p"
-            multiline={true}
             className="font-body-md text-body-md text-on-surface-variant leading-relaxed block"
           />
         </div>
 
         {/* Project Progress Gallery */}
-        <div className="space-y-4 pt-sm">
+        <div className="section-band-inset section-grid space-y-4 p-6 md:p-8">
           <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold"><EditableText contentKey="update_detail_gallery_title" value="Project Progress Gallery" tag="span" inline /></h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {(update.gallery || []).map((imgUrl, idx) => (
+            {galleryImages.map((imgUrl, idx) => (
               <div key={idx} className="aspect-[4/3] rounded-lg overflow-hidden border border-outline-variant/20 relative group/gallery shadow-sm bg-surface-container-low">
-                <img src={imgUrl} alt={`Progress gallery ${idx + 1}`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+                <button
+                  type="button"
+                  onClick={() => setLightboxIndex(idx)}
+                  className="block h-full w-full cursor-zoom-in"
+                  aria-label={`Open progress photo ${idx + 1} full screen`}
+                >
+                  <img src={imgUrl} alt={`Progress gallery ${idx + 1}`} className="w-full h-full object-cover transition-transform duration-300 group-hover/gallery:scale-105" />
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition-opacity duration-200 group-hover/gallery:opacity-100">
+                    <ZoomIn className="h-6 w-6 text-white drop-shadow" />
+                  </span>
+                </button>
                 {isAdmin && (
                   <button
                     onClick={() => {
-                      const newGallery = (update.gallery || []).filter((_, i) => i !== idx);
-                      updateUpdateField(update.id, 'gallery', newGallery);
+                      updateUpdateField(update.id, 'gallery', galleryImages.filter((_, i) => i !== idx));
+                      // Indices shift on removal, so a stale open lightbox would show the wrong photo.
+                      setLightboxIndex(null);
                     }}
-                    className="absolute top-2 right-2 bg-black/60 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md cursor-pointer"
+                    className="absolute top-2 right-2 z-10 bg-black/60 text-white p-1.5 rounded-full hover:bg-red-600 transition-colors shadow-md cursor-pointer"
                     title="Remove Image"
                   >
                     <X className="w-4 h-4" />
@@ -190,6 +205,18 @@ export const UpdatesDetailPage: React.FC = () => {
           </Link>
         </div>
       </div>
+
+      <Lightbox
+        isOpen={lightboxIndex !== null}
+        images={galleryImages}
+        currentIndex={lightboxIndex ?? 0}
+        title={update.title}
+        onClose={() => setLightboxIndex(null)}
+        // Wrapping keeps the arrows usable at either end of the strip.
+        onPrev={() => setLightboxIndex((i) => ((i ?? 0) - 1 + galleryImages.length) % galleryImages.length)}
+        onNext={() => setLightboxIndex((i) => ((i ?? 0) + 1) % galleryImages.length)}
+        onJump={(index) => setLightboxIndex(index)}
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { useAdmin } from '../context/AdminContext';
 import { EditableImage } from '../components/admin/EditableImage';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 
 export const NewsDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -60,15 +61,22 @@ export const NewsDetailPage: React.FC = () => {
           </EditableImage>
         </div>
 
-        <div className="prose max-w-none text-on-surface-variant text-body-md leading-relaxed space-y-4 pt-4">
-          <EditableText
+      </div>
+
+      {/* Article body — a quiet band sets the reading column apart from the headline and lead image */}
+      <div className="section-band section-dots py-16">
+        <div className="container-custom max-w-4xl mx-auto space-y-md">
+        <div className="prose max-w-none text-on-surface-variant text-body-md leading-relaxed space-y-4">
+          <EditableRichText
             value={article.excerpt}
             onSave={(val: string) => updateNewsField(article.id, 'excerpt', val)}
             className="font-bold text-on-surface text-body-lg"
-            tag="p"
-            multiline={true}
+            compact
           />
-          <EditableText value={article.content} onSave={(val: string) => updateNewsField(article.id, 'content', val)} tag="p" multiline={true} />
+          <EditableRichText
+            value={article.content}
+            onSave={(val: string) => updateNewsField(article.id, 'content', val)}
+          />
         </div>
 
         <div className="pt-sm border-t border-outline-variant/30">
@@ -76,6 +84,7 @@ export const NewsDetailPage: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             <EditableText contentKey="news_detail_back" value="Back to News &amp; Events" tag="span" inline />
           </Link>
+        </div>
         </div>
       </div>
     </div>

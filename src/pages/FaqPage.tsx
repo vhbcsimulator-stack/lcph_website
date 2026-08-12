@@ -1,37 +1,120 @@
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
+import { ConfirmDialog } from '../components/ui/ConfirmDialog';
+import { PromptDialog } from '../components/ui/PromptDialog';
 import { faqsData } from '../data/faqsData';
-import { faqAnswerKey, faqQuestionKey, resolveFaqs } from '../data/faqContent';
+import {
+  FAQ_CATEGORIES,
+  FAQ_LIST_KEY,
+  type FaqCategory,
+  faqAnswerKey,
+  faqCategoriesInUse,
+  faqCategoryOptions,
+  faqQuestionKey,
+  resolveFaqs,
+  toFaqEntries,
+} from '../data/faqContent';
 import { Link } from 'react-router-dom';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { accordionTransition } from '../utils/animations';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
 import { useAdmin } from '../context/AdminContext';
-import { ArrowRight, ChevronDown, HelpCircle, MessageCircle, Search, X } from 'lucide-react';
+import { ArrowRight, ChevronDown, HelpCircle, MessageCircle, Plus, Search, Trash2 } from 'lucide-react';
 
 export const FaqPage: React.FC = () => {
-  const { pageContent } = useAdmin();
+  const { pageContent, updateText, isAdmin } = useAdmin();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [openFaqId, setOpenFaqId] = useState<string | null>(faqsData[0]?.id || null);
+  /** Admin dialogs, each holding the id of the question it was opened for. */
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
+  const [namingCategoryFor, setNamingCategoryFor] = useState<string | null>(null);
   const prefersReducedMotion = useReducedMotion();
-
-  const categories = ['All', 'About LCPH', 'Property Ownership', 'Payment Terms'];
 
   const faqs = useMemo(() => resolveFaqs(pageContent), [pageContent]);
 
+  /**
+   * Chips follow the questions that actually exist — suggested categories first, then any an admin
+   * has named. A hard-coded list would strand questions filed under anything not on it.
+   */
+  const categories = useMemo(() => ['All', ...faqCategoriesInUse(faqs)], [faqs]);
+
+  /** Everything offerable in the picker, whether or not it currently has questions filed under it. */
+  const categoryOptions = useMemo(() => faqCategoryOptions(faqs), [faqs]);
+
+  /*
+   * Every write rebuilds the whole list, so it must start from the newest one. Read through a ref,
+   * not the render's `faqs`: a card mid-exit-animation still has its old handlers bound, and those
+   * closures would otherwise write back a list that silently drops anything added since.
+   */
+  const faqsRef = useRef(faqs);
+  faqsRef.current = faqs;
+
+  const writeFaqs = (entries: ReturnType<typeof toFaqEntries>) =>
+    updateText(FAQ_LIST_KEY, JSON.stringify(entries));
+
+  const currentEntries = () => toFaqEntries(faqsRef.current);
+
+  const addFaq = () => {
+    const id = `faq-${Date.now()}`;
+    // Seeded together with the list so the new card has copy to show and to click into straight away.
+    updateText(faqQuestionKey(id), 'New question');
+    updateText(faqAnswerKey(id), '<p>Write the answer here.</p>');
+    writeFaqs([
+      ...currentEntries(),
+      { id, category: activeCategory === 'All' ? FAQ_CATEGORIES[0] : (activeCategory as FaqCategory) },
+    ]);
+    setOpenFaqId(id);
+  };
+
+  /** The question and answer keys are left in place, so a removal can be undone from the admin bar. */
+  const removeFaq = (id: string) => {
+    writeFaqs(currentEntries().filter((entry) => entry.id !== id));
+    if (openFaqId === id) setOpenFaqId(null);
+    setPendingRemoveId(null);
+  };
+
+  const setFaqCategory = (id: string, category: FaqCategory) =>
+    writeFaqs(currentEntries().map((entry) => (entry.id === id ? { ...entry, category } : entry)));
+
+  /** Sentinel value for the picker's last option; never stored. */
+  const NEW_CATEGORY = '__new__';
+
+  const pickCategory = (id: string, choice: string) => {
+    // Cancelling the dialog leaves the select showing the sentinel until the next render, which the
+    // state change here guarantees — React then restores it to the entry's real category.
+    if (choice === NEW_CATEGORY) setNamingCategoryFor(id);
+    else setFaqCategory(id, choice);
+  };
+
+  const createCategory = (name: string) => {
+    if (!namingCategoryFor) return;
+    // Reuse the existing spelling on a case-insensitive match, so "payment terms" doesn't become a
+    // second chip next to "Payment Terms". Read through the ref for the same reason writes do.
+    const existing = faqCategoryOptions(faqsRef.current).find(
+      (option) => option.toLowerCase() === name.toLowerCase(),
+    );
+    setFaqCategory(namingCategoryFor, existing ?? name);
+    setNamingCategoryFor(null);
+  };
+
   const filteredFaqs = faqs.filter(faq => {
     const categoryMatch = activeCategory === 'All' || faq.category === activeCategory;
-    const searchMatch = searchQuery === '' || 
-      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase());
+    // Answers are rich text, so the markup is dropped before matching — otherwise "p" hits every tag.
+    const answerText = faq.answer.replace(/<[^>]*>/g, ' ');
+    const needle = searchQuery.toLowerCase();
+    const searchMatch = searchQuery === '' ||
+      faq.question.toLowerCase().includes(needle) ||
+      answerText.toLowerCase().includes(needle);
     return categoryMatch && searchMatch;
   });
 
   return (
     <AnimatedPage className="overflow-hidden pb-xl">
-      <div className="border-b border-outline-variant/20 via-surface-container-low to-surface">
+      {/* No bottom rule here: the tinted band below already separates the header from the list. */}
+      <div>
         <div className="container-custom pb-12 pt-sm md:pb-16">
         <Breadcrumbs items={[{ label: 'FAQs' }]} />
 
@@ -51,7 +134,7 @@ export const FaqPage: React.FC = () => {
             className="mx-auto mt-3 max-w-2xl font-body-lg text-body-lg leading-relaxed text-on-surface-variant"
           />
 
-          <div className="group relative mx-auto mt-8 max-w-2xl">
+          {/* <div className="group relative mx-auto mt-8 max-w-2xl">
             <Search className="w-5 h-5 absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant transition-colors group-focus-within:text-primary" />
             <input 
               type="text"
@@ -71,15 +154,18 @@ export const FaqPage: React.FC = () => {
                 <X className="w-4 h-4" />
               </button>
             )}
-          </div>
+          </div> */}
         </div>
         </div>
       </div>
 
-      <div className="container-custom space-y-8 pt-10 md:pt-12">
+      <div className="section-band section-dots">
+        <div className="container-custom space-y-8">
 
         {/* Categories */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Narrow screens keep the swipe scroller; from sm up the chips wrap and centre under the header.
+            Centring the scroller itself would make its first chip unreachable once it overflows. */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:flex-wrap sm:justify-center sm:overflow-visible">
           {categories.map(cat => (
             <button
               key={cat}
@@ -156,12 +242,40 @@ export const FaqPage: React.FC = () => {
                       className="overflow-hidden"
                     >
                       <div className="ml-[4.25rem] border-t border-outline-variant/15 pb-6 pr-6 pt-4 font-body-md text-body-md leading-relaxed text-on-surface-variant">
-                        <EditableText
+                        <EditableRichText
                           contentKey={faqAnswerKey(faq.id)}
                           value={faq.answer}
-                          tag="p"
-                          multiline={true}
+                          compact
                         />
+
+                        {/* Sits inside the panel because the header is a <button> and cannot hold controls. */}
+                        {isAdmin && (
+                          <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-outline-variant/15 pt-3">
+                            <label className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+                              Category
+                            </label>
+                            <select
+                              value={faq.category}
+                              onChange={(e) => pickCategory(faq.id, e.target.value)}
+                              className="cursor-pointer rounded border border-outline-variant bg-surface px-2 py-1 text-body-sm text-on-surface outline-none focus:border-primary"
+                            >
+                              {categoryOptions.map((category) => (
+                                <option key={category} value={category}>
+                                  {category}
+                                </option>
+                              ))}
+                              <option value={NEW_CATEGORY}>+ New category…</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => setPendingRemoveId(faq.id)}
+                              className="ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded border border-outline-variant px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-on-surface-variant transition-colors hover:border-error/50 hover:text-error"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              Remove
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
@@ -171,6 +285,17 @@ export const FaqPage: React.FC = () => {
           })}
           </AnimatePresence>
           </motion.div>
+
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={addFaq}
+              className="mt-3 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-outline-variant/50 bg-surface-container-lowest px-6 py-6 text-on-surface-variant transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-[11px] font-bold uppercase tracking-wider">Add Question</span>
+            </button>
+          )}
 
           {filteredFaqs.length === 0 && (
             <div className="rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-6 py-14 text-center">
@@ -223,7 +348,28 @@ export const FaqPage: React.FC = () => {
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
+        </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={pendingRemoveId !== null}
+        title="Remove this question?"
+        message="It disappears from the FAQ list."
+        confirmLabel="Remove"
+        onConfirm={() => pendingRemoveId && removeFaq(pendingRemoveId)}
+        onCancel={() => setPendingRemoveId(null)}
+      />
+
+      <PromptDialog
+        isOpen={namingCategoryFor !== null}
+        title="New category"
+        message="Questions filed under it get their own filter chip."
+        label="Category name"
+        placeholder="e.g. Turnover & Handover"
+        confirmLabel="Create"
+        onSubmit={createCategory}
+        onCancel={() => setNamingCategoryFor(null)}
+      />
     </AnimatedPage>
   );
 };

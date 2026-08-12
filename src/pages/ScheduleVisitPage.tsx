@@ -40,6 +40,11 @@ export const ScheduleVisitPage: React.FC = () => {
           />
         </div>
 
+      </div>
+
+      {/* Booking flow — banded so the form reads as a distinct step away from the page header */}
+      <div className="section-band section-dots py-16">
+        <div className="container-custom space-y-md">
         {/* Step Indicator */}
         <div className="max-w-2xl mx-auto flex items-center justify-between border-b border-outline-variant/30 pb-4">
           <div className={`flex items-center gap-2 font-label-lg text-label-lg font-bold ${step >= 1 ? 'text-primary' : 'text-on-surface-variant'}`}>
@@ -225,6 +230,7 @@ export const ScheduleVisitPage: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
         </div>
       </div>
     </div>

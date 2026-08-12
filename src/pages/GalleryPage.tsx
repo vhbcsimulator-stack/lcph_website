@@ -49,9 +49,10 @@ export const GalleryPage: React.FC = () => {
   };
 
   return (
-    <div className="overflow-hidden pb-xl">
-      <div className="relative border-b border-outline-variant/20">
-        <div className="container-custom relative pb-12 pt-sm md:pb-16">
+    <div className="overflow-hidden">
+      {/* No bottom rule here: the tinted band below already separates the header from the grid. */}
+      <div className="relative">
+        <div className="container-custom relative pt-sm">
         <Breadcrumbs items={[{ label: 'Media Gallery' }]} />
 
         {/* Page Header */}
@@ -73,7 +74,8 @@ export const GalleryPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="container-custom space-y-8 pt-10 md:pt-12">
+      <div className="section-band section-grid pb-16 pt-10 md:pt-12">
+        <div className="container-custom space-y-8">
 
         {/* Categories */}
         <div className="flex items-center justify-between gap-4 border-b border-outline-variant/20 pb-4">
@@ -180,9 +182,10 @@ export const GalleryPage: React.FC = () => {
             </button>
           </div>
         )}
+        </div>
       </div>
 
-      <Lightbox 
+      <Lightbox
         isOpen={lightboxOpen} 
         images={imagesForLightbox} 
         currentIndex={lightboxIndex} 

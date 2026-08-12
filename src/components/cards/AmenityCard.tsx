@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Amenity } from '../../types';
 import { useAdmin } from '../../context/AdminContext';
 import { EditableText } from '../admin/EditableText';
+import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { CheckCircle, Trash2 } from 'lucide-react';
@@ -103,12 +104,11 @@ export const AmenityCard: React.FC<AmenityCardProps> = ({ amenity, variant = 'gr
               tag="h3"
             />
 
-            <EditableText
+            <EditableRichText
               value={amenity.description}
               onSave={(val) => updateAmenityField(amenity.id, 'description', val)}
               className="font-body-md text-body-md capitalize leading-relaxed text-on-surface-variant"
-              tag="p"
-              multiline={true}
+              compact
             />
 
             <div className="space-y-1.5 pt-1">
@@ -155,12 +155,11 @@ export const AmenityCard: React.FC<AmenityCardProps> = ({ amenity, variant = 'gr
               className="font-headline-sm text-headline-sm font-bold text-on-surface transition-colors group-hover:text-primary"
               tag="h3"
             />
-            <EditableText
+            <EditableRichText
               value={amenity.description}
               onSave={(val) => updateAmenityField(amenity.id, 'description', val)}
               className="mt-2 font-body-sm text-body-sm leading-relaxed text-on-surface-variant"
-              tag="p"
-              multiline={true}
+              compact
             />
           </div>
 

@@ -123,6 +123,89 @@
   margin-inline: auto;
 }
 
+/*
+ * Section backgrounds.
+ *
+ * Full-bleed bands used to break up long stretches of flat surface. They are deliberately quiet —
+ * a few percent of tint and a hairline rule — so they read as structure, not decoration. Apply them
+ * to a full-width section wrapper (the padded max-width container stays inside), and never to a
+ * hero or the first section of a page, which keep the plain surface.
+ */
+.section-band {
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    color-mix(in srgb, var(--color-surface-container-low) 78%, var(--color-surface)) 18%,
+    color-mix(in srgb, var(--color-surface-container-low) 78%, var(--color-surface)) 82%,
+    var(--color-surface) 100%
+  );
+  border-block: none;
+}
+
+/*
+ * Same tint as a band, but boxed — for pages whose content lives inside a max-width container,
+ * where a full-bleed band isn't possible. overflow-hidden clips any pattern to the radius.
+ */
+.section-band-inset {
+  overflow: hidden;
+  background-color: color-mix(in srgb, var(--color-surface-container-low) 70%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 40%, transparent);
+  border-radius: 0.75rem;
+}
+
+/*
+ * Section patterns.
+ *
+ * One texture per section, drawn in --pattern-ink at a few percent so it only registers as a
+ * surface quality up close. Each is a single class; combine with .section-band for the tint, or
+ * use alone over a solid colour. On a dark section add .pattern-on-dark to flip the ink to white.
+ *
+ * The pattern sits in a ::before at z-index -1 (isolate keeps it from falling behind the page),
+ * so it paints over the section's own background but under all of its content.
+ */
+.section-dots,
+.section-grid,
+.section-diagonal {
+  position: relative;
+  isolation: isolate;
+  --pattern-ink: rgb(0 67 33 / 0.07);
+}
+.pattern-on-dark {
+  --pattern-ink: rgb(255 255 255 / 0.07);
+}
+.section-dots::before,
+.section-grid::before,
+.section-diagonal::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  /* Fades the texture out top and bottom so a band never ends on a hard seam. */
+  mask-image: linear-gradient(180deg, transparent 0%, black 22%, black 78%, transparent 100%);
+}
+
+/* Dot grid — quietest of the three; suits type-heavy sections. */
+.section-dots::before {
+  background-image: radial-gradient(circle, var(--pattern-ink) 1px, transparent 1.3px);
+  background-size: 22px 22px;
+}
+
+/* Blueprint grid — squares off card grids and plan-like content. */
+.section-grid::before {
+  background-image: linear-gradient(90deg, var(--pattern-ink) 1px, transparent 1px),
+    linear-gradient(180deg, var(--pattern-ink) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Hairline diagonals — the most directional, so keep it to narrow bands. */
+.section-diagonal::before {
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--pattern-ink) 0 1px,
+    transparent 1px 14px
+  );
+}
+
 /* Homepage interactions share one crisp, tactile motion language. */
 .home-cta {
   position: relative;
@@ -221,6 +304,190 @@
 .interactive-icon {
   transition: transform 300ms cubic-bezier(0.2, 0, 0, 1), color 240ms ease,
     background-color 240ms ease;
+}
+
+/*
+ * Rich text.
+ *
+ * `.rich-content` styles the HTML produced by the Quill editor (EditableRichText) on the public site,
+ * and `.rich-editor` re-skins Quill's snow theme so the toolbar reads as part of the admin UI rather
+ * than a third-party widget. Both stay inside the site type scale and colour tokens.
+ */
+.rich-content > * + * {
+  margin-top: 1rem;
+}
+.rich-content p {
+  line-height: 1.75;
+}
+.rich-content h3,
+.rich-content h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--color-on-surface);
+  line-height: 1.3;
+}
+.rich-content h3 {
+  font-size: 1.375rem;
+}
+.rich-content h4 {
+  font-size: 1.125rem;
+}
+.rich-content strong {
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+.rich-content em {
+  font-style: italic;
+}
+.rich-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+/*
+ * Lists. Quill emits both bullet and numbered lists as <ol>, telling them apart with data-list on the
+ * <li>, and draws its own markers with CSS that only applies inside the editor. So the marker is set
+ * per item here, and the empty .ql-ui span Quill uses for its editor-side marker is hidden.
+ */
+.rich-content ul,
+.rich-content ol {
+  padding-left: 1.5rem;
+  line-height: 1.75;
+}
+.rich-content li {
+  display: list-item;
+}
+.rich-content ul > li,
+.rich-content li[data-list='bullet'] {
+  list-style-type: disc;
+}
+.rich-content ol > li,
+.rich-content li[data-list='ordered'] {
+  list-style-type: decimal;
+}
+.rich-content li + li {
+  margin-top: 0.35rem;
+}
+.rich-content .ql-ui {
+  display: none;
+}
+/* Quill records nesting as an indent class rather than a nested list. Margin, not padding, so a
+   nested item's bullet moves with its text instead of staying on the parent's rail. */
+.rich-content .ql-indent-1 {
+  margin-left: 1.5rem;
+}
+.rich-content .ql-indent-2 {
+  margin-left: 3rem;
+}
+.rich-content .ql-indent-3 {
+  margin-left: 4.5rem;
+}
+.rich-content blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding: 0.25rem 0 0.25rem 1rem;
+  color: var(--color-on-surface);
+  font-style: italic;
+}
+/* Quill marks empty lines with a bare <br>, which must keep its height for the author's spacing. */
+.rich-content p:empty::before {
+  content: '\00a0';
+}
+
+.rich-editor .ql-toolbar.ql-snow,
+.rich-editor .ql-container.ql-snow {
+  border-color: var(--color-outline-variant);
+}
+.rich-editor .ql-toolbar.ql-snow {
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: var(--color-surface-container-low);
+}
+.rich-editor .ql-container.ql-snow {
+  border-radius: 0 0 0.5rem 0.5rem;
+  background: var(--color-surface-container-lowest);
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+/*
+ * Icon sizing and colour are pinned here rather than left to the snow theme alone. Quill's icons carry
+ * only a viewBox, so if its stylesheet is late or missing they stretch to the container width, and the
+ * stroke-only icons disappear while the arrow polygons fill solid black.
+ */
+.rich-editor .ql-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  padding: 8px;
+}
+.rich-editor .ql-toolbar .ql-formats {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 0;
+}
+.rich-editor .ql-toolbar button,
+.rich-editor .ql-toolbar .ql-picker-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  float: none;
+  height: 24px;
+}
+.rich-editor .ql-toolbar button {
+  width: 28px;
+  padding: 3px 5px;
+}
+.rich-editor .ql-toolbar svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  float: none;
+}
+.rich-editor .ql-snow .ql-stroke {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.rich-editor .ql-editor {
+  min-height: 220px;
+  color: var(--color-on-surface-variant);
+}
+.rich-editor.rich-editor-compact .ql-editor {
+  min-height: 110px;
+}
+.rich-editor .ql-editor.ql-blank::before {
+  color: var(--color-outline);
+  font-style: normal;
+}
+.rich-editor .ql-snow .ql-stroke {
+  stroke: var(--color-on-surface-variant);
+}
+.rich-editor .ql-snow .ql-fill {
+  fill: var(--color-on-surface-variant);
+}
+.rich-editor .ql-snow .ql-picker {
+  color: var(--color-on-surface-variant);
+}
+.rich-editor .ql-snow button:hover .ql-stroke,
+.rich-editor .ql-snow button.ql-active .ql-stroke,
+.rich-editor .ql-snow .ql-picker-label:hover .ql-stroke {
+  stroke: var(--color-primary);
+}
+.rich-editor .ql-snow button:hover .ql-fill,
+.rich-editor .ql-snow button.ql-active .ql-fill {
+  fill: var(--color-primary);
+}
+.rich-editor .ql-snow button.ql-active,
+.rich-editor .ql-snow .ql-picker-label.ql-active {
+  color: var(--color-primary);
+  background: rgb(0 67 33 / 0.08);
+  border-radius: 0.25rem;
+}
+.rich-editor .ql-snow .ql-picker-options {
+  background: var(--color-surface-container-lowest);
+  border-color: var(--color-outline-variant);
+  border-radius: 0.5rem;
 }
 
 .site-page-motion :is(input, textarea, select) {

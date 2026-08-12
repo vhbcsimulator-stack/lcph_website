@@ -41,9 +41,10 @@ export const NewsPage: React.FC = () => {
   };
 
   return (
-    <div className="overflow-hidden pb-xl">
-      <div className="border-b border-outline-variant/20 via-surface-container-low to-surface">
-        <div className="container-custom pb-10 pt-sm md:pb-14">
+    <div className="overflow-hidden">
+      {/* No bottom rule here: the tinted band below already separates the header from the feed. */}
+      <div>
+        <div className="container-custom  pt-sm ">
         <Breadcrumbs items={[{ label: 'News & Events' }]} />
 
         {/* Page Header */}
@@ -64,7 +65,8 @@ export const NewsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="container-custom space-y-9 pt-10 md:pt-12">
+      <div className="section-band section-dots pb-16 pt-10 md:pt-12">
+        <div className="container-custom space-y-9">
 
         {/* Categories */}
         <div className="flex items-center justify-between gap-4 border-b border-outline-variant/20 pb-4">
@@ -167,6 +169,7 @@ export const NewsPage: React.FC = () => {
             )}
           </motion.div>
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );

@@ -39,3 +39,35 @@ export const scrollToTop = ({ immediate = false }: ScrollToTopOptions = {}) => {
 
   window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
 };
+
+/** Header heights, mirrored from Header.tsx (h-[72px] below lg, lg:h-28). */
+const HEADER_H = { mobile: 72, desktop: 112 };
+
+/**
+ * How far down the viewport is covered by fixed chrome: the site header, plus the admin toolbar
+ * when one is present. Anything that scrolls itself into view has to clear this much.
+ */
+export const getHeaderOffset = () => {
+  const adminOffset =
+    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--admin-offset')) || 0;
+  const headerHeight = window.matchMedia('(min-width: 1024px)').matches
+    ? HEADER_H.desktop
+    : HEADER_H.mobile;
+  return headerHeight + adminOffset;
+};
+
+/**
+ * Scrolls an element up to just below the fixed chrome. Goes through Lenis where it is running,
+ * because a raw window.scrollTo is undone by its next frame.
+ */
+export const scrollToElement = (element: HTMLElement, offset = getHeaderOffset()) => {
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (smoothScroller) {
+    smoothScroller.scrollTo(element, { offset: -offset, immediate: reducedMotion, force: true });
+    return;
+  }
+
+  const top = element.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior: reducedMotion ? 'auto' : 'smooth' });
+};

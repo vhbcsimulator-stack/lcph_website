@@ -1,11 +1,30 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ProjectCard } from '../components/cards/ProjectCard';
+import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { EditableRichText } from '../components/admin/EditableRichText';
+import { fadeInUp, scaleUp, staggerContainer } from '../utils/animations';
 import type { Project } from '../types';
 import { ChevronDown, Filter, MapPin, Star } from 'lucide-react';
+
+/** Sections below the fold rise in as they are scrolled to, once each. */
+const REVEAL_ON_SCROLL = {
+  variants: fadeInUp(0.6),
+  initial: 'hidden',
+  whileInView: 'visible',
+  viewport: { once: true, amount: 0.14, margin: '0px 0px -14% 0px' },
+} as const;
+
+const normalizeFilterValue = (value: string) => value.trim().toLocaleLowerCase();
+
+const uniqueFilterValues = (values: string[]) =>
+  Array.from(new Set(values.map(value => value.trim()).filter(Boolean))).sort((a, b) =>
+    a.localeCompare(b),
+  );
 
 export const ProjectsPage: React.FC = () => {
   const { projects, isAdmin, updateProjectField } = useAdmin();
@@ -14,15 +33,20 @@ export const ProjectsPage: React.FC = () => {
   const [selectedType, setSelectedType] = useState<string>('All');
   const [featuredPickerOpen, setFeaturedPickerOpen] = useState(false);
 
-  const locations = Array.from(new Set(projects.map(p => p.location))).filter(Boolean);
+  const locations = uniqueFilterValues(projects.map(project => project.location));
+  const statuses = uniqueFilterValues(projects.map(project => project.status));
+  const types = uniqueFilterValues(projects.map(project => project.category));
 
-  // Derive featured project — first one with featured=true, else first project
+  // Derive featured project â€” first one with featured=true, else first project
   const featuredProject = projects.find(p => p.featured) ?? projects[0] ?? null;
 
   const filteredProjects = projects.filter(project => {
-    const locationMatch = selectedLocation === 'All' || project.location.includes(selectedLocation);
-    const statusMatch = selectedStatus === 'All' || project.status === selectedStatus;
-    const typeMatch = selectedType === 'All' || project.category === selectedType;
+    const matches = (selectedValue: string, projectValue: string) =>
+      selectedValue === 'All' || normalizeFilterValue(projectValue) === normalizeFilterValue(selectedValue);
+
+    const locationMatch = matches(selectedLocation, project.location);
+    const statusMatch = matches(selectedStatus, project.status);
+    const typeMatch = matches(selectedType, project.category);
     return locationMatch && statusMatch && typeMatch;
   });
 
@@ -35,13 +59,18 @@ export const ProjectsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-xl py-sm">
+    <AnimatedPage className="space-y-xl">
       <div className="container-custom space-y-lg">
         <Breadcrumbs items={[{ label: 'Projects' }]} />
 
-        {/* Header & Filter Section */}
-        <section className="space-y-md">
-          <div className="space-y-xs">
+        {/* Header & Filter Section â€” animates on mount, so the page opens with the reveal */}
+        <motion.section
+          variants={staggerContainer(0.12, 0.05)}
+          initial="hidden"
+          animate="visible"
+          className="space-y-md"
+        >
+          <motion.div variants={fadeInUp(0.55)} className="space-y-xs">
             <EditableText
               contentKey="projects_hero_title"
               className="font-headline-xl-mobile md:font-headline-xl text-headline-xl-mobile md:text-headline-xl text-primary font-bold"
@@ -52,26 +81,33 @@ export const ProjectsPage: React.FC = () => {
               className="font-body-lg text-body-lg text-on-surface-variant max-w-3xl leading-relaxed"
               tag="p"
             />
-          </div>
+          </motion.div>
 
-          <div className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20 flex flex-col md:flex-row gap-sm items-end">
-            <div className="w-full md:w-1/4 space-y-xs">
-              <label className="font-label-lg text-label-lg text-on-surface-variant block">
+          <motion.div
+            variants={fadeInUp(0.55)}
+            className="bg-surface-container-lowest p-md rounded-xl shadow-sm border border-outline-variant/20 flex flex-col md:flex-row md:flex-wrap gap-sm items-end"
+          >
+
+            <div className="w-full md:flex-1 space-y-xs">
+              <label className="flex items-center gap-2 font-label-lg text-base font-bold text-on-surface-variant">
+                <Filter className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
                 <EditableText contentKey="projects_filter_location" value="Location" tag="span" inline />
               </label>
-              <select
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none outline-none"
-              >
-                <option value="All">All Locations</option>
-                {locations.map(loc => (
-                  <option key={loc} value={loc}>{loc}</option>
-                ))}
-              </select>
+              <div>
+                <select
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none outline-none"
+                >
+                  <option value="All">All Locations</option>
+                  {locations.map(loc => (
+                    <option key={loc} value={loc}>{loc}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div className="w-full md:w-1/4 space-y-xs">
+            <div className="w-full md:flex-1 space-y-xs">
               <label className="font-label-lg text-label-lg text-on-surface-variant block">
                 <EditableText contentKey="projects_filter_status" value="Status" tag="span" inline />
               </label>
@@ -81,12 +117,13 @@ export const ProjectsPage: React.FC = () => {
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none outline-none"
               >
                 <option value="All">All Statuses</option>
-                <option value="Ongoing">Pre-selling / Ongoing</option>
-                <option value="Completed">Ready / Completed</option>
+                {statuses.map(status => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
               </select>
             </div>
 
-            <div className="w-full md:w-1/4 space-y-xs">
+            <div className="w-full md:flex-1 space-y-xs">
               <label className="font-label-lg text-label-lg text-on-surface-variant block">
                 <EditableText contentKey="projects_filter_type" value="Type" tag="span" inline />
               </label>
@@ -96,27 +133,29 @@ export const ProjectsPage: React.FC = () => {
                 className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-4 py-3 font-body-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary transition-colors appearance-none outline-none"
               >
                 <option value="All">All Types</option>
-                <option value="Residential">Residential</option>
-                <option value="Leisure">Leisure</option>
-                <option value="Mixed-Use">Mixed-Use</option>
-                <option value="Condominium">Condominium</option>
+                {types.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
               </select>
             </div>
 
-            <div className="w-full md:w-1/4">
+            {/* <div className="w-full md:w-1/4">
               <button
                 className="w-full bg-primary text-on-primary font-label-lg text-label-lg px-6 py-3 rounded hover:bg-primary-container hover:text-on-primary-container transition-all flex items-center justify-center gap-2 cursor-pointer h-[48px]"
               >
                 <Filter className="w-4 h-4" />
                 <EditableText contentKey="projects_filter_cta" value="Apply Filters" tag="span" inline />
               </button>
-            </div>
-          </div>
-        </section>
+            </div> */}
+          </motion.div>
+        </motion.section>
 
         {/* Featured Project Asymmetric Bento Block */}
         {featuredProject && (
-          <section className="grid grid-cols-1 gap-5 md:grid-cols-12 md:grid-rows-2 md:auto-rows-[238px]">
+          <motion.section
+            {...REVEAL_ON_SCROLL}
+            className="grid grid-cols-1 gap-5 md:grid-cols-12 md:grid-rows-2 md:auto-rows-[238px]"
+          >
             {/* Main featured card */}
             <div className="group relative h-full overflow-hidden rounded-xl shadow-lg md:col-span-8 md:row-span-2 md:h-100">
               <div
@@ -129,7 +168,7 @@ export const ProjectsPage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 p-lg w-full text-white">
                 <span className="inline-block bg-primary text-on-primary font-label-lg text-label-lg px-3 py-1 rounded-full mb-3 shadow-sm">
-                  <EditableText contentKey="projects_featured_badge" value="Featured" tag="span" inline /> •{' '}
+                  <EditableText contentKey="projects_featured_badge" value="Featured" tag="span" inline /> â€¢{' '}
                   <EditableText
                     value={featuredProject.status}
                     onSave={(val) => updateProjectField(featuredProject.id, 'status', val as Project['status'])}
@@ -218,11 +257,10 @@ export const ProjectsPage: React.FC = () => {
                 className="mb-2 font-headline-sm text-headline-sm font-bold text-primary"
                 tag="h3"
               />
-              <EditableText
+              <EditableRichText
                 contentKey="projects_invest_text"
                 className="font-body-md text-body-md leading-relaxed text-on-surface-variant"
-                tag="p"
-                multiline={true}
+                compact
               />
             </div>
             <div className="relative min-h-[220px] overflow-hidden rounded-xl border border-outline-variant/20 shadow-sm md:col-span-4 md:min-h-0">
@@ -231,11 +269,15 @@ export const ProjectsPage: React.FC = () => {
                 style={{ backgroundImage: `url('${featuredProject.gallery?.[0] ?? featuredProject.image}')` }}
               />
             </div>
-          </section>
+          </motion.section>
         )}
 
-        {/* All Projects Grid */}
-        <section className="space-y-md">
+      </div>
+
+      {/* All Projects Grid â€” banded so the results read as their own zone below the featured block */}
+      <div className="section-band section-grid py-16">
+        <div className="container-custom">
+        <motion.section {...REVEAL_ON_SCROLL} className="space-y-md">
           <div className="flex justify-between items-end border-b border-outline-variant/30 pb-sm">
             <EditableText
               contentKey="projects_grid_title"
@@ -250,13 +292,24 @@ export const ProjectsPage: React.FC = () => {
           </div>
 
           {filteredProjects.length > 0 ? (
-            <div className="flex flex-wrap justify-center gap-gutter">
+            /* Keyed on the filters so re-filtering replays the cascade over the new results. */
+            <motion.div
+              key={`${selectedLocation}-${selectedStatus}-${selectedType}`}
+              variants={staggerContainer(0.08, 0.05)}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-wrap justify-center gap-gutter"
+            >
               {filteredProjects.map(project => (
-                <div key={project.id} className="w-full max-w-[410px] md:w-[calc(50%_-_12px)] lg:w-[calc(33.333%_-_16px)]">
+                <motion.div
+                  key={project.id}
+                  variants={scaleUp(0.45)}
+                  className="w-full max-w-[410px] md:w-[calc(50%_-_12px)] lg:w-[calc(33.333%_-_16px)]"
+                >
                   <ProjectCard project={project} />
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           ) : (
             <div className="text-center py-12 text-on-surface-variant">
               <EditableText
@@ -266,9 +319,10 @@ export const ProjectsPage: React.FC = () => {
               />
             </div>
           )}
-        </section>
+        </motion.section>
+        </div>
       </div>
-    </div>
+    </AnimatedPage>
   );
 };
 export default ProjectsPage;
