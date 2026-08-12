@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { FileText } from 'lucide-react';
 import type { DevelopmentUpdate } from '../types';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { UpdateCard } from '../components/cards/UpdateCard';
@@ -74,6 +75,32 @@ export const UpdatesPage: React.FC = () => {
           {featured && (
             <motion.div {...REVEAL_ON_SCROLL}>
               <UpdateCard update={featured} variant="featured" onEdit={setEditing} onSetFeatured={setFeatured} />
+            </motion.div>
+          )}
+
+          {/* Empty state â€” the band would otherwise read as a broken/blank section */}
+          {updates.length === 0 && (
+            <motion.div
+              {...REVEAL_ON_SCROLL}
+              className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-outline-variant bg-surface/60 px-6 py-16 text-center"
+            >
+              {/* rounded-[50%]: this theme redefines --radius-full to 0.75rem, so `rounded-full` is not a circle */}
+              <span className="flex h-14 w-14 items-center justify-center rounded-[50%] bg-primary/10 text-primary">
+                <FileText className="h-7 w-7" aria-hidden="true" />
+              </span>
+              <h2 className="font-headline-sm text-headline-sm text-primary font-semibold">
+                No progress reports yet
+              </h2>
+              {/* Explicit ch width: `max-w-md` would resolve against this theme's --spacing-md (24px) */}
+              <p className="font-body-md text-body-md text-on-surface-variant max-w-[52ch] leading-relaxed">
+                   Construction milestones and site photos will be posted here as soon as they are available. Please check back soon.
+              </p>
+                <Link
+                  to="/projects"
+                  className="mt-2 rounded border border-primary/40 px-6 py-2.5 font-label-lg text-label-lg text-primary transition-colors hover:bg-primary/5"
+                >
+                  View Projects
+                </Link>
             </motion.div>
           )}
 
