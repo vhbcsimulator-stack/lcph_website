@@ -168,7 +168,7 @@ export const ProjectsPage: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-on-background/80 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 p-lg w-full text-white">
                 <span className="inline-block bg-primary text-on-primary font-label-lg text-label-lg px-3 py-1 rounded-full mb-3 shadow-sm">
-                  <EditableText contentKey="projects_featured_badge" value="Featured" tag="span" inline /> â€¢{' '}
+                  <EditableText contentKey="projects_featured_badge" value="Featured" tag="span" inline />|{' '}
                   <EditableText
                     value={featuredProject.status}
                     onSave={(val) => updateProjectField(featuredProject.id, 'status', val as Project['status'])}
