@@ -6,11 +6,15 @@ import { EditableImage } from '../components/admin/EditableImage';
 import { ArrowLeft, Calendar, Clock } from 'lucide-react';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
+import { metaForNews } from '../seo/site.js';
+import { useSeo, type SeoMeta } from '../seo/useSeo';
 
 export const NewsDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { news, updateNewsField } = useAdmin();
   const article = news.find((n) => n.slug === slug) || news[0];
+
+  useSeo(article ? (metaForNews(article) as SeoMeta) : null);
 
   if (!article) return null;
 

@@ -1,12 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL =
-  (import.meta as any).env?.VITE_SUPABASE_URL ??
-  'https://thxzmrfsfmdvkuuhfizy.supabase.co';
+/**
+ * Credentials come from the environment only. They were previously hardcoded as
+ * fallbacks, which put the project URL and anon key in git history and made them
+ * impossible to rotate without a code change.
+ *
+ * The anon key still ships inside the client bundle — that is unavoidable for a
+ * browser Supabase client and is what the key is designed for. Row Level Security
+ * on every table, not secrecy of this key, is what actually protects the data.
+ */
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY;
 
-const SUPABASE_ANON_KEY =
-  (import.meta as any).env?.VITE_SUPABASE_ANON_KEY ??
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoeHptcmZzZm1kdmt1dWhmaXp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODUzMDQxMDEsImV4cCI6MjEwMDg4MDEwMX0.ps59LIAQ88knefWGQlsXn5NOWyhbglb1v_0fQeZykmI';
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error(
+    'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set. Add them to .env locally and to the deployment environment.'
+  );
+}
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   realtime: {

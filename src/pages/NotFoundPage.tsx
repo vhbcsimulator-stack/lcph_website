@@ -2,8 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { EditableText } from '../components/admin/EditableText';
+import { useNoIndexSeo } from '../seo/useSeo';
 
 export const NotFoundPage: React.FC = () => {
+  useNoIndexSeo(
+    'Page Not Found | LCPH Realty Inc.',
+    'The page you are looking for might have been moved or updated.'
+  );
+
   return (
     <div className="min-h-[60vh] flex items-center justify-center container-custom py-16 text-center">
       <div className="max-w-[448px] space-y-4">

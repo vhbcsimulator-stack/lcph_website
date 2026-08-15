@@ -7,6 +7,8 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
+import { metaForUpdate } from '../seo/site.js';
+import { useSeo, type SeoMeta } from '../seo/useSeo';
 import { Activity, ArrowLeft, Calendar, UploadCloud, X, ZoomIn } from 'lucide-react';
 
 export const UpdatesDetailPage: React.FC = () => {
@@ -17,6 +19,8 @@ export const UpdatesDetailPage: React.FC = () => {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const update = updates.find(u => u.slug === slug || u.id === slug);
+
+  useSeo(update ? (metaForUpdate(update) as SeoMeta) : null);
 
   if (loading) {
     return (

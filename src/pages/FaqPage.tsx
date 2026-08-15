@@ -21,6 +21,8 @@ import { accordionTransition } from '../utils/animations';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { useAdmin } from '../context/AdminContext';
+import { faqLd, metaForStatic } from '../seo/site.js';
+import { useSeo, type SeoMeta } from '../seo/useSeo';
 import { ArrowRight, ChevronDown, HelpCircle, MessageCircle, Plus, Search, Trash2 } from 'lucide-react';
 
 export const FaqPage: React.FC = () => {
@@ -34,6 +36,10 @@ export const FaqPage: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
 
   const faqs = useMemo(() => resolveFaqs(pageContent), [pageContent]);
+
+  // Adds the FAQPage rich result on top of the base metadata RouteSeo already applied.
+  const base = metaForStatic('/faqs') as SeoMeta;
+  useSeo(faqs.length ? { ...base, jsonLd: [...(base.jsonLd || []), faqLd(faqs)] } : base);
 
   /**
    * Chips follow the questions that actually exist — suggested categories first, then any an admin

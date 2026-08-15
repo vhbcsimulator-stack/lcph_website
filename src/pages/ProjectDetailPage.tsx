@@ -10,6 +10,8 @@ import { EditableImage } from '../components/admin/EditableImage';
 import { compressImage } from '../utils/image';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { getHeaderOffset, scrollToElement } from '../utils/scroll';
+import { metaForProject } from '../seo/site.js';
+import { useSeo, type SeoMeta } from '../seo/useSeo';
 import { ArrowRight, CheckCircle, MapPin, MessageSquare, Plus, Trash2, X } from 'lucide-react';
 
 /** The sub-nav tabs, in page order â€” the scroll spy walks this list top to bottom. */
@@ -25,6 +27,8 @@ export const ProjectDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { projects, loading, updateProjectField, deleteProject, isAdmin, pageContent } = useAdmin();
   const project = projects.find(p => p.slug === slug || p.id === slug);
+
+  useSeo(project ? (metaForProject(project) as SeoMeta) : null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

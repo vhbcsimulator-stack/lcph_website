@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && node scripts/prerender.mjs",
+    "seo": "node scripts/prerender.mjs",
     "dev:admin": "npm run dev --prefix admin",
     "build:admin": "npm run build --prefix admin",
     "lint": "oxlint",
