@@ -5,7 +5,7 @@ import { Footer } from './components/layout/Footer';
 import { PageEffects } from './components/layout/PageEffects';
 import { ScrollToTop } from './components/ui/ScrollToTop';
 import { SmoothScroll } from './components/ui/SmoothScroll';
-import { PageSkeleton } from './components/ui/PageSkeleton';
+import { AnnouncementBarSkeleton, RouteSkeleton } from './components/ui/PageSkeleton';
 import { RouteSeo } from './seo/RouteSeo';
 import { useAdmin } from './context/AdminContext';
 import { AdminProvider } from './context/AdminContext';
@@ -43,17 +43,20 @@ const SiteContent = () => {
     );
   }
 
-  if (loading) return <PageSkeleton />;
-
   return (
-    <Router>
+    <>
       <RouteSeo />
       <SmoothScroll />
       <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-surface">
-        <AnnouncementBar />
+        {/* The header and footer read no CMS data, so they are real from the first paint; only
+            the announcement copy and the routed body need standing in for. */}
+        {loading ? <AnnouncementBarSkeleton /> : <AnnouncementBar />}
         <Header />
         <main className="flex-1">
+          {loading ? (
+            <RouteSkeleton />
+          ) : (
           <PageEffects>
           <Routes>
             <Route path="/" element={<HomePage />} />
@@ -78,17 +81,21 @@ const SiteContent = () => {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
           </PageEffects>
+          )}
         </main>
         <Footer />
       </div>
-    </Router>
+    </>
   );
 };
 
 export function App() {
   return (
     <AdminProvider isAdmin={false}>
-      <SiteContent />
+      {/* The router wraps the loading state too, so the skeleton can match the open route. */}
+      <Router>
+        <SiteContent />
+      </Router>
     </AdminProvider>
   );
 }
