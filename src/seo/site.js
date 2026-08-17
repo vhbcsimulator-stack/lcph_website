@@ -100,6 +100,34 @@ export function pageTitle(title) {
   return `${title} | ${SITE_NAME}`;
 }
 
+// ─── Keywords ─────────────────────────────────────────────────────────────────
+
+/**
+ * Terms every page carries: the brand, the two provinces the business spans, and the
+ * category language buyers actually type. Google itself ignores the keywords meta tag
+ * (it has since 2009), so the value of this list is not the tag — it is that the same
+ * terms are deliberately worked into the titles, descriptions and headings, which do
+ * count. Keep it honest and specific; padding it with unrelated terms helps nothing.
+ */
+export const BASE_KEYWORDS = [
+  'LCPH Realty',
+  'LCPH Realty Inc',
+  'Lakeshore Community Philippines',
+  'Lakeshore Community North',
+  'lot for sale Nueva Ecija',
+  'subdivision Nueva Ecija',
+  'Talugtug Nueva Ecija real estate',
+  'real estate developer Pampanga',
+  'San Fernando Pampanga real estate office',
+  'master-planned community Central Luzon',
+  'lakeside lots Philippines',
+];
+
+/** Merge page-specific terms with the base list, de-duplicated, order preserved. */
+export function keywordsFor(...extra) {
+  return [...new Set([...extra.flat().filter(Boolean), ...BASE_KEYWORDS])].join(', ');
+}
+
 // ─── Static routes ────────────────────────────────────────────────────────────
 
 /**
@@ -113,7 +141,8 @@ export const STATIC_ROUTES = [
     path: '/',
     title: `${SITE_NAME} | Lakeside Master-Planned Communities in Nueva Ecija`,
     description:
-      'LCPH Realty Inc., a subsidiary of VHBC, develops premier lakeside residential and commercial communities in Talugtug, Nueva Ecija. Explore Lakeshore Community North lots, amenities and pricing.',
+      'Residential and commercial lots for sale at Lakeshore Community North, a master-planned lakeside community in Talugtug, Nueva Ecija. LCPH Realty Inc. — a VHBC subsidiary with offices in San Fernando, Pampanga.',
+    keywords: keywordsFor(['lot for sale Philippines','residential lots for sale','investment property Central Luzon','lakeside subdivision']),
     priority: 1.0,
     changefreq: 'weekly',
   },
@@ -121,7 +150,8 @@ export const STATIC_ROUTES = [
     path: '/about',
     title: pageTitle('About Us'),
     description:
-      'Learn how LCPH Realty Inc. builds master-planned lakeside estates in Nueva Ecija — our story as a VHBC subsidiary, our core pillars and our commitment to heritage quality.',
+      'LCPH Realty Inc. is a VHBC subsidiary building master-planned lakeside estates in Nueva Ecija, with its corporate office in San Fernando, Pampanga. Our story, pillars and commitment to heritage quality.',
+    keywords: keywordsFor(['about LCPH Realty','VHBC subsidiary','property developer Central Luzon','real estate company Pampanga']),
     priority: 0.7,
     changefreq: 'monthly',
   },
@@ -130,6 +160,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Our Projects'),
     description:
       'Browse LCPH Realty Inc. master-planned communities and townships, including the flagship Lakeshore Community North estate in Brgy. Buted, Talugtug, Nueva Ecija.',
+    keywords: keywordsFor(['master-planned communities Philippines','townships Nueva Ecija','Mini Complete Vacation Community','residential and commercial estates']),
     priority: 0.9,
     changefreq: 'weekly',
   },
@@ -138,6 +169,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Amenities'),
     description:
       'Resort-style amenities at Lakeshore Community North in Nueva Ecija: clubhouse and pools, nature trails, sports courts, wellness facilities and 24/7 secured perimeters.',
+    keywords: keywordsFor(['subdivision amenities','clubhouse and pool','nature trails','gated community Nueva Ecija']),
     priority: 0.7,
     changefreq: 'monthly',
   },
@@ -145,7 +177,8 @@ export const STATIC_ROUTES = [
     path: '/updates',
     title: pageTitle('Construction Updates'),
     description:
-      'Track construction progress across LCPH Realty Inc. developments with dated site engineering reports, progress percentages and on-site photos.',
+      'Construction progress at Lakeshore Community North, Talugtug, Nueva Ecija — dated site engineering reports, completion percentages and on-site photos from LCPH Realty Inc.',
+    keywords: keywordsFor(['construction updates','project progress','site development Nueva Ecija']),
     priority: 0.8,
     changefreq: 'weekly',
   },
@@ -153,7 +186,8 @@ export const STATIC_ROUTES = [
     path: '/news',
     title: pageTitle('News & Events'),
     description:
-      'Announcements, events, buyer guides and company news from LCPH Realty Inc. and the Lakeshore Community Philippines developments.',
+      'Property news, buyer guides and events from LCPH Realty Inc. — investing in Central Luzon real estate, Nueva Ecija lot buying, and updates from Lakeshore Community North.',
+    keywords: keywordsFor(['real estate news Philippines','property investment guides','Central Luzon property news']),
     priority: 0.8,
     changefreq: 'weekly',
   },
@@ -161,7 +195,8 @@ export const STATIC_ROUTES = [
     path: '/gallery',
     title: pageTitle('Gallery'),
     description:
-      'Aerial views, amenity renders, construction progress and community photos from LCPH Realty Inc. lakeside developments in Talugtug, Nueva Ecija.',
+      'Photos of Lakeshore Community North: aerial views of the lake and lots, amenity renders, construction progress and community life in Talugtug, Nueva Ecija.',
+    keywords: keywordsFor(['subdivision photos','aerial view','property renders Nueva Ecija']),
     priority: 0.6,
     changefreq: 'monthly',
   },
@@ -170,6 +205,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Contact Us'),
     description:
       'Talk to an LCPH Realty Inc. property specialist. Office at the Freluz Building, Jose Abad Santos Avenue, San Fernando, Pampanga — call +63 917 123 4567 or send an inquiry online.',
+    keywords: keywordsFor(['contact LCPH Realty','property specialist Pampanga','real estate office San Fernando Pampanga','Freluz Building Jose Abad Santos Avenue']),
     priority: 0.8,
     changefreq: 'monthly',
   },
@@ -178,6 +214,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Schedule a Site Visit'),
     description:
       'Book a guided site tour of Lakeshore Community North in Talugtug, Nueva Ecija. Pick a date, meet a certified property specialist and walk the lots, amenities and master plan in person.',
+    keywords: keywordsFor(['schedule site visit','property tripping Nueva Ecija','site tour Lakeshore Community North']),
     priority: 0.8,
     changefreq: 'monthly',
   },
@@ -186,6 +223,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Frequently Asked Questions'),
     description:
       'Answers on LCPH lot pricing, payment terms, reservation requirements, turnover timelines, titles and financing for our Nueva Ecija developments.',
+    keywords: keywordsFor(['lot pricing','payment terms','reservation requirements','financing Pag-IBIG bank loan']),
     priority: 0.6,
     changefreq: 'monthly',
   },
@@ -194,6 +232,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Careers'),
     description:
       'Join LCPH Realty Inc. Open roles across sales and marketing, engineering and architecture, property management and corporate operations.',
+    keywords: keywordsFor(['real estate jobs Pampanga','careers LCPH Realty','property sales jobs Central Luzon']),
     priority: 0.5,
     changefreq: 'monthly',
   },
@@ -202,6 +241,7 @@ export const STATIC_ROUTES = [
     title: pageTitle('Partner With Us'),
     description:
       'Broker, landowner and institutional partnership opportunities with LCPH Realty Inc., a VHBC subsidiary developing lakeside communities in Nueva Ecija.',
+    keywords: keywordsFor(['broker partnership','real estate brokers Philippines','landowner joint venture']),
     priority: 0.5,
     changefreq: 'monthly',
   },
@@ -263,7 +303,13 @@ export function organizationLd() {
       latitude: ORGANIZATION.latitude,
       longitude: ORGANIZATION.longitude,
     },
-    areaServed: { '@type': 'AdministrativeArea', name: 'Nueva Ecija, Philippines' },
+    // Two provinces matter: the office serves buyers in Pampanga, the developments
+    // are in Nueva Ecija, and both sit inside Central Luzon.
+    areaServed: [
+      { '@type': 'AdministrativeArea', name: 'Nueva Ecija, Philippines' },
+      { '@type': 'AdministrativeArea', name: 'Pampanga, Philippines' },
+      { '@type': 'AdministrativeArea', name: 'Central Luzon, Philippines' },
+    ],
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -341,6 +387,7 @@ export function metaForStatic(path) {
     canonical: absoluteUrl(route ? route.path : '/'),
     image: absoluteUrl(DEFAULT_OG_IMAGE),
     type: 'website',
+    keywords: route && route.keywords ? route.keywords : keywordsFor(),
     noindex: route ? Boolean(route.noindex) : false,
     jsonLd,
   };
@@ -359,6 +406,7 @@ export function metaForProject(project) {
   return {
     title: pageTitle(`${project.name} — ${DEVELOPMENT.shortLabel}`),
     description,
+    keywords: keywordsFor([project.name, `${project.name} lots`, `${project.name} price`, `${project.name} location`, project.category]),
     canonical: absoluteUrl(path),
     image: socialImage(project.image),
     type: 'website',
@@ -428,6 +476,7 @@ export function metaForProperty(property) {
   return {
     title: pageTitle(`${property.title} — ${DEVELOPMENT.shortLabel}`),
     description: clamp(summary, 160),
+    keywords: keywordsFor([property.title, property.lotType, property.category, property.lotSize ? `${property.lotSize} sqm lot` : null, `${property.lotType || 'lot'} for sale Nueva Ecija`]),
     canonical: absoluteUrl(path),
     image: socialImage((property.images || [])[0]),
     type: 'website',
@@ -480,6 +529,7 @@ export function metaForNews(article) {
   return {
     title: pageTitle(article.title),
     description: clamp(article.excerpt || article.content, 160),
+    keywords: keywordsFor([article.title, article.category]),
     canonical: absoluteUrl(path),
     image: socialImage(article.image),
     type: 'article',
@@ -513,6 +563,7 @@ export function metaForUpdate(update) {
   return {
     title: pageTitle(`${update.title} — Construction Update`),
     description: clamp(update.summary || update.content, 160),
+    keywords: keywordsFor([update.title, update.projectName, 'construction update']),
     canonical: absoluteUrl(path),
     image: socialImage(update.image),
     type: 'article',

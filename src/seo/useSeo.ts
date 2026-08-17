@@ -5,6 +5,7 @@ export interface SeoMeta {
   title: string;
   description: string;
   canonical: string;
+  keywords?: string;
   image?: string;
   /** Open Graph object type — 'website' for pages, 'article' for news/updates. */
   type?: string;
@@ -48,6 +49,7 @@ export function applySeo(meta: SeoMeta) {
   document.title = meta.title;
 
   upsertMeta('name', 'description', meta.description);
+  if (meta.keywords) upsertMeta('name', 'keywords', meta.keywords);
   upsertLink('canonical', meta.canonical);
 
   if (meta.noindex) {

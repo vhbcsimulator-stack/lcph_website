@@ -211,6 +211,7 @@ function headFor(meta) {
   const tags = [
     `<title>${escapeAttr(meta.title)}</title>`,
     `<meta name="description" content="${escapeAttr(meta.description)}" />`,
+    ...(meta.keywords ? [`<meta name="keywords" content="${escapeAttr(meta.keywords)}" />`] : []),
     `<meta name="robots" content="${robots}" />`,
     `<meta name="author" content="LCPH Realty Inc." />`,
     `<link rel="canonical" href="${escapeAttr(meta.canonical)}" />`,
@@ -255,7 +256,7 @@ function renderRoute(shell, meta) {
     // which this script also rewrites, so anything not stripped would accumulate on a
     // second run (e.g. `npm run seo` without an intervening `vite build`).
     .replace(
-      /<meta\s+name="(description|robots|author|google-site-verification|twitter:[^"]+)"[^>]*>\s*/gi,
+      /<meta\s+name="(description|keywords|robots|author|google-site-verification|twitter:[^"]+)"[^>]*>\s*/gi,
       ''
     )
     .replace(/<meta\s+property="og:[^"]+"[^>]*>\s*/gi, '')
