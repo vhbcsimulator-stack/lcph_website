@@ -33,6 +33,26 @@ export const ORGANIZATION = {
   latitude: 15.0418329,
   longitude: 120.6836597,
   parentOrganization: 'VHBC',
+
+  /** Every name the company is searched by, including the bare acronym. */
+  alternateNames: [
+    'LCPH',
+    'LCPH Realty',
+    'Lakeshore Community Philippines',
+    'Leisure Community PH',
+  ],
+
+  /**
+   * Official profiles, used for schema.org `sameAs`. This is one of the strongest
+   * signals Google uses to resolve a brand to a real entity — an acronym as contested
+   * as "LCPH" needs it. Add the real URLs (Facebook page, Google Business Profile,
+   * YouTube, LinkedIn) as they exist; empty entries are omitted from the output.
+   */
+  sameAs: [
+    // 'https://www.facebook.com/<page>',
+    // 'https://www.youtube.com/@<channel>',
+    // 'https://www.linkedin.com/company/<company>',
+  ].filter(Boolean),
 };
 
 /**
@@ -284,7 +304,12 @@ export function organizationLd() {
     '@id': `${SITE_URL}/#organization`,
     name: ORGANIZATION.name,
     legalName: ORGANIZATION.legalName,
+    // "LCPH" is a contested acronym (a hospital, a league of cities, two churches all
+    // use it), so every name this company is known by is declared explicitly. This is
+    // how Google learns which entity a bare "LCPH" query might mean.
+    alternateName: ORGANIZATION.alternateNames,
     url: SITE_URL,
+    ...(ORGANIZATION.sameAs.length ? { sameAs: ORGANIZATION.sameAs } : {}),
     logo: absoluteUrl(DEFAULT_OG_IMAGE),
     image: absoluteUrl(DEFAULT_OG_IMAGE),
     telephone: ORGANIZATION.telephone,
