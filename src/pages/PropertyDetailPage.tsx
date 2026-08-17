@@ -7,6 +7,8 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { Calendar, CheckCircle, MapPin, ZoomIn } from 'lucide-react';
+import { metaForProperty } from '../seo/site.js';
+import { useSeo, type SeoMeta } from '../seo/useSeo';
 import type { Property } from '../types';
 
 /** Landmark rows are page copy rather than property data, so they live in page_content. */
@@ -21,6 +23,8 @@ export const PropertyDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { properties, loading, updatePropertyField } = useAdmin();
   const property = properties.find(p => p.slug === slug || p.id === slug);
+
+  useSeo(property ? (metaForProperty(property) as SeoMeta) : null);
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

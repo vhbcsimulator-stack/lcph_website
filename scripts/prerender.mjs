@@ -28,6 +28,7 @@ import {
   faqLd,
   metaForStatic,
   metaForProject,
+  metaForProperty,
   metaForNews,
   metaForUpdate,
 } from '../src/seo/site.js';
@@ -128,8 +129,9 @@ function faqsFromPageContent(pageContent) {
 }
 
 async function loadContent() {
-  const [projectRows, newsRows, updateRows, contentRows] = await Promise.all([
+  const [projectRows, propertyRows, newsRows, updateRows, contentRows] = await Promise.all([
     fetchTable('projects', 'slug,name,location,description,long_description,image,amenities,created_at'),
+    fetchTable('properties', 'slug,title,project_name,location,category,lot_size,price_placeholder,status,lot_type,description,images,created_at'),
     fetchTable('news', 'slug,title,date,category,author,excerpt,content,image,created_at'),
     fetchTable('development_updates', 'slug,title,date,project_name,summary,content,image,created_at'),
     fetchTable('page_content', 'key,value'),
@@ -148,6 +150,20 @@ async function loadContent() {
       longDescription: r.long_description,
       image: r.image,
       amenities: r.amenities ?? [],
+      lastmod: r.created_at,
+    })),
+    properties: withSlug(propertyRows).map((r) => ({
+      slug: r.slug,
+      title: r.title,
+      projectName: r.project_name,
+      location: r.location,
+      category: r.category,
+      lotSize: r.lot_size,
+      pricePlaceholder: r.price_placeholder,
+      status: r.status,
+      lotType: r.lot_type,
+      description: r.description,
+      images: r.images ?? [],
       lastmod: r.created_at,
     })),
     news: withSlug(newsRows).map((r) => ({
@@ -318,7 +334,7 @@ async function main() {
   }
   const shell = await readFile(shellPath, 'utf8');
 
-  const { projects, news, updates, faqs } = await loadContent();
+  const { projects, properties, news, updates, faqs } = await loadContent();
   const sitemap = [];
 
   for (const route of STATIC_ROUTES) {
@@ -340,6 +356,14 @@ async function main() {
     sitemap.push({ path, priority: 0.9, changefreq: 'monthly', lastmod: project.lastmod });
   }
 
+  for (const property of properties) {
+    const path = `/properties/${property.slug}`;
+    await writeRoute(path, renderRoute(shell, metaForProperty(property)));
+    // Sold lots stay in the sitemap: they still rank for the searches that bring
+    // buyers to the development, and the page states its own availability.
+    sitemap.push({ path, priority: 0.7, changefreq: 'weekly', lastmod: property.lastmod });
+  }
+
   for (const article of news) {
     const path = `/news/${article.slug}`;
     await writeRoute(path, renderRoute(shell, metaForNews(article)));
@@ -357,7 +381,8 @@ async function main() {
 
   console.log(
     `[seo] ${sitemap.length} URLs in sitemap.xml — ` +
-      `${STATIC_ROUTES.length} static, ${projects.length} projects, ${news.length} news, ${updates.length} updates`
+      `${STATIC_ROUTES.length} static, ${projects.length} projects, ${properties.length} properties, ` +
+      `${news.length} news, ${updates.length} updates`
   );
 }
 

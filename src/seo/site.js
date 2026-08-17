@@ -403,6 +403,75 @@ export function metaForProject(project) {
   };
 }
 
+/**
+ * Individual lot listings. These are the pages that match specific buyer searches
+ * ("corner lot Nueva Ecija", "300 sqm lot for sale"), so each gets a RealEstateListing.
+ *
+ * Price is deliberately omitted from the structured data: `pricePlaceholder` is free
+ * text an admin types, and publishing a mis-parsed number as a machine-readable price
+ * is worse than publishing none. Availability is safe to state.
+ *
+ * @returns {SeoMeta}
+ */
+export function metaForProperty(property) {
+  const path = `/properties/${property.slug}`;
+  const availability = {
+    Available: 'https://schema.org/InStock',
+    Reserved: 'https://schema.org/LimitedAvailability',
+    Sold: 'https://schema.org/SoldOut',
+  }[property.status];
+
+  const summary =
+    property.description ||
+    `${property.lotType || 'Lot'} at ${property.projectName || SITE_NAME}, ${DEVELOPMENT.shortLabel}.`;
+
+  return {
+    title: pageTitle(`${property.title} — ${DEVELOPMENT.shortLabel}`),
+    description: clamp(summary, 160),
+    canonical: absoluteUrl(path),
+    image: socialImage((property.images || [])[0]),
+    type: 'website',
+    jsonLd: [
+      breadcrumbLd([
+        { name: 'Projects', path: '/projects' },
+        { name: property.title, path },
+      ]),
+      {
+        '@context': 'https://schema.org',
+        '@type': 'RealEstateListing',
+        name: property.title,
+        url: absoluteUrl(path),
+        description: clamp(summary, 400),
+        ...((property.images || []).length ? { image: property.images.map(socialImage) } : {}),
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Brgy. Buted',
+          addressLocality: DEVELOPMENT.addressLocality,
+          addressRegion: DEVELOPMENT.addressRegion,
+          postalCode: DEVELOPMENT.postalCode,
+          addressCountry: DEVELOPMENT.addressCountry,
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: DEVELOPMENT.latitude,
+          longitude: DEVELOPMENT.longitude,
+        },
+        ...(property.lotSize
+          ? {
+              floorSize: {
+                '@type': 'QuantitativeValue',
+                value: property.lotSize,
+                unitCode: 'MTK', // square metres
+              },
+            }
+          : {}),
+        ...(availability ? { offers: { '@type': 'Offer', availability } } : {}),
+        provider: { '@id': `${SITE_URL}/#organization` },
+      },
+    ],
+  };
+}
+
 /** @returns {SeoMeta} */
 export function metaForNews(article) {
   const path = `/news/${article.slug}`;

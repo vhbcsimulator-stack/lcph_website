@@ -14,6 +14,7 @@ import { HomePage } from './pages/HomePage';
 import { AboutPage } from './pages/AboutPage';
 import { ProjectsPage } from './pages/ProjectsPage';
 import { ProjectDetailPage } from './pages/ProjectDetailPage';
+import { PropertyDetailPage } from './pages/PropertyDetailPage';
 import { AmenitiesPage } from './pages/AmenitiesPage';
 import { UpdatesPage } from './pages/UpdatesPage';
 import { UpdatesDetailPage } from './pages/UpdatesDetailPage';
@@ -59,6 +60,7 @@ const SiteContent = () => {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/projects" element={<ProjectsPage />} />
             <Route path="/projects/:slug" element={<ProjectDetailPage />} />
+            <Route path="/properties/:slug" element={<PropertyDetailPage />} />
             <Route path="/amenities" element={<AmenitiesPage />} />
             <Route path="/updates" element={<UpdatesPage />} />
             <Route path="/updates/:slug" element={<UpdatesDetailPage />} />
