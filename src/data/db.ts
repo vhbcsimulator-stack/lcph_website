@@ -33,7 +33,7 @@ export const defaultPageContent: Record<string, string> = {
   'home_contact_desc': 'Connect with our certified property specialists for custom sample computations, site tour arrangements, or master plan inquiries.',
   'home_contact_phone': 'Sales Hotline: +63 (917) 123-4567',
   'home_contact_email': 'Email: inquire@lcphrealty.com',
-  'home_contact_address': 'Location: KM 71 NLEX Interchange, Mexico, Pampanga',
+  'home_contact_address': 'Location: Brgy. Buted, Talugtug, Nueva Ecija',
 
   // Homepage updates section
   'home_updates_badge': 'Site Engineering',
@@ -74,7 +74,7 @@ export const defaultPageContent: Record<string, string> = {
   'contact_subtitle': 'Get in touch with us to find your dream property. Our team is here to help.',
   'contact_form_title': 'General Inquiry Form',
   'contact_info_title': 'Office Information',
-  'contact_info_address': 'KM 71 NLEX, Mexico, Pampanga',
+  'contact_info_address': 'Ground Floor, Freluz Building, Jose Abad Santos Ave., Brgy. Dolores, City of San Fernando, Pampanga 2000',
   'contact_info_phone': '+63 917 123 4567',
   'contact_info_email': 'inquire@lcphrealty.com',
   'contact_info_hours': 'Monday - Saturday: 8:00 AM - 5:00 PM\nSunday: 9:00 AM - 4:00 PM (Site Office)',

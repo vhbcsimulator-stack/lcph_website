@@ -16,20 +16,41 @@ export const SITE_LEGAL_NAME = 'Lakeshore Community Philippines (LCPH) Realty In
 export const SITE_LOCALE = 'en_PH';
 export const DEFAULT_OG_IMAGE = '/og-image.jpg';
 
-/** Used by Organization/LocalBusiness JSON-LD and the contact page. */
+/**
+ * The corporate office — where the company *is*, not where it builds.
+ * Verified against the Google Maps listing for LCPH Realty Inc.
+ */
 export const ORGANIZATION = {
   name: SITE_NAME,
   legalName: SITE_LEGAL_NAME,
   telephone: '+63 917 123 4567',
   email: 'inquire@lcphrealty.com',
-  streetAddress: 'KM 71 NLEX Interchange',
-  addressLocality: 'Umingan',
+  streetAddress: 'Ground Floor, Freluz Building, Jose Abad Santos Avenue',
+  addressLocality: 'City of San Fernando',
   addressRegion: 'Pampanga',
-  postalCode: '2021',
+  postalCode: '2000',
   addressCountry: 'PH',
-  latitude: 15.0418381,
-  longitude: 120.6810848,
+  latitude: 15.0418329,
+  longitude: 120.6836597,
   parentOrganization: 'VHBC',
+};
+
+/**
+ * Where the developments actually are — a different province from the office, so the
+ * two must never be conflated. Search engines cross-check a project's stated address
+ * against its coordinates, and the office address on a project page reads as a
+ * mismatch that suppresses the local result.
+ */
+export const DEVELOPMENT = {
+  addressLocality: 'Talugtug',
+  addressRegion: 'Nueva Ecija',
+  postalCode: '3118',
+  addressCountry: 'PH',
+  latitude: 15.792,
+  longitude: 120.811,
+  /** Human-readable form used in titles and prose. */
+  label: 'Brgy. Buted, Talugtug, Nueva Ecija',
+  shortLabel: 'Talugtug, Nueva Ecija',
 };
 
 // ─── URL + text helpers ───────────────────────────────────────────────────────
@@ -75,7 +96,7 @@ export function clamp(text, max = 160) {
 
 /** Every page title ends with the brand, except the home page which leads with it. */
 export function pageTitle(title) {
-  if (!title) return `${SITE_NAME} | Lakeside Master-Planned Communities in Pampanga`;
+  if (!title) return `${SITE_NAME} | Lakeside Master-Planned Communities in Nueva Ecija`;
   return `${title} | ${SITE_NAME}`;
 }
 
@@ -90,9 +111,9 @@ export function pageTitle(title) {
 export const STATIC_ROUTES = [
   {
     path: '/',
-    title: `${SITE_NAME} | Lakeside Master-Planned Communities in Pampanga`,
+    title: `${SITE_NAME} | Lakeside Master-Planned Communities in Nueva Ecija`,
     description:
-      'LCPH Realty Inc., a subsidiary of VHBC, develops premier lakeside residential and commercial communities in Pampanga. Explore Lakeshore Community North lots, amenities and pricing.',
+      'LCPH Realty Inc., a subsidiary of VHBC, develops premier lakeside residential and commercial communities in Talugtug, Nueva Ecija. Explore Lakeshore Community North lots, amenities and pricing.',
     priority: 1.0,
     changefreq: 'weekly',
   },
@@ -100,7 +121,7 @@ export const STATIC_ROUTES = [
     path: '/about',
     title: pageTitle('About Us'),
     description:
-      'Learn how LCPH Realty Inc. builds master-planned lakeside estates in Pampanga — our story as a VHBC subsidiary, our core pillars and our commitment to heritage quality.',
+      'Learn how LCPH Realty Inc. builds master-planned lakeside estates in Nueva Ecija — our story as a VHBC subsidiary, our core pillars and our commitment to heritage quality.',
     priority: 0.7,
     changefreq: 'monthly',
   },
@@ -108,7 +129,7 @@ export const STATIC_ROUTES = [
     path: '/projects',
     title: pageTitle('Our Projects'),
     description:
-      'Browse LCPH Realty Inc. master-planned communities and townships, including the flagship Lakeshore Community North estate in Mexico, Pampanga.',
+      'Browse LCPH Realty Inc. master-planned communities and townships, including the flagship Lakeshore Community North estate in Brgy. Buted, Talugtug, Nueva Ecija.',
     priority: 0.9,
     changefreq: 'weekly',
   },
@@ -116,7 +137,7 @@ export const STATIC_ROUTES = [
     path: '/amenities',
     title: pageTitle('Amenities'),
     description:
-      'Resort-style amenities across LCPH communities: clubhouse and pools, nature trails, sports courts, wellness facilities and 24/7 secured perimeters.',
+      'Resort-style amenities at Lakeshore Community North in Nueva Ecija: clubhouse and pools, nature trails, sports courts, wellness facilities and 24/7 secured perimeters.',
     priority: 0.7,
     changefreq: 'monthly',
   },
@@ -140,7 +161,7 @@ export const STATIC_ROUTES = [
     path: '/gallery',
     title: pageTitle('Gallery'),
     description:
-      'Aerial views, amenity renders, construction progress and community photos from LCPH Realty Inc. lakeside developments in Pampanga.',
+      'Aerial views, amenity renders, construction progress and community photos from LCPH Realty Inc. lakeside developments in Talugtug, Nueva Ecija.',
     priority: 0.6,
     changefreq: 'monthly',
   },
@@ -148,7 +169,7 @@ export const STATIC_ROUTES = [
     path: '/contact',
     title: pageTitle('Contact Us'),
     description:
-      'Talk to an LCPH Realty Inc. property specialist. Office at KM 71 NLEX, Mexico, Pampanga — call +63 917 123 4567 or send an inquiry online.',
+      'Talk to an LCPH Realty Inc. property specialist. Office at the Freluz Building, Jose Abad Santos Avenue, San Fernando, Pampanga — call +63 917 123 4567 or send an inquiry online.',
     priority: 0.8,
     changefreq: 'monthly',
   },
@@ -156,7 +177,7 @@ export const STATIC_ROUTES = [
     path: '/schedule-site-visit',
     title: pageTitle('Schedule a Site Visit'),
     description:
-      'Book a guided site tour of Lakeshore Community North. Pick a date, meet a certified property specialist and walk the lots, amenities and master plan in person.',
+      'Book a guided site tour of Lakeshore Community North in Talugtug, Nueva Ecija. Pick a date, meet a certified property specialist and walk the lots, amenities and master plan in person.',
     priority: 0.8,
     changefreq: 'monthly',
   },
@@ -164,7 +185,7 @@ export const STATIC_ROUTES = [
     path: '/faqs',
     title: pageTitle('Frequently Asked Questions'),
     description:
-      'Answers on LCPH lot pricing, payment terms, reservation requirements, turnover timelines, titles and financing for our Pampanga developments.',
+      'Answers on LCPH lot pricing, payment terms, reservation requirements, turnover timelines, titles and financing for our Nueva Ecija developments.',
     priority: 0.6,
     changefreq: 'monthly',
   },
@@ -180,7 +201,7 @@ export const STATIC_ROUTES = [
     path: '/partner-with-us',
     title: pageTitle('Partner With Us'),
     description:
-      'Broker, landowner and institutional partnership opportunities with LCPH Realty Inc., a VHBC subsidiary developing lakeside communities in Pampanga.',
+      'Broker, landowner and institutional partnership opportunities with LCPH Realty Inc., a VHBC subsidiary developing lakeside communities in Nueva Ecija.',
     priority: 0.5,
     changefreq: 'monthly',
   },
@@ -242,7 +263,7 @@ export function organizationLd() {
       latitude: ORGANIZATION.latitude,
       longitude: ORGANIZATION.longitude,
     },
-    areaServed: { '@type': 'AdministrativeArea', name: 'Pampanga, Philippines' },
+    areaServed: { '@type': 'AdministrativeArea', name: 'Nueva Ecija, Philippines' },
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
@@ -333,8 +354,10 @@ export function metaForProject(project) {
     160
   );
 
+  // `project.location` is admin-editable and has held the office's province rather than
+  // the site's, so the development constant is authoritative for the address block.
   return {
-    title: pageTitle(`${project.name} — ${project.location}`),
+    title: pageTitle(`${project.name} — ${DEVELOPMENT.shortLabel}`),
     description,
     canonical: absoluteUrl(path),
     image: socialImage(project.image),
@@ -354,9 +377,16 @@ export function metaForProject(project) {
         image: socialImage(project.image),
         address: {
           '@type': 'PostalAddress',
-          addressLocality: project.location,
-          addressRegion: ORGANIZATION.addressRegion,
-          addressCountry: ORGANIZATION.addressCountry,
+          streetAddress: 'Brgy. Buted',
+          addressLocality: DEVELOPMENT.addressLocality,
+          addressRegion: DEVELOPMENT.addressRegion,
+          postalCode: DEVELOPMENT.postalCode,
+          addressCountry: DEVELOPMENT.addressCountry,
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: DEVELOPMENT.latitude,
+          longitude: DEVELOPMENT.longitude,
         },
         ...(project.amenities && project.amenities.length
           ? {
