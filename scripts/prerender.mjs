@@ -130,7 +130,7 @@ function faqsFromPageContent(pageContent) {
 
 async function loadContent() {
   const [projectRows, propertyRows, newsRows, updateRows, contentRows] = await Promise.all([
-    fetchTable('projects', 'slug,name,location,description,long_description,image,amenities,created_at'),
+    fetchTable('projects', 'slug,name,location,category,status,description,long_description,image,amenities,total_area,total_units,lot_sizes,price_range,created_at'),
     fetchTable('properties', 'slug,title,project_name,location,category,lot_size,price_placeholder,status,lot_type,description,images,created_at'),
     fetchTable('news', 'slug,title,date,category,author,excerpt,content,image,created_at'),
     fetchTable('development_updates', 'slug,title,date,project_name,summary,content,image,created_at'),
@@ -146,10 +146,20 @@ async function loadContent() {
       slug: r.slug,
       name: r.name,
       location: r.location,
+      category: r.category,
+      status: r.status,
       description: r.description,
       longDescription: r.long_description,
       image: r.image,
       amenities: r.amenities ?? [],
+      // Mirrors mapProject in src/data/db.ts — metaForProject reads specs.*, so the
+      // prerendered HTML would otherwise omit what the browser renders.
+      specs: {
+        totalArea: r.total_area,
+        totalUnits: r.total_units,
+        lotSizes: r.lot_sizes,
+        priceRange: r.price_range,
+      },
       lastmod: r.created_at,
     })),
     properties: withSlug(propertyRows).map((r) => ({

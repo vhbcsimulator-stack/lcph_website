@@ -418,6 +418,19 @@ export function metaForStatic(path) {
   };
 }
 
+/** The admin-entered specs, as schema.org PropertyValue rows. Blank fields are skipped. */
+function specProperties(project) {
+  const specs = project.specs || {};
+  return [
+    ['Total area', specs.totalArea],
+    ['Lot sizes', specs.lotSizes],
+    ['Total units', specs.totalUnits],
+    ['Price range', specs.priceRange],
+  ]
+    .filter(([, value]) => value && String(value).trim() && String(value).trim() !== 'TBA')
+    .map(([name, value]) => ({ '@type': 'PropertyValue', name, value: String(value).trim() }));
+}
+
 /** @returns {SeoMeta} */
 export function metaForProject(project) {
   const path = `/projects/${project.slug}`;
@@ -426,12 +439,43 @@ export function metaForProject(project) {
     160
   );
 
+  const isCondo = project.category === 'Condominium';
+  // What buyers actually type. A subdivision and a condominium are different searches,
+  // and "pre-selling" is high-intent language in Philippine real estate — it belongs in
+  // the title rather than buried in the body.
+  const productLabel = isCondo ? 'Condominium' : 'Subdivision Lots';
+  const preSelling = project.status === 'Pre-selling';
+  const headline = `${preSelling ? 'Pre-selling ' : ''}${productLabel} in ${DEVELOPMENT.addressRegion}`;
+
+  const productKeywords = isCondo
+    ? [
+        `${project.name} condominium`,
+        'condo for sale Nueva Ecija',
+        'pre-selling condo Nueva Ecija',
+        'condominium Talugtug',
+        'vacation condo Philippines',
+      ]
+    : [
+        `${project.name} lots`,
+        'lot for sale Nueva Ecija',
+        'lot for sale Talugtug',
+        'subdivision Nueva Ecija',
+        'pre-selling lots Nueva Ecija',
+        'residential lots for sale Central Luzon',
+        project.specs && project.specs.lotSizes ? `lots ${project.specs.lotSizes}` : null,
+      ];
+
   // `project.location` is admin-editable and has held the office's province rather than
   // the site's, so the development constant is authoritative for the address block.
   return {
-    title: pageTitle(`${project.name} — ${DEVELOPMENT.shortLabel}`),
+    title: pageTitle(`${project.name} — ${headline}`),
     description,
-    keywords: keywordsFor([project.name, `${project.name} lots`, `${project.name} price`, `${project.name} location`, project.category]),
+    keywords: keywordsFor(productKeywords, [
+      project.name,
+      `${project.name} price`,
+      `${project.name} location`,
+      preSelling ? `${project.name} pre-selling` : null,
+    ]),
     canonical: absoluteUrl(path),
     image: socialImage(project.image),
     type: 'website',
@@ -443,11 +487,16 @@ export function metaForProject(project) {
       ]),
       {
         '@context': 'https://schema.org',
-        '@type': 'ResidentialComplex',
+        // ApartmentComplex for the condominium, ResidentialComplex for the subdivision —
+        // the two are distinct entities to Google and surface for different queries.
+        '@type': isCondo ? 'ApartmentComplex' : 'ResidentialComplex',
         name: project.name,
         url: absoluteUrl(path),
         description: clamp(project.longDescription || project.description, 400),
         image: socialImage(project.image),
+        // Lot sizes are a range ("170 sqm to 2043 sqm"), not a single measurement, so
+        // they belong in additionalProperty rather than a QuantitativeValue.
+        ...(specProperties(project).length ? { additionalProperty: specProperties(project) } : {}),
         address: {
           '@type': 'PostalAddress',
           streetAddress: 'Brgy. Buted',
