@@ -43,7 +43,24 @@ function upsertLink(rel: string, href: string) {
   tag.setAttribute('href', href);
 }
 
+/**
+ * Off switch for the whole module.
+ *
+ * The admin shell renders these same pages for editing, on a private origin that is never
+ * crawled — there it has no metadata to publish, and letting the pages run would retitle the
+ * browser tab per record and point canonical/OG at the public site. Its entry point calls
+ * `disableSeo()` at startup; everything below then becomes a no-op. The public site leaves it on.
+ */
+let seoEnabled = true;
+
+/** Turns every SEO write in this module into a no-op. Call before the app renders. */
+export function disableSeo() {
+  seoEnabled = false;
+}
+
 export function applySeo(meta: SeoMeta) {
+  if (!seoEnabled) return;
+
   const image = meta.image || absoluteUrl('/og-image.jpg');
 
   document.title = meta.title;

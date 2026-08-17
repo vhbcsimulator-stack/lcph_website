@@ -101,7 +101,7 @@ export const HomePage: React.FC = () => {
                   decoding="async"
                   className="h-full w-full object-cover opacity-85"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-slate-950/95 from-10% via-slate-900/80 via-35% to-transparent to-90%" />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-black/60 from-0% via-black/60 via-35% to-transparent to-90%" />
               </div>
             )}
           </EditableImage>
