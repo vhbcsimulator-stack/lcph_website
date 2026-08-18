@@ -81,7 +81,7 @@ export const HomePage: React.FC = () => {
   return (
     <AnimatedPage className="overflow-x-clip bg-surface">
       {/* 1. HERO SECTION */}
-      <section className="relative flex min-h-[560px] w-full items-center justify-center overflow-hidden bg-surface-variant sm:h-[600px] lg:h-[900px]">
+      <section className="relative flex min-h-[560px] w-full items-center justify-center overflow-hidden bg-surface-variant sm:h-[600px] lg:h-[950px]">
         {/* Background Image Overlay with Parallax */}
         <motion.div
           style={{ y: yBg, scale: scaleBg }}
@@ -103,7 +103,7 @@ export const HomePage: React.FC = () => {
                   decoding="async"
                   className="h-full w-full object-cover opacity-85"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-linear-to-r from-black/60 from-0% via-black/60 via-35% to-transparent to-90%" />
+                <div className="pointer-events-none absolute inset-0 bg-black/60 sm:bg-transparent sm:bg-linear-to-r sm:from-black/60 sm:from-0% sm:via-black/60 sm:via-35% sm:to-transparent sm:to-90%" />
               </div>
             )}
           </EditableImage>
