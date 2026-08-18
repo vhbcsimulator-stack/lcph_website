@@ -85,7 +85,8 @@ export const EditableRichText: React.FC<EditableRichTextProps> = ({
   const editorRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<Quill | null>(null);
 
-  const currentValue = contentKey ? (pageContent[contentKey] ?? '') : (value || '');
+  // A key with no row yet falls back to `value`; an admin-cleared key stores '', which still wins.
+  const currentValue = contentKey ? (pageContent[contentKey] ?? value ?? '') : (value || '');
   // The editor is uncontrolled once mounted, so the latest saved value is read at mount time only.
   const currentValueRef = useRef(currentValue);
   currentValueRef.current = currentValue;

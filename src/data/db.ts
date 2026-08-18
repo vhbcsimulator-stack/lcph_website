@@ -180,6 +180,8 @@ export const defaultPageContent: Record<string, string> = {
   'home_hero_subtitle': 'Experience the perfect blend of nature, comfort, and investment potential in the heart of the Philippines.',
   'home_projects_badge': 'Flagship Townships',
   'home_projects_cta': 'View All Projects',
+  'home_projects_empty_text': 'Our flagship townships are being prepared for launch. Please check back soon.',
+  'home_projects_empty_title': 'No developments listed yet',
   'home_projects_title': 'Featured Master Developments',
   'home_spotlight_cta': 'Explore Project',
   'home_spotlight_feature_1': '300 - 800 sqm Lot Sizes',
@@ -188,6 +190,8 @@ export const defaultPageContent: Record<string, string> = {
   'home_spotlight_tag_1': 'Residential',
   'home_spotlight_tag_2': 'Commercial',
   'home_updates_cta': 'All Progress Reports',
+  'home_updates_empty_text': 'Construction milestones and site photos will be posted here as work progresses.',
+  'home_updates_empty_title': 'No progress reports yet',
 
   // About page
   'about_cta_primary': 'Browse Projects',
@@ -205,7 +209,9 @@ export const defaultPageContent: Record<string, string> = {
   'about_vision_title': 'Our Vision',
 
   // Projects page
+  'projects_empty_cta': 'Reset Filters',
   'projects_empty_text': 'No projects found matching the selected filter criteria.',
+  'projects_empty_title': 'No projects to show',
   'projects_featured_badge': 'Featured',
   'projects_featured_cta': 'Explore Project',
   'projects_filter_cta': 'Apply Filters',

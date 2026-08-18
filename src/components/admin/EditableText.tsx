@@ -30,9 +30,11 @@ export const EditableText: React.FC<EditableTextProps> = ({
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  // Determine current value to display
+  // Determine current value to display.
+  // A key with no row yet falls back to `value`, so newly added copy shows its default instead of
+  // rendering blank until an admin saves it. An admin-cleared key stores '', which still wins.
   const currentValue = contentKey
-    ? (pageContent[contentKey] ?? '')
+    ? (pageContent[contentKey] ?? value ?? '')
     : (value || '');
 
   useEffect(() => {

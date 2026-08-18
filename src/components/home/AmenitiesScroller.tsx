@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform, type MotionValue } from 'framer-motion';
 import type { Amenity } from '../../types';
 import { AmenityCard } from '../cards/AmenityCard';
+import { EmptyState } from '../ui/EmptyState';
+import { Layers3 } from 'lucide-react';
 import { fadeInUp, staggerContainer } from '../../utils/animations';
 
 /** How the focused card compares to its neighbours: full size and opacity versus shrunk and dimmed. */
@@ -147,6 +149,23 @@ export const AmenitiesScroller: React.FC<AmenitiesScrollerProps> = ({ amenities,
     offset: ['start start', 'end end'],
   });
   const x = useTransform(scrollYProgress, [0, 1], [0, -distance]);
+
+  // Nothing to scroll through: the pinned branch below would hold a full viewport of blank space,
+  // so the section collapses to its heading plus an indicator instead.
+  if (cards.length === 0) {
+    return (
+      <section className="py-16">
+        <div className="w-full max-w-[1280px] mx-auto space-y-10 px-margin-mobile md:px-margin-desktop">
+          {header}
+          <EmptyState
+            icon={Layers3}
+            title="No amenities listed yet"
+            description="The clubhouse, parks and recreation facilities for our estates will be featured here soon."
+          />
+        </div>
+      </section>
+    );
+  }
 
   if (!pinned) {
     return (

@@ -12,7 +12,8 @@ import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { IMAGE_PRESETS } from '../utils/image';
 import { fadeInUp, fadeInLeft, fadeInRight, staggerContainer, scaleUp } from '../utils/animations';
-import { ArrowRight, CheckCircle2, ChevronDown, HelpCircle, Mail, MapPin, Phone } from 'lucide-react';
+import { EmptyState } from '../components/ui/EmptyState';
+import { ArrowRight, CheckCircle2, ChevronDown, FileText, HelpCircle, Mail, MapPin, Phone } from 'lucide-react';
 
 /** Title-case treatment used throughout the design. Drop this constant to revert to sentence case. */
 const TITLE_CASE = 'capitalize';
@@ -329,16 +330,33 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          <motion.div
-            variants={staggerContainer(0.1, 0.1)}
-            className="grid w-full grid-cols-1 gap-gutter md:grid-cols-2"
-          >
-            {projects.slice(0, 2).map((project) => (
-              <motion.div key={project.id} variants={scaleUp(0.5)}>
-                <ProjectCard project={project} />
-              </motion.div>
-            ))}
-          </motion.div>
+          {projects.length > 0 ? (
+            <motion.div
+              variants={staggerContainer(0.1, 0.1)}
+              className="grid w-full grid-cols-1 gap-gutter md:grid-cols-2"
+            >
+              {projects.slice(0, 2).map((project) => (
+                <motion.div key={project.id} variants={scaleUp(0.5)}>
+                  <ProjectCard project={project} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <EmptyState
+              icon={MapPin}
+              title={
+                <EditableText contentKey="home_projects_empty_title" value="No developments listed yet" tag="span" inline />
+              }
+              description={
+                <EditableText
+                  contentKey="home_projects_empty_text"
+                  value="Our flagship townships are being prepared for launch. Please check back soon."
+                  tag="span"
+                  inline
+                />
+              }
+            />
+          )}
         </div>
       </motion.section>
 
@@ -401,18 +419,35 @@ export const HomePage: React.FC = () => {
             </Link>
           </div>
 
-          <motion.div variants={staggerContainer(0.12, 0.1)} className="grid grid-cols-1 gap-gutter md:grid-cols-2">
-            {updates.slice(0, 2).map((update) => (
-              <motion.div
-                key={update.id}
-                variants={fadeInUp(0.4)}
-                whileHover={prefersReducedMotion ? undefined : { y: -6 }}
-                transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
-              >
-                <UpdateCard update={update} />
-              </motion.div>
-            ))}
-          </motion.div>
+          {updates.length > 0 ? (
+            <motion.div variants={staggerContainer(0.12, 0.1)} className="grid grid-cols-1 gap-gutter md:grid-cols-2">
+              {updates.slice(0, 2).map((update) => (
+                <motion.div
+                  key={update.id}
+                  variants={fadeInUp(0.4)}
+                  whileHover={prefersReducedMotion ? undefined : { y: -6 }}
+                  transition={{ duration: 0.28, ease: [0.2, 0, 0, 1] }}
+                >
+                  <UpdateCard update={update} />
+                </motion.div>
+              ))}
+            </motion.div>
+          ) : (
+            <EmptyState
+              icon={FileText}
+              title={
+                <EditableText contentKey="home_updates_empty_title" value="No progress reports yet" tag="span" inline />
+              }
+              description={
+                <EditableText
+                  contentKey="home_updates_empty_text"
+                  value="Construction milestones and site photos will be posted here as work progresses."
+                  tag="span"
+                  inline
+                />
+              }
+            />
+          )}
         </div>
       </motion.section>
 

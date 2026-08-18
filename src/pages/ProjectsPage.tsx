@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ProjectCard } from '../components/cards/ProjectCard';
+import { EmptyState } from '../components/ui/EmptyState';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
@@ -49,6 +50,10 @@ export const ProjectsPage: React.FC = () => {
     const typeMatch = matches(selectedType, project.category);
     return locationMatch && statusMatch && typeMatch;
   });
+
+  // Drives the empty state: with no filters on, an empty grid means "nothing published yet",
+  // so offering a reset button there would be misleading.
+  const hasActiveFilters = selectedLocation !== 'All' || selectedStatus !== 'All' || selectedType !== 'All';
 
   const handleSetFeatured = (projectId: string) => {
     // Unfeature all others, feature selected
@@ -311,13 +316,29 @@ export const ProjectsPage: React.FC = () => {
               ))}
             </motion.div>
           ) : (
-            <div className="text-center py-12 text-on-surface-variant">
-              <EditableText
-                contentKey="projects_empty_text"
-                value="No projects found matching the selected filter criteria."
-                tag="p"
-              />
-            </div>
+            <EmptyState
+              icon={MapPin}
+              title={<EditableText contentKey="projects_empty_title" value="No projects to show" tag="span" inline />}
+              description={
+                <EditableText
+                  contentKey="projects_empty_text"
+                  value="No projects found matching the selected filter criteria."
+                  tag="span"
+                  inline
+                />
+              }
+              action={
+                hasActiveFilters ? (
+                  <button
+                    type="button"
+                    onClick={() => { setSelectedLocation('All'); setSelectedStatus('All'); setSelectedType('All'); }}
+                    className="cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-on-primary transition-colors hover:bg-primary-container hover:text-on-primary-container"
+                  >
+                    <EditableText contentKey="projects_empty_cta" value="Reset Filters" tag="span" inline />
+                  </button>
+                ) : undefined
+              }
+            />
           )}
         </motion.section>
         </div>

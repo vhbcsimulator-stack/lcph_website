@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useSearchParams } from 'react-router-dom';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
+import { EmptyState } from '../components/ui/EmptyState';
 import { AmenityCard } from '../components/cards/AmenityCard';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
@@ -208,27 +209,26 @@ export const AmenitiesPage: React.FC = () => {
             </AnimatePresence>
           </motion.div>
         ) : (
-          <div className="space-y-3 rounded-2xl border border-dashed border-outline-variant/60 bg-surface-container-lowest px-6 py-16 text-center">
-            <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/8 text-primary opacity-90"><Layers3 className="w-5 h-5" /></span>
-            <EditableText
-              contentKey="amenities_empty_title"
-              value="No amenities found"
-              className="block font-headline-sm text-headline-sm font-bold text-on-surface"
-              tag="p"
-            />
-            <EditableText
-              contentKey="amenities_empty_text"
-              value="Try selecting a different project or category."
-              className="block text-sm text-on-surface-variant"
-              tag="p"
-            />
-            <button
-              onClick={() => { handleProjectChange('All'); setSelectedCategory('All'); }}
-              className="home-cta mt-3 cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-on-primary hover:bg-primary-container hover:text-on-primary-container"
-            >
-              <EditableText contentKey="amenities_empty_cta" value="Reset Filters" tag="span" inline />
-            </button>
-          </div>
+          <EmptyState
+            icon={Layers3}
+            title={<EditableText contentKey="amenities_empty_title" value="No amenities found" tag="span" inline />}
+            description={
+              <EditableText
+                contentKey="amenities_empty_text"
+                value="Try selecting a different project or category."
+                tag="span"
+                inline
+              />
+            }
+            action={
+              <button
+                onClick={() => { handleProjectChange('All'); setSelectedCategory('All'); }}
+                className="home-cta cursor-pointer rounded-lg bg-primary px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-on-primary hover:bg-primary-container hover:text-on-primary-container"
+              >
+                <EditableText contentKey="amenities_empty_cta" value="Reset Filters" tag="span" inline />
+              </button>
+            }
+          />
         )}
         </div>
       </div>
