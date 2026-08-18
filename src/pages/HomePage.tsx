@@ -10,6 +10,7 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { IMAGE_PRESETS } from '../utils/image';
 import { fadeInUp, fadeInLeft, fadeInRight, staggerContainer, scaleUp } from '../utils/animations';
 import { ArrowRight, CheckCircle2, ChevronDown, HelpCircle, Mail, MapPin, Phone } from 'lucide-react';
 
@@ -90,6 +91,7 @@ export const HomePage: React.FC = () => {
             contentKey="home_hero_image"
             value="/src/assets/herolcn.png"
             overlayClassName="p-6 pr-8 flex items-center justify-end"
+            compress={IMAGE_PRESETS.hero}
           >
             {(src) => (
               <div className="relative h-full w-full">
@@ -329,7 +331,7 @@ export const HomePage: React.FC = () => {
 
           <motion.div
             variants={staggerContainer(0.1, 0.1)}
-            className="mx-auto grid max-w-[960px] grid-cols-1 gap-gutter md:grid-cols-2"
+            className="grid w-full grid-cols-1 gap-gutter md:grid-cols-2"
           >
             {projects.slice(0, 2).map((project) => (
               <motion.div key={project.id} variants={scaleUp(0.5)}>

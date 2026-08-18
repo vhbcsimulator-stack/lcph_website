@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useAdmin } from '../../context/AdminContext';
-import { compressImage } from '../../utils/image';
+import { compressImage, IMAGE_PRESETS, type CompressOptions } from '../../utils/image';
 import { Image, UploadCloud, X } from 'lucide-react';
 
 interface EditableImageProps {
@@ -9,6 +9,11 @@ interface EditableImageProps {
   value?: string;      // used if editing inline data from database
   onSave?: (newValue: string) => void; // custom save callback
   overlayClassName?: string; // custom overlay classes for positioning
+  /**
+   * Resize/quality budget for the upload. Defaults to the `content` preset; full-bleed images
+   * (hero backgrounds, banners) need `IMAGE_PRESETS.hero` or they render upscaled and soft.
+   */
+  compress?: CompressOptions;
   children: (src: string) => React.ReactNode;
 }
 
@@ -17,6 +22,7 @@ export const EditableImage: React.FC<EditableImageProps> = ({
   value,
   onSave,
   overlayClassName,
+  compress = IMAGE_PRESETS.content,
   children,
 }) => {
   const { isAdmin, pageContent, updateImage } = useAdmin();
@@ -37,13 +43,13 @@ export const EditableImage: React.FC<EditableImageProps> = ({
       return;
     }
     try {
-      const compressedData = await compressImage(file);
+      const compressedData = await compressImage(file, compress);
       setPreviewUrl(compressedData);
     } catch (err) {
       setError('Failed to process image.');
       console.error(err);
     }
-  }, []);
+  }, [compress]);
 
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
