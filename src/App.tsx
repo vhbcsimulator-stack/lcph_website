@@ -5,6 +5,7 @@ import { Footer } from './components/layout/Footer';
 import { PageEffects } from './components/layout/PageEffects';
 import { ScrollToTop } from './components/ui/ScrollToTop';
 import { SmoothScroll } from './components/ui/SmoothScroll';
+import { FloatingBackToTopButton } from './components/ui/FloatingBackToTopButton';
 import { AnnouncementBarSkeleton, RouteSkeleton } from './components/ui/PageSkeleton';
 import { RouteSeo } from './seo/RouteSeo';
 import { useAdmin } from './context/AdminContext';
@@ -84,6 +85,7 @@ const SiteContent = () => {
           )}
         </main>
         <Footer />
+        <FloatingBackToTopButton />
       </div>
     </>
   );
