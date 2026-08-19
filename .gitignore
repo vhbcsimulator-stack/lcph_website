@@ -26,6 +26,7 @@ dist-ssr
 # Admin root folder (excluded as requested)
 /admin/
 /admin
+/supabase
 
 # Environment variables (keep secrets out of source control)
 .env

@@ -303,14 +303,10 @@ export const ProjectsPage: React.FC = () => {
               variants={staggerContainer(0.08, 0.05)}
               initial="hidden"
               animate="visible"
-              className="flex flex-wrap justify-center gap-gutter"
+              className="grid w-full grid-cols-1 gap-gutter md:grid-cols-2"
             >
               {filteredProjects.map(project => (
-                <motion.div
-                  key={project.id}
-                  variants={scaleUp(0.45)}
-                  className="w-full max-w-[410px] md:w-[calc(50%_-_12px)] lg:w-[calc(33.333%_-_16px)]"
-                >
+                <motion.div key={project.id} variants={scaleUp(0.45)}>
                   <ProjectCard project={project} />
                 </motion.div>
               ))}
