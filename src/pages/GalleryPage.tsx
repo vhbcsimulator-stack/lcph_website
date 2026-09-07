@@ -7,6 +7,7 @@ import { AddItemButton, DeleteItemButton } from '../components/admin/AddItemButt
 import { Lightbox } from '../components/ui/Lightbox';
 import { EditableText } from '../components/admin/EditableText';
 import { Image, Maximize2 } from 'lucide-react';
+import { GALLERY_CATEGORY_OPTIONS } from '../data/fieldOptions';
 
 export const GalleryPage: React.FC = () => {
   const { gallery: galleryData, addGalleryItem, updateGalleryField, deleteGalleryItem } = useAdmin();
@@ -148,6 +149,7 @@ export const GalleryPage: React.FC = () => {
                     <EditableText
                       value={item.category}
                       onSave={(val) => updateGalleryField(item.id, 'category', val as typeof item.category)}
+                      options={GALLERY_CATEGORY_OPTIONS}
                       tag="span"
                       inline
                     />

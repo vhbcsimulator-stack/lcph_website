@@ -10,6 +10,7 @@ import { Calendar, CheckCircle, MapPin, ZoomIn } from 'lucide-react';
 import { metaForProperty } from '../seo/site.js';
 import { useSeo, type SeoMeta } from '../seo/useSeo';
 import type { Property } from '../types';
+import { PROPERTY_CATEGORY_OPTIONS, PROPERTY_STATUS_OPTIONS } from '../data/fieldOptions';
 
 /** Landmark rows are page copy rather than property data, so they live in page_content. */
 const LANDMARKS = [
@@ -121,6 +122,7 @@ export const PropertyDetailPage: React.FC = () => {
                   <EditableText
                     value={property.status}
                     onSave={(val) => updatePropertyField(property.id, 'status', val as Property['status'])}
+                    options={PROPERTY_STATUS_OPTIONS}
                     tag="span"
                     inline
                   />
@@ -230,6 +232,7 @@ export const PropertyDetailPage: React.FC = () => {
                   <EditableText
                     value={property.category}
                     onSave={(val) => updatePropertyField(property.id, 'category', val as Property['category'])}
+                    options={PROPERTY_CATEGORY_OPTIONS}
                     className="font-headline-sm text-headline-sm text-on-background font-bold"
                     tag="p"
                   />

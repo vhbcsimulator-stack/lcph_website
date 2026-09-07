@@ -13,6 +13,7 @@ import { getHeaderOffset, scrollToElement } from '../utils/scroll';
 import { metaForProject } from '../seo/site.js';
 import { useSeo, type SeoMeta } from '../seo/useSeo';
 import { ArrowRight, CheckCircle, MapPin, MessageSquare, Plus, Trash2, X } from 'lucide-react';
+import { PROJECT_CATEGORY_OPTIONS, PROJECT_STATUS_OPTIONS } from '../data/fieldOptions';
 
 /** The sub-nav tabs, in page order â€” the scroll spy walks this list top to bottom. */
 const SECTION_TABS = [
@@ -308,6 +309,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <EditableText
                     value={project.status}
                     onSave={(val: string) => updateProjectField(project.id, 'status', val as any)}
+                    options={PROJECT_STATUS_OPTIONS}
                     tag="span"
                     inline
                   />
@@ -452,6 +454,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <EditableText
                     value={project.category}
                     onSave={(val: string) => updateProjectField(project.id, 'category', val as any)}
+                    options={PROJECT_CATEGORY_OPTIONS}
                     suffix={pageContent['project_detail_stat_type_suffix'] ?? ''}
                     className="font-headline-sm text-headline-sm text-on-background font-bold"
                     tag="p"
@@ -471,6 +474,7 @@ export const ProjectDetailPage: React.FC = () => {
                   <EditableText
                     value={project.status}
                     onSave={(val: string) => updateProjectField(project.id, 'status', val as any)}
+                    options={PROJECT_STATUS_OPTIONS}
                     className="font-headline-sm text-headline-sm text-primary font-bold animate-pulse"
                     tag="p"
                   />

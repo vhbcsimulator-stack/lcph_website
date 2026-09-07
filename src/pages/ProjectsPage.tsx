@@ -11,6 +11,7 @@ import { EditableRichText } from '../components/admin/EditableRichText';
 import { fadeInUp, scaleUp, staggerContainer } from '../utils/animations';
 import type { Project } from '../types';
 import { ChevronDown, Filter, MapPin, Star } from 'lucide-react';
+import { PROJECT_STATUS_OPTIONS } from '../data/fieldOptions';
 
 /** Sections below the fold rise in as they are scrolled to, once each. */
 const REVEAL_ON_SCROLL = {
@@ -177,6 +178,7 @@ export const ProjectsPage: React.FC = () => {
                   <EditableText
                     value={featuredProject.status}
                     onSave={(val) => updateProjectField(featuredProject.id, 'status', val as Project['status'])}
+                    options={PROJECT_STATUS_OPTIONS}
                     tag="span"
                     inline
                   />

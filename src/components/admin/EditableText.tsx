@@ -13,6 +13,11 @@ interface EditableTextProps {
   inline?: boolean;
   /** Static text shown after the value inside the same field, e.g. a unit or a word like "Estate". */
   suffix?: string;
+  /**
+   * Fixed set of allowed values — renders a dropdown instead of a free-text input.
+   * Required for columns Supabase guards with a CHECK constraint (see data/fieldOptions).
+   */
+  options?: readonly string[];
 }
 
 export const EditableText: React.FC<EditableTextProps> = ({
@@ -24,11 +29,12 @@ export const EditableText: React.FC<EditableTextProps> = ({
   multiline = false,
   inline = false,
   suffix,
+  options,
 }) => {
   const { isAdmin, pageContent, updateText } = useAdmin();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
 
   // Determine current value to display.
   // A key with no row yet falls back to `value`, so newly added copy shows its default instead of
@@ -124,7 +130,23 @@ export const EditableText: React.FC<EditableTextProps> = ({
           multiline ? 'flex flex-col' : 'inline-flex items-center align-middle'
         } ${inline && !multiline ? 'w-[min(280px,100%)]' : 'w-full'}`}
       >
-        {multiline ? (
+        {options ? (
+          <select
+            ref={inputRef as React.RefObject<HTMLSelectElement>}
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="min-w-0 flex-1 rounded border border-outline-variant px-2 py-1 font-body-md text-body-md text-on-surface outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+          >
+            {/* A stored value outside the allowed list still shows, so nothing silently changes on open */}
+            {!options.includes(currentValue) && <option value={currentValue}>{currentValue}</option>}
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        ) : multiline ? (
           <textarea
             ref={inputRef as React.RefObject<HTMLTextAreaElement>}
             value={editValue}

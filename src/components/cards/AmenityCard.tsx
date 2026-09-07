@@ -7,6 +7,7 @@ import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { CheckCircle, Trash2 } from 'lucide-react';
+import { AMENITY_CATEGORY_OPTIONS } from '../../data/fieldOptions';
 
 interface AmenityCardProps {
   amenity: Amenity;
@@ -92,6 +93,7 @@ export const AmenityCard: React.FC<AmenityCardProps> = ({ amenity, variant = 'gr
               <EditableText
                 value={amenity.category}
                 onSave={(val) => updateAmenityField(amenity.id, 'category', val as Amenity['category'])}
+                options={AMENITY_CATEGORY_OPTIONS}
                 tag="span"
                 inline
               />
@@ -140,6 +142,7 @@ export const AmenityCard: React.FC<AmenityCardProps> = ({ amenity, variant = 'gr
             <EditableText
               value={amenity.category}
               onSave={(val) => updateAmenityField(amenity.id, 'category', val as Amenity['category'])}
+              options={AMENITY_CATEGORY_OPTIONS}
               tag="span"
               inline
             />

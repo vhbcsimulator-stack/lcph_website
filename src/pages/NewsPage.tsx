@@ -8,6 +8,8 @@ import { EditableImage } from '../components/admin/EditableImage';
 import { NewsCard } from '../components/cards/NewsCard';
 import { EditableText } from '../components/admin/EditableText';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
+import { NEWS_CATEGORY_OPTIONS } from '../data/fieldOptions';
+import type { NewsArticle } from '../types';
 
 export const NewsPage: React.FC = () => {
   const { news: newsData, addNews, updateNewsField } = useAdmin();
@@ -125,7 +127,7 @@ export const NewsPage: React.FC = () => {
 
                 <div className="flex flex-col justify-center p-7 md:p-10 lg:p-12">
                   <span className="mb-4 w-fit rounded-full bg-secondary-container/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-secondary">
-                    <EditableText value={featuredArticle.category} onSave={(val) => updateNewsField(featuredArticle.id, 'category', val)} tag="span" inline />
+                    <EditableText value={featuredArticle.category} onSave={(val) => updateNewsField(featuredArticle.id, 'category', val as NewsArticle['category'])} options={NEWS_CATEGORY_OPTIONS} tag="span" inline />
                   </span>
                   <div className="mb-3 flex flex-wrap items-center gap-3 text-xs font-semibold text-on-surface-variant">
                     <span className="flex items-center gap-1.5"><Calendar className="w-4 h-4 text-primary" /><EditableText value={featuredArticle.date} onSave={(val) => updateNewsField(featuredArticle.id, 'date', val)} tag="span" inline /></span>

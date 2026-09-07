@@ -3,14 +3,36 @@ import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableEmbed } from '../components/admin/EditableEmbed';
-import { CheckCircle, Clock, Mail, MapPin, Phone } from 'lucide-react';
+import { CheckCircle, Clock, Loader2, Mail, MapPin, Phone } from 'lucide-react';
+import { submitLead } from '../lib/leads';
 
 export const ContactPage: React.FC = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [inquiryType, setInquiryType] = useState('purchase');
+  const [message, setMessage] = useState('');
+
+  /** The success panel only replaces the form once GHL has actually accepted the lead. */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError('');
+
+    try {
+      await submitLead('contact', { name, email, phone, inquiryType, message });
+      setFormSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -63,9 +85,11 @@ export const ContactPage: React.FC = () => {
                     <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">
                       <EditableText contentKey="contact_label_name" value="Full Name" tag="span" inline />
                     </label>
-                    <input 
-                      type="text" 
-                      required 
+                    <input
+                      type="text"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Maria Santos"
                       className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     />
@@ -74,9 +98,11 @@ export const ContactPage: React.FC = () => {
                     <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">
                       <EditableText contentKey="contact_label_email" value="Email Address" tag="span" inline />
                     </label>
-                    <input 
-                      type="email" 
-                      required 
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       placeholder="maria@example.com"
                       className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     />
@@ -88,9 +114,11 @@ export const ContactPage: React.FC = () => {
                     <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">
                       <EditableText contentKey="contact_label_mobile" value="Mobile Number" tag="span" inline />
                     </label>
-                    <input 
-                      type="tel" 
-                      required 
+                    <input
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
                       placeholder="+63 917 000 0000"
                       className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     />
@@ -99,7 +127,11 @@ export const ContactPage: React.FC = () => {
                     <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">
                       <EditableText contentKey="contact_label_inquiry" value="Inquiry Type" tag="span" inline />
                     </label>
-                    <select className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none">
+                    <select
+                      value={inquiryType}
+                      onChange={(e) => setInquiryType(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none appearance-none"
+                    >
                       <option value="purchase">Purchase</option>
                       <option value="lease">Lease</option>
                       <option value="general">General Inquiry</option>
@@ -112,18 +144,28 @@ export const ContactPage: React.FC = () => {
                   <label className="block font-label-lg text-label-lg text-on-surface-variant mb-1">
                     <EditableText contentKey="contact_label_message" value="Message" tag="span" inline />
                   </label>
-                  <textarea 
-                    rows={4} 
-                    required 
+                  <textarea
+                    rows={4}
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                     placeholder="Write your message or inquiry here..."
                     className="w-full px-3.5 py-2.5 rounded border border-outline-variant bg-surface text-body-md focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                   />
                 </div>
 
-                <button 
-                  type="submit" 
-                  className="px-6 py-3 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container font-label-lg text-label-lg rounded transition-colors shadow-sm cursor-pointer"
+                {error && (
+                  <p role="alert" className="font-body-sm text-body-sm text-error">
+                    {error}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-container text-on-primary hover:text-on-primary-container font-label-lg text-label-lg rounded transition-colors shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                 >
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   <EditableText contentKey="contact_submit_label" value="Send Message" tag="span" inline />
                 </button>
               </form>

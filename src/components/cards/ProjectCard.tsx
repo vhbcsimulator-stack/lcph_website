@@ -7,6 +7,7 @@ import { EditableText } from '../admin/EditableText';
 import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { ArrowRight, MapPin } from 'lucide-react';
+import { PROJECT_CATEGORY_OPTIONS, PROJECT_STATUS_OPTIONS } from '../../data/fieldOptions';
 
 interface ProjectCardProps {
   project: Project;
@@ -36,6 +37,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <EditableText
               value={project.status}
               onSave={(val) => updateProjectField(project.id, 'status', val as Project['status'])}
+              options={PROJECT_STATUS_OPTIONS}
               tag="span"
               inline
             />
@@ -44,6 +46,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
             <EditableText
               value={project.category}
               onSave={(val) => updateProjectField(project.id, 'category', val as Project['category'])}
+              options={PROJECT_CATEGORY_OPTIONS}
               tag="span"
               inline
             />

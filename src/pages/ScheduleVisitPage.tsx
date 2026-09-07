@@ -2,23 +2,65 @@ import React, { useState } from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { projectsData } from '../data/projectsData';
 import { EditableText } from '../components/admin/EditableText';
-import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle, Loader2 } from 'lucide-react';
+import { submitLead } from '../lib/leads';
 
 export const ScheduleVisitPage: React.FC = () => {
   const [step, setStep] = useState(1);
   const [selectedProject, setSelectedProject] = useState(projectsData[0].id);
   const [visitDate, setVisitDate] = useState('');
-  const [visitTime, setVisitTime] = useState('10:00 AM');
+  // Must match one of the <option> values below, or the select renders with nothing chosen.
+  const [visitTime, setVisitTime] = useState('10:30 AM');
   const [numVisitors, setNumVisitors] = useState('2');
   const [visitorName, setVisitorName] = useState('');
   const [visitorEmail, setVisitorEmail] = useState('');
   const [visitorPhone, setVisitorPhone] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleNext = (e: React.FormEvent) => {
+  /**
+   * Step 1 is local only. Step 2 is the real booking: the confirmation screen appears
+   * only after GHL has accepted the lead, so a visitor is never told their tour is
+   * booked when nothing reached the coordinator.
+   */
+  const handleNext = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 3) {
-      setStep(step + 1);
+
+    if (step === 1) {
+      setStep(2);
+      return;
     }
+
+    if (submitting) return;
+    setSubmitting(true);
+    setError('');
+
+    try {
+      await submitLead('schedule-visit', {
+        name: visitorName,
+        email: visitorEmail,
+        phone: visitorPhone,
+        project: projectsData.find((p) => p.id === selectedProject)?.name ?? selectedProject,
+        visitDate,
+        visitTime,
+        numVisitors,
+      });
+      setStep(3);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /** "Book Another Visit" must clear the previous booking, not pre-fill it. */
+  const resetBooking = () => {
+    setVisitorName('');
+    setVisitorEmail('');
+    setVisitorPhone('');
+    setVisitDate('');
+    setError('');
+    setStep(1);
   };
 
   return (
@@ -185,10 +227,17 @@ export const ScheduleVisitPage: React.FC = () => {
                 </select>
               </div>
 
+              {error && (
+                <p role="alert" className="font-body-sm text-body-sm text-error">
+                  {error}
+                </p>
+              )}
+
               <div className="flex justify-between items-center">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
+                  disabled={submitting}
                   className="px-4 py-2.5 border border-outline-variant text-on-surface-variant font-label-lg text-label-lg rounded flex items-center gap-1 hover:bg-surface-container-low cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -197,10 +246,12 @@ export const ScheduleVisitPage: React.FC = () => {
 
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-primary text-on-primary font-label-lg text-label-lg rounded flex items-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors cursor-pointer h-[48px]"
+                  disabled={submitting}
+                  className="px-6 py-3 bg-primary text-on-primary font-label-lg text-label-lg rounded flex items-center gap-2 hover:bg-primary-container hover:text-on-primary-container transition-colors cursor-pointer h-[48px] disabled:cursor-not-allowed disabled:opacity-60"
                 >
+                  {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   <EditableText contentKey="schedule_cta_complete" value="Complete Reservation" tag="span" inline />
-                  <ArrowRight className="w-4 h-4" />
+                  {!submitting && <ArrowRight className="w-4 h-4" />}
                 </button>
               </div>
             </form>
@@ -223,7 +274,7 @@ export const ScheduleVisitPage: React.FC = () => {
               </div>
 
               <button
-                onClick={() => setStep(1)}
+                onClick={resetBooking}
                 className="mt-4 px-6 py-2.5 bg-primary text-on-primary font-label-lg text-label-lg rounded hover:bg-primary-container hover:text-on-primary-container transition-colors cursor-pointer h-[44px]"
               >
                 <EditableText contentKey="schedule_cta_again" value="Book Another Visit" tag="span" inline />

@@ -7,6 +7,7 @@ import { EditableRichText } from '../admin/EditableRichText';
 import { EditableImage } from '../admin/EditableImage';
 import { DeleteItemButton } from '../admin/AddItemButton';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
+import { NEWS_CATEGORY_OPTIONS } from '../../data/fieldOptions';
 
 interface NewsCardProps {
   news: NewsArticle;
@@ -31,6 +32,7 @@ export const NewsCard: React.FC<NewsCardProps> = ({ news }) => {
           <EditableText
             value={news.category}
             onSave={(val) => updateNewsField(news.id, 'category', val as NewsArticle['category'])}
+            options={NEWS_CATEGORY_OPTIONS}
             tag="span"
             inline
           />

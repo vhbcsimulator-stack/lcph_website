@@ -5,6 +5,7 @@ import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
+import { submitLead } from '../lib/leads';
 import {
   ArrowRight,
   Award,
@@ -17,6 +18,7 @@ import {
   Handshake,
   HardHat,
   Landmark,
+  Loader2,
   Mail,
   Package,
   Phone,
@@ -179,6 +181,12 @@ export const PartnerPage: React.FC = () => {
   const { isAdmin, pageContent, updateText } = useAdmin();
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [category, setCategory] = useState<string>(DEFAULT_TRACKS[0].id);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [applicantName, setApplicantName] = useState('');
+  const [license, setLicense] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const formRef = useRef<HTMLDivElement>(null);
 
   const copy = (key: string, _fallback: string) => pageContent[key] ?? '';
@@ -225,9 +233,32 @@ export const PartnerPage: React.FC = () => {
   const setBenefit = (index: number, text: string) =>
     writeBenefits(benefits.map((b, i) => (i === index ? text : b)));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    if (submitting) return;
+
+    setSubmitting(true);
+    setError('');
+
+    try {
+      await submitLead('partner', {
+        name: applicantName,
+        license,
+        email,
+        phone,
+        // The readable track title, since admins can rename tracks and the id means nothing in GHL.
+        category: tracks.find((t) => t.id === activeCategory)?.title ?? activeCategory,
+      });
+      setApplicantName('');
+      setLicense('');
+      setEmail('');
+      setPhone('');
+      setFormSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /** Picking a card pre-fills the dropdown, so the choice carries into the form. */
@@ -480,7 +511,14 @@ export const PartnerPage: React.FC = () => {
                       <label className={FIELD_LABEL}>
                         <EditableText contentKey="partner_label_name" value="Full Name / Agency" tag="span" inline />
                       </label>
-                      <input type="text" required placeholder={placeholder(0)} className={FIELD} />
+                      <input
+                        type="text"
+                        required
+                        value={applicantName}
+                        onChange={(e) => setApplicantName(e.target.value)}
+                        placeholder={placeholder(0)}
+                        className={FIELD}
+                      />
                     </div>
                     <div>
                       <label className={FIELD_LABEL}>
@@ -491,7 +529,14 @@ export const PartnerPage: React.FC = () => {
                           inline
                         />
                       </label>
-                      <input type="text" required placeholder={placeholder(1)} className={FIELD} />
+                      <input
+                        type="text"
+                        required
+                        value={license}
+                        onChange={(e) => setLicense(e.target.value)}
+                        placeholder={placeholder(1)}
+                        className={FIELD}
+                      />
                     </div>
                   </div>
 
@@ -500,13 +545,27 @@ export const PartnerPage: React.FC = () => {
                       <label className={FIELD_LABEL}>
                         <EditableText contentKey="partner_label_email" value="Email Address" tag="span" inline />
                       </label>
-                      <input type="email" required placeholder={placeholder(2)} className={FIELD} />
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={placeholder(2)}
+                        className={FIELD}
+                      />
                     </div>
                     <div>
                       <label className={FIELD_LABEL}>
                         <EditableText contentKey="partner_label_mobile" value="Mobile Number" tag="span" inline />
                       </label>
-                      <input type="tel" required placeholder={placeholder(3)} className={FIELD} />
+                      <input
+                        type="tel"
+                        required
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder={placeholder(3)}
+                        className={FIELD}
+                      />
                     </div>
                   </div>
 
@@ -533,10 +592,18 @@ export const PartnerPage: React.FC = () => {
                     </select>
                   </div>
 
+                  {error && (
+                    <p role="alert" className="font-body-sm text-body-sm text-error">
+                      {error}
+                    </p>
+                  )}
+
                   <button
                     type="submit"
-                    className="home-cta inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded bg-primary px-6 py-3 font-label-lg text-label-lg text-on-primary shadow-sm hover:bg-primary-container hover:text-on-primary-container"
+                    disabled={submitting}
+                    className="home-cta inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded bg-primary px-6 py-3 font-label-lg text-label-lg text-on-primary shadow-sm hover:bg-primary-container hover:text-on-primary-container disabled:cursor-not-allowed disabled:opacity-60"
                   >
+                    {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     <EditableText contentKey="partner_submit" value="Submit Accreditation Request" tag="span" inline />
                     <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </button>

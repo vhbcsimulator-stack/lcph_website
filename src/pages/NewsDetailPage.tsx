@@ -8,6 +8,7 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { metaForNews } from '../seo/site.js';
 import { useSeo, type SeoMeta } from '../seo/useSeo';
+import { NEWS_CATEGORY_OPTIONS } from '../data/fieldOptions';
 
 export const NewsDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -31,6 +32,7 @@ export const NewsDetailPage: React.FC = () => {
             <EditableText
               value={article.category}
               onSave={(val: string) => updateNewsField(article.id, 'category', val as any)}
+              options={NEWS_CATEGORY_OPTIONS}
               tag="span"
               inline
             />
