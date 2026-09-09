@@ -2,6 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../../utils/scroll';
 import { ArrowRight, Menu, X } from 'lucide-react';
+import { useVisibility } from '../../hooks/useVisibility';
 
 const NAV_ITEMS = [
   { to: '/', label: 'Home' },
@@ -121,6 +122,12 @@ export const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { isAdmin, isPageHidden, isSectionHidden } = useVisibility();
+
+  /* Visitors lose the link to a hidden page entirely; admins keep it, struck through, so they can
+     still reach the page they just hid. */
+  const navItems = NAV_ITEMS.filter((item) => isAdmin || !isPageHidden(item.to));
+  const ctaHidden = isSectionHidden('chrome.header_cta') || isPageHidden('/contact');
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -254,11 +261,13 @@ export const Header: React.FC = () => {
 <nav
             className="hidden min-w-0 flex-1 items-center justify-center gap-6 transition-[gap] duration-300 ease-out xl:gap-8 lg:flex"
           >
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const active = isActive(item.to);
+              const pageHidden = isPageHidden(item.to);
               return (
                 <Link
                   key={item.to}
+                  title={pageHidden ? 'Hidden from the public site' : undefined}
                   to={item.to}
                   onClick={handleNavClick(item.to)}
                   aria-current={active ? 'page' : undefined}
@@ -266,7 +275,7 @@ export const Header: React.FC = () => {
                     overlay
                       ? `text-white drop-shadow-sm focus-visible:ring-white/70 ${active ? '' : 'text-white/80 hover:text-white'}`
                       : `focus-visible:ring-primary/50 ${active ? 'text-primary' : 'text-on-surface hover:text-primary'}`
-                  }`}
+                  } ${pageHidden ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''}`}
                 >
                   {item.label}
                   <span
@@ -280,7 +289,7 @@ export const Header: React.FC = () => {
             })}
           </nav>
           <div className={`hidden shrink-0 lg:block lg:w-[var(--cta-col)] ${EASE}`}>
-            {!isContactPage && (
+            {!isContactPage && (isAdmin || !ctaHidden) && (
             <Link
               to="/contact"
               onClick={handleNavClick('/contact')}
@@ -320,11 +329,13 @@ export const Header: React.FC = () => {
           />
           <div className="animate-in slide-in-from-top space-y-sm border-b border-outline-variant/30 bg-surface-container-lowest px-margin-mobile py-sm shadow-lg duration-300 lg:hidden">
             <nav className="flex flex-col gap-1">
-              {NAV_ITEMS.map((item) => {
+              {navItems.map((item) => {
                 const active = isActive(item.to);
+                const pageHidden = isPageHidden(item.to);
                 return (
                   <Link
                     key={item.to}
+                    title={pageHidden ? 'Hidden from the public site' : undefined}
                     to={item.to}
                     onClick={handleNavClick(item.to)}
                     aria-current={active ? 'page' : undefined}
@@ -332,7 +343,7 @@ export const Header: React.FC = () => {
                       active
                         ? 'bg-primary/8 text-primary'
                         : 'text-on-surface-variant hover:bg-primary/5 hover:text-primary'
-                    }`}
+                    } ${pageHidden ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''}`}
                   >
                     <span
                       aria-hidden
@@ -345,7 +356,7 @@ export const Header: React.FC = () => {
                 );
               })}
             </nav>
-            {!isContactPage && (
+            {!isContactPage && (isAdmin || !ctaHidden) && (
             <div className="flex flex-col gap-sm border-t border-outline-variant/20 pt-sm">
               <Link
                 to="/contact"

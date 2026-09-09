@@ -6,6 +6,7 @@ import type { DevelopmentUpdate } from '../types';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { UpdateCard } from '../components/cards/UpdateCard';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { Hideable } from '../components/admin/Hideable';
 import { UpdateFormModal } from '../components/admin/UpdateFormModal';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
@@ -42,6 +43,7 @@ export const UpdatesPage: React.FC = () => {
 
   return (
     <AnimatedPage className="space-y-l">
+      <Hideable id="updates.header">
       <div className="container-custom max-w-[1120px] space-y-md">
         <Breadcrumbs items={[{ label: 'Development Updates' }]} />
 
@@ -67,7 +69,9 @@ export const UpdatesPage: React.FC = () => {
         </motion.div>
 
       </div>
+      </Hideable>
 
+      <Hideable id="updates.feed">
       {/* Report feed â€” banded so the reports read as one zone under the page header */}
       <div className="section-band section-dots py-16">
         <div className="container-custom max-w-[1120px] space-y-md">
@@ -175,6 +179,7 @@ export const UpdatesPage: React.FC = () => {
           </div>
         </motion.section>
       </div>
+      </Hideable>
 
       <UpdateFormModal
         isOpen={editing !== undefined}

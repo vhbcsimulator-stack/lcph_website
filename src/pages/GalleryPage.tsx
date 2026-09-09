@@ -6,6 +6,7 @@ import { EditableImage } from '../components/admin/EditableImage';
 import { AddItemButton, DeleteItemButton } from '../components/admin/AddItemButton';
 import { Lightbox } from '../components/ui/Lightbox';
 import { EditableText } from '../components/admin/EditableText';
+import { Hideable } from '../components/admin/Hideable';
 import { Image, Maximize2 } from 'lucide-react';
 import { GALLERY_CATEGORY_OPTIONS } from '../data/fieldOptions';
 
@@ -51,6 +52,7 @@ export const GalleryPage: React.FC = () => {
 
   return (
     <div className="overflow-hidden">
+      <Hideable id="gallery.header">
       {/* No bottom rule here: the tinted band below already separates the header from the grid. */}
       <div className="relative">
         <div className="container-custom relative pt-sm">
@@ -74,7 +76,9 @@ export const GalleryPage: React.FC = () => {
         </div>
         </div>
       </div>
+      </Hideable>
 
+      <Hideable id="gallery.grid">
       <div className="section-band section-grid pb-16 pt-10 md:pt-12">
         <div className="container-custom space-y-8">
 
@@ -186,6 +190,7 @@ export const GalleryPage: React.FC = () => {
         )}
         </div>
       </div>
+      </Hideable>
 
       <Lightbox
         isOpen={lightboxOpen} 

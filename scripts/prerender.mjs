@@ -128,6 +128,26 @@ function faqsFromPageContent(pageContent) {
     .filter(complete);
 }
 
+/**
+ * Pages an admin has hidden, read from the same `page_content` row the site reads.
+ *
+ * Kept as a few local lines rather than an import because this script must run standalone against
+ * the built output; the shape it parses is defined in src/data/visibility.ts.
+ */
+function hiddenPagesFromPageContent(pageContent) {
+  try {
+    const parsed = JSON.parse(pageContent['site_visibility'] ?? '');
+    return Array.isArray(parsed?.pages) ? parsed.pages.filter((p) => typeof p === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Mirrors isPathHidden(): hiding an index page hides the detail pages beneath it. */
+function isHidden(path, hiddenPages) {
+  return hiddenPages.some((id) => (id === '/' ? path === '/' : path === id || path.startsWith(`${id}/`)));
+}
+
 async function loadContent() {
   const [projectRows, propertyRows, newsRows, updateRows, contentRows] = await Promise.all([
     fetchTable('projects', 'slug,name,location,category,status,description,long_description,image,amenities,total_area,total_units,lot_sizes,price_range,created_at'),
@@ -141,6 +161,7 @@ async function loadContent() {
   const pageContent = Object.fromEntries(contentRows.map((r) => [r.key, r.value]));
 
   return {
+    hiddenPages: hiddenPagesFromPageContent(pageContent),
     faqs: faqsFromPageContent(pageContent),
     projects: withSlug(projectRows).map((r) => ({
       slug: r.slug,
@@ -345,10 +366,32 @@ async function main() {
   }
   const shell = await readFile(shellPath, 'utf8');
 
-  const { projects, properties, news, updates, faqs } = await loadContent();
+  const { projects, properties, news, updates, faqs, hiddenPages } = await loadContent();
   const sitemap = [];
+  const visible = (path) => !isHidden(path, hiddenPages);
+  let skippedStatic = 0;
+
+  /*
+   * A hidden page still gets a static file, matching what the SPA renders for it: the maintenance
+   * notice, marked noindex. Writing nothing would be worse — the host would fall back to the shell,
+   * whose default metadata is indexable, so a crawler could file the placeholder under the real
+   * page's title. It stays out of the sitemap either way.
+   */
+  const maintenanceMeta = (path) => ({
+    title: 'Under Maintenance | LCPH Realty Inc.',
+    description: 'This page is temporarily unavailable while we make updates. Please check back shortly.',
+    canonical: `${SITE_URL}${path}`,
+    type: 'website',
+    noindex: true,
+    jsonLd: [],
+  });
 
   for (const route of STATIC_ROUTES) {
+    if (!visible(route.path)) {
+      await writeRoute(route.path, renderRoute(shell, maintenanceMeta(route.path)));
+      skippedStatic += 1;
+      continue;
+    }
     const meta = metaForStatic(route.path);
     // The FAQ rich result is the one piece of structured data that depends on
     // page_content, so it is attached here rather than baked into metaForStatic.
@@ -363,12 +406,20 @@ async function main() {
 
   for (const project of projects) {
     const path = `/projects/${project.slug}`;
+    if (!visible(path)) {
+      await writeRoute(path, renderRoute(shell, maintenanceMeta(path)));
+      continue;
+    }
     await writeRoute(path, renderRoute(shell, metaForProject(project)));
     sitemap.push({ path, priority: 0.9, changefreq: 'monthly', lastmod: project.lastmod });
   }
 
   for (const property of properties) {
     const path = `/properties/${property.slug}`;
+    if (!visible(path)) {
+      await writeRoute(path, renderRoute(shell, maintenanceMeta(path)));
+      continue;
+    }
     await writeRoute(path, renderRoute(shell, metaForProperty(property)));
     // Sold lots stay in the sitemap: they still rank for the searches that bring
     // buyers to the development, and the page states its own availability.
@@ -377,12 +428,20 @@ async function main() {
 
   for (const article of news) {
     const path = `/news/${article.slug}`;
+    if (!visible(path)) {
+      await writeRoute(path, renderRoute(shell, maintenanceMeta(path)));
+      continue;
+    }
     await writeRoute(path, renderRoute(shell, metaForNews(article)));
     sitemap.push({ path, priority: 0.6, changefreq: 'yearly', lastmod: article.lastmod });
   }
 
   for (const update of updates) {
     const path = `/updates/${update.slug}`;
+    if (!visible(path)) {
+      await writeRoute(path, renderRoute(shell, maintenanceMeta(path)));
+      continue;
+    }
     await writeRoute(path, renderRoute(shell, metaForUpdate(update)));
     sitemap.push({ path, priority: 0.6, changefreq: 'yearly', lastmod: update.lastmod });
   }
@@ -392,7 +451,7 @@ async function main() {
 
   console.log(
     `[seo] ${sitemap.length} URLs in sitemap.xml — ` +
-      `${STATIC_ROUTES.length} static, ${projects.length} projects, ${properties.length} properties, ` +
+      `${STATIC_ROUTES.length - skippedStatic} static, ${projects.length} projects, ${properties.length} properties, ` +
       `${news.length} news, ${updates.length} updates`
   );
 }

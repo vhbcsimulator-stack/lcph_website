@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { EditableText } from '../components/admin/EditableText';
+import { Hideable } from '../components/admin/Hideable';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableEmbed } from '../components/admin/EditableEmbed';
 import { CheckCircle, Clock, Loader2, Mail, MapPin, Phone } from 'lucide-react';
@@ -37,6 +38,7 @@ export const ContactPage: React.FC = () => {
 
   return (
     <div data-page-motion="custom" className="simple-page-enter space-y-xl py-sm">
+      <Hideable id="contact.body">
       <div className="container-custom space-y-md">
         <Breadcrumbs items={[{ label: 'Contact Us' }]} />
 
@@ -214,6 +216,8 @@ export const ContactPage: React.FC = () => {
           </div>
         </div>
       </div>
+      </Hideable>
+      <Hideable id="contact.map">
       <section data-reveal className="section-band w-full h-96 relative overflow-hidden">
         <EditableEmbed
           contentKey="contact_map_embed"
@@ -222,6 +226,7 @@ export const ContactPage: React.FC = () => {
           title="LCPH office location map"
         />
       </section>
+      </Hideable>
     </div>
   );
 };

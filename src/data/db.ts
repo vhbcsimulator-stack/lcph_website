@@ -329,6 +329,11 @@ export const defaultPageContent: Record<string, string> = {
   'notfound_text': 'The page or lot listing you are looking for might have been moved or updated.',
   'notfound_title': 'Page Not Found',
 
+  // Maintenance page — shown in place of a page an admin has hidden
+  'maintenance_cta': 'Return to Home',
+  'maintenance_text': 'This page is temporarily unavailable while we make some updates. Please check back shortly.',
+  'maintenance_title': 'Page Under Maintenance',
+
   // Project detail page
   'project_detail_amenities_title': 'Exclusive Amenities',
   'project_detail_amenity_blurb': 'High-quality township features curated exclusively for LCPH homeowners.',

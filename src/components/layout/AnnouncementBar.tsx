@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 import { EditableText } from '../admin/EditableText';
+import { Hideable } from '../admin/Hideable';
 
 export const AnnouncementBar: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -8,6 +9,7 @@ export const AnnouncementBar: React.FC = () => {
   if (!isVisible) return null;
 
   return (
+    <Hideable id="chrome.announcement" toggleClassName="right-16 top-1/2 -translate-y-1/2">
     <div className="bg-primary text-on-primary py-xs px-margin-desktop relative text-center">
       <EditableText
         contentKey="announcement_text"
@@ -24,5 +26,6 @@ export const AnnouncementBar: React.FC = () => {
         <X className="w-4.5 h-4.5" />
       </button>
     </div>
+    </Hideable>
   );
 };

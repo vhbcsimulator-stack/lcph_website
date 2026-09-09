@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { scrollToTop } from '../../utils/scroll';
+import { useVisibility } from '../../hooks/useVisibility';
+import { Hideable } from '../admin/Hideable';
 
 const LINK_CLASS =
   'font-body-sm text-body-sm text-on-surface-variant hover:text-primary hover:underline transition-all focus:ring-2 focus:ring-primary rounded';
@@ -23,6 +25,11 @@ const LEGAL_LINKS = [
 
 export const Footer: React.FC = () => {
   const location = useLocation();
+  const { isAdmin, isPageHidden } = useVisibility();
+
+  /* A hidden page keeps no footer link either, or the footer would advertise a 404. */
+  const visible = (items: typeof COMPANY_LINKS) =>
+    items.filter((item) => isAdmin || !isPageHidden(item.to));
 
   /** Clicking a link for the page you are already on scrolls back to the top instead of doing nothing. */
   const handleNavClick = (to: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -43,31 +50,45 @@ export const Footer: React.FC = () => {
           </p>
         </div>
 
-        <div>
+        <Hideable id="chrome.footer_company">
           <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Company</h4>
           <ul className="space-y-sm">
-            {COMPANY_LINKS.map((item) => (
+            {visible(COMPANY_LINKS).map((item) => (
               <li key={item.to}>
-                <Link to={item.to} className={LINK_CLASS} onClick={handleNavClick(item.to)}>
+                <Link
+                  to={item.to}
+                  title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
+                  className={`${LINK_CLASS} ${
+                    isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
+                  }`}
+                  onClick={handleNavClick(item.to)}
+                >
                   {item.label}
                 </Link>
               </li>
             ))}
           </ul>
-        </div>
+        </Hideable>
 
-        <div>
+        <Hideable id="chrome.footer_legal">
           <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Legal</h4>
           <ul className="space-y-sm">
-            {LEGAL_LINKS.map((item) => (
+            {visible(LEGAL_LINKS).map((item) => (
               <li key={item.to}>
-                <Link to={item.to} className={LINK_CLASS} onClick={handleNavClick(item.to)}>
+                <Link
+                  to={item.to}
+                  title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
+                  className={`${LINK_CLASS} ${
+                    isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
+                  }`}
+                  onClick={handleNavClick(item.to)}
+                >
                   {item.label}
                 </Link>
               </li>
             ))}
           </ul>
-        </div>
+        </Hideable>
       </div>
       <div className="border-t border-outline-variant/30 py-md text-center">
         <p className="font-body-sm text-body-sm text-on-surface-variant">

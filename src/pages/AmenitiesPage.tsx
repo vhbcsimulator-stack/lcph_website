@@ -6,6 +6,7 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { AmenityCard } from '../components/cards/AmenityCard';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
+import { Hideable } from '../components/admin/Hideable';
 import type { Amenity } from '../types';
 import { Filter, Layers3, SlidersHorizontal, X } from 'lucide-react';
 
@@ -89,6 +90,7 @@ export const AmenitiesPage: React.FC = () => {
       data-page-motion="custom"
       className={`overflow-hidden ${prefersReducedMotion ? '' : 'simple-page-enter'}`}
     >
+      <Hideable id="amenities.header">
       {/* No bottom rule here: the tinted band below already separates the header from the list. */}
       <div className="relative">
         <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full" />
@@ -114,7 +116,9 @@ export const AmenitiesPage: React.FC = () => {
         </div>
         </div>
       </div>
+      </Hideable>
 
+      <Hideable id="amenities.grid">
       <div className="section-band section-grid pb-16 ">
         <div className="container-custom space-y-8">
 
@@ -232,6 +236,7 @@ export const AmenitiesPage: React.FC = () => {
         )}
         </div>
       </div>
+      </Hideable>
     </motion.div>
   );
 };

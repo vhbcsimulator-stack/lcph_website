@@ -10,6 +10,7 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { Hideable } from '../components/admin/Hideable';
 import { IMAGE_PRESETS } from '../utils/image';
 import { fadeInUp, fadeInLeft, fadeInRight, staggerContainer, scaleUp } from '../utils/animations';
 import { EmptyState } from '../components/ui/EmptyState';
@@ -81,6 +82,7 @@ export const HomePage: React.FC = () => {
   // the pinned amenities section's position: sticky.
   return (
     <AnimatedPage className="overflow-x-clip bg-surface">
+      <Hideable id="home.hero">
       {/* 1. HERO SECTION */}
       <section className="relative flex min-h-[560px] w-full items-center justify-center overflow-hidden bg-surface-variant sm:h-[600px] lg:h-[950px]">
         {/* Background Image Overlay with Parallax */}
@@ -194,7 +196,9 @@ export const HomePage: React.FC = () => {
           </motion.button>
         </motion.div>
       </section>
+      </Hideable>
 
+      <Hideable id="home.intro">
       {/* 3. LCPH INTRODUCTION */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -211,7 +215,9 @@ export const HomePage: React.FC = () => {
           compact
         />
       </motion.section>
+      </Hideable>
 
+      <Hideable id="home.spotlight">
       {/* 4. FEATURED FLAGSHIP SPOTLIGHT */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -296,7 +302,9 @@ export const HomePage: React.FC = () => {
           </motion.div>
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="home.projects">
       {/* 5. ALL PROJECTS GRID */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -359,7 +367,9 @@ export const HomePage: React.FC = () => {
           )}
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="home.amenities">
       {/* 7. AMENITIES PREVIEW â€” pins and scrolls sideways on desktop, swipe rail elsewhere */}
       <AmenitiesScroller
         amenities={amenities}
@@ -385,7 +395,9 @@ export const HomePage: React.FC = () => {
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
         </Link>
       </div>
+      </Hideable>
 
+      <Hideable id="home.updates">
       {/* 8. DEVELOPMENT PROGRESS UPDATES */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -450,7 +462,9 @@ export const HomePage: React.FC = () => {
           )}
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="home.faq">
       {/* 10. FREQUENTLY ASKED QUESTIONS */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -544,7 +558,9 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="home.contact">
       {/* 11. INQUIRY & CONTACT FORM SECTION */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -706,6 +722,7 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </motion.section>
+      </Hideable>
     </AnimatedPage>
   );
 };

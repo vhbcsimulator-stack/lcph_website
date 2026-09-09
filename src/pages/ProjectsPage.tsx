@@ -5,6 +5,7 @@ import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { ProjectCard } from '../components/cards/ProjectCard';
 import { EmptyState } from '../components/ui/EmptyState';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { Hideable } from '../components/admin/Hideable';
 import { useAdmin } from '../context/AdminContext';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
@@ -66,6 +67,7 @@ export const ProjectsPage: React.FC = () => {
 
   return (
     <AnimatedPage className="space-y-xl">
+      <Hideable id="projects.header">
       <div className="container-custom space-y-lg">
         <Breadcrumbs items={[{ label: 'Projects' }]} />
 
@@ -280,7 +282,9 @@ export const ProjectsPage: React.FC = () => {
         )}
 
       </div>
+      </Hideable>
 
+      <Hideable id="projects.grid">
       {/* All Projects Grid â€” banded so the results read as their own zone below the featured block */}
       <div className="section-band section-grid py-16">
         <div className="container-custom">
@@ -341,6 +345,7 @@ export const ProjectsPage: React.FC = () => {
         </motion.section>
         </div>
       </div>
+      </Hideable>
     </AnimatedPage>
   );
 };

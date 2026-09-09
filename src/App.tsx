@@ -8,6 +8,7 @@ import { SmoothScroll } from './components/ui/SmoothScroll';
 import { FloatingBackToTopButton } from './components/ui/FloatingBackToTopButton';
 import { AnnouncementBarSkeleton, RouteSkeleton } from './components/ui/PageSkeleton';
 import { RouteSeo } from './seo/RouteSeo';
+import { PageGuard } from './components/layout/PageGuard';
 import { useAdmin } from './context/AdminContext';
 import { AdminProvider } from './context/AdminContext';
 
@@ -59,6 +60,7 @@ const SiteContent = () => {
             <RouteSkeleton />
           ) : (
           <PageEffects>
+          <PageGuard>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -81,6 +83,7 @@ const SiteContent = () => {
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
+          </PageGuard>
           </PageEffects>
           )}
         </main>

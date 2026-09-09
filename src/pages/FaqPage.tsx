@@ -17,6 +17,7 @@ import {
 } from '../data/faqContent';
 import { Link } from 'react-router-dom';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { Hideable } from '../components/admin/Hideable';
 import { accordionTransition } from '../utils/animations';
 import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
@@ -119,6 +120,7 @@ export const FaqPage: React.FC = () => {
 
   return (
     <AnimatedPage className="overflow-hidden pb-xl">
+      <Hideable id="faq.header">
       {/* No bottom rule here: the tinted band below already separates the header from the list. */}
       <div>
         <div className="container-custom pb-12 pt-sm md:pb-16">
@@ -164,7 +166,9 @@ export const FaqPage: React.FC = () => {
         </div>
         </div>
       </div>
+      </Hideable>
 
+      <Hideable id="faq.list">
       <div className="section-band section-dots">
         <div className="container-custom space-y-8">
 
@@ -356,6 +360,7 @@ export const FaqPage: React.FC = () => {
         </div>
         </div>
       </div>
+      </Hideable>
 
       <ConfirmDialog
         isOpen={pendingRemoveId !== null}

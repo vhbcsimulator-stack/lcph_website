@@ -5,6 +5,7 @@ import { EditableText } from '../components/admin/EditableText';
 import { EditableRichText } from '../components/admin/EditableRichText';
 import { EditableImage } from '../components/admin/EditableImage';
 import { AnimatedPage } from '../components/layout/AnimatedPage';
+import { Hideable } from '../components/admin/Hideable';
 import { Breadcrumbs } from '../components/ui/Breadcrumbs';
 import { fadeInUp, fadeInLeft, fadeInRight, staggerContainer, scaleUp } from '../utils/animations';
 import { Eye, Gem, Target } from 'lucide-react';
@@ -15,6 +16,7 @@ export const AboutPage: React.FC = () => {
 
   return (
     <AnimatedPage className="overflow-hidden bg-background pb-xl pt-lg">
+      <Hideable id="about.hero">
       <div className="container-custom max-w-[1120px]">
         <Breadcrumbs items={[{ label: 'About Us' }]} />
 
@@ -65,7 +67,9 @@ export const AboutPage: React.FC = () => {
           </motion.div>
         </motion.div>
       </div>
+      </Hideable>
 
+      <Hideable id="about.overview">
       {/* Company Overview */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -108,7 +112,9 @@ export const AboutPage: React.FC = () => {
           </motion.div>
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="about.pillars">
       {/* Mission, Vision, Values (Bento Grid Style) */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -191,7 +197,9 @@ export const AboutPage: React.FC = () => {
           </motion.div>
         </div>
       </motion.section>
+      </Hideable>
 
+      <Hideable id="about.cta">
       {/* CTA Section */}
       <motion.section
         variants={fadeInUp(0.6)}
@@ -223,6 +231,7 @@ export const AboutPage: React.FC = () => {
           </div>
         </div>
       </motion.section>
+      </Hideable>
     </AnimatedPage>
   );
 };

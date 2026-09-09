@@ -7,6 +7,7 @@ import { AddItemButton } from '../components/admin/AddItemButton';
 import { EditableImage } from '../components/admin/EditableImage';
 import { NewsCard } from '../components/cards/NewsCard';
 import { EditableText } from '../components/admin/EditableText';
+import { Hideable } from '../components/admin/Hideable';
 import { ArrowRight, Calendar, Clock } from 'lucide-react';
 import { NEWS_CATEGORY_OPTIONS } from '../data/fieldOptions';
 import type { NewsArticle } from '../types';
@@ -44,6 +45,7 @@ export const NewsPage: React.FC = () => {
 
   return (
     <div className="overflow-hidden">
+      <Hideable id="news.header">
       {/* No bottom rule here: the tinted band below already separates the header from the feed. */}
       <div>
         <div className="container-custom  pt-sm ">
@@ -66,7 +68,9 @@ export const NewsPage: React.FC = () => {
         </div>
         </div>
       </div>
+      </Hideable>
 
+      <Hideable id="news.feed">
       <div className="section-band section-dots pb-16 pt-10 md:pt-12">
         <div className="container-custom space-y-9">
 
@@ -173,6 +177,7 @@ export const NewsPage: React.FC = () => {
         </AnimatePresence>
         </div>
       </div>
+      </Hideable>
     </div>
   );
 };
