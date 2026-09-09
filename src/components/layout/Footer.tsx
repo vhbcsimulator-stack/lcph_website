@@ -51,43 +51,47 @@ export const Footer: React.FC = () => {
         </div>
 
         <Hideable id="chrome.footer_company">
-          <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Company</h4>
-          <ul className="space-y-sm">
-            {visible(COMPANY_LINKS).map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
-                  className={`${LINK_CLASS} ${
-                    isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
-                  }`}
-                  onClick={handleNavClick(item.to)}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Company</h4>
+            <ul className="space-y-sm">
+              {visible(COMPANY_LINKS).map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
+                    className={`${LINK_CLASS} ${
+                      isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
+                    }`}
+                    onClick={handleNavClick(item.to)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </Hideable>
 
         <Hideable id="chrome.footer_legal">
-          <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Legal</h4>
-          <ul className="space-y-sm">
-            {visible(LEGAL_LINKS).map((item) => (
-              <li key={item.to}>
-                <Link
-                  to={item.to}
-                  title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
-                  className={`${LINK_CLASS} ${
-                    isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
-                  }`}
-                  onClick={handleNavClick(item.to)}
-                >
-                  {item.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <h4 className="font-label-lg text-label-lg text-on-surface mb-md font-bold">Legal</h4>
+            <ul className="space-y-sm">
+              {visible(LEGAL_LINKS).map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    title={isPageHidden(item.to) ? 'Hidden from the public site' : undefined}
+                    className={`${LINK_CLASS} ${
+                      isPageHidden(item.to) ? 'line-through decoration-amber-500 decoration-2 opacity-60' : ''
+                    }`}
+                    onClick={handleNavClick(item.to)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </Hideable>
       </div>
       <div className="border-t border-outline-variant/30 py-md text-center">
