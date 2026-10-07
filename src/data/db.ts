@@ -91,7 +91,7 @@ export const defaultPageContent: Record<string, string> = {
   // Partner Page
   'partner_hero_image': '/src/assets/lcngate.png',
   'partner_eyebrow': 'Partner Program',
-  'partner_title': 'Partner With Lakeshore Community Philippines',
+  'partner_title': 'Partner With Leisure Community Philippines',
   'partner_subtitle': 'Broker Accreditation, Corporate Sales Partnerships, Supplier & Contractor Registration.',
   'partner_cta_primary': 'Apply for Accreditation',
   'partner_cta_secondary': 'Talk to Broker Relations',
@@ -147,9 +147,9 @@ export const defaultPageContent: Record<string, string> = {
 
   // Policy Pages
   'policy_privacy_title': 'Privacy Policy',
-  'policy_privacy_content_p1': 'Lakeshore Community Philippines (LCPH), a subsidiary of VHBC, is committed to protecting the privacy of prospective lot buyers, site visitors, and clients.',
+  'policy_privacy_content_p1': 'Leisure Community Philippines (LCPH), a subsidiary of VHBC, is committed to protecting the privacy of prospective lot buyers, site visitors, and clients.',
   'policy_terms_title': 'Terms of Use',
-  'policy_terms_content_p1': 'Welcome to the official website of Lakeshore Community Philippines (LCPH). By using this platform, you agree to these terms.',
+  'policy_terms_content_p1': 'Welcome to the official website of Leisure Community Philippines (LCPH). By using this platform, you agree to these terms.',
   'policy_cookies_title': 'Cookie Policy',
   'policy_cookies_content_p1': 'This website uses essential session cookies to enhance navigation, remember search filters, and ensure secure form submissions.',
 

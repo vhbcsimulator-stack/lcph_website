@@ -9,8 +9,8 @@ export const newsData: NewsArticle[] = [
     category: 'Announcements',
     author: 'LCPH Corporate Communications',
     readTime: '4 min read',
-    excerpt: 'Lakeshore Community Philippines reinforces its vision for eco-luxury real estate developments in Central Luzon under VHBC guidance.',
-    content: 'Lakeshore Community Philippines (LCPH), a premier subsidiary of VHBC, today unveiled its expanded sustainability framework. The framework integrates solar-powered common areas, smart water management systems for the central lake, and zero-waste community hubs across all upcoming residential phases.',
+    excerpt: 'Leisure Community Philippines reinforces its vision for eco-luxury real estate developments in Central Luzon under VHBC guidance.',
+    content: 'Leisure Community Philippines (LCPH), a premier subsidiary of VHBC, today unveiled its expanded sustainability framework. The framework integrates solar-powered common areas, smart water management systems for the central lake, and zero-waste community hubs across all upcoming residential phases.',
     image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDDn4QYY5RyP9HlFJxEx1F2XuHqbTxvsJfSxeklG8UGytMdWzFm0OCH0Cms3BMsBlTBl1r-FQ046MWLBvUIGXS5HleQc1zGOTQtV83aaEwt7F9woi_V3vBo8xISTbV8VCxYOR55NOlD-NLjLFHxtwLS94YXH72BXsyZJCFs2tphjbmwtarCxQmkykfRHuU4ohvJwXrqKzzzLwDyba8G2yIEyaECPSA9rfApQrk2dh7jTotxxsv5gi0JhFk7XswId2do5w',
     featured: true
   },

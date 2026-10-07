@@ -1,4 +1,4 @@
-/**
+  /**
  * Single source of truth for every piece of SEO metadata on the public site.
  *
  * This file is plain ESM on purpose: it is imported by the React app through Vite
@@ -12,7 +12,9 @@ const ENV_SITE_URL = typeof process !== 'undefined' && process.env ? process.env
 
 export const SITE_URL = (ENV_SITE_URL || 'https://www.lcph.com.ph').replace(/\/+$/, '');
 export const SITE_NAME = 'LCPH Realty Inc.';
-export const SITE_LEGAL_NAME = 'Lakeshore Community Philippines (LCPH) Realty Inc.';
+export const SITE_LEGAL_NAME = 'Leisure Community Philippines (LCPH) Realty Inc.';
+/** What the "LCPH" acronym stands for. Not to be confused with the Lakeshore Community North project. */
+export const BRAND_EXPANSION = 'Leisure Community Philippines';
 export const SITE_LOCALE = 'en_PH';
 export const DEFAULT_OG_IMAGE = '/og-image.jpg';
 
@@ -38,9 +40,17 @@ export const ORGANIZATION = {
   alternateNames: [
     'LCPH',
     'LCPH Realty',
-    'Lakeshore Community Philippines',
+    'LCPH Realty Inc',
+    'Leisure Community Philippines',
+    'Leisure Community Philippines Realty Inc.',
     'Leisure Community PH',
+    'LCPH Leisure Community',
   ],
+
+  /** Plain-language summary used as the Organization `description` in JSON-LD. */
+  description:
+    'LCPH Realty Inc. (Leisure Community Philippines) is a VHBC subsidiary developing master-planned leisure and lakeside communities in Central Luzon, including Lakeshore Community North in Talugtug, Nueva Ecija.',
+  slogan: 'Leisure living, master-planned in Central Luzon.',
 
   /**
    * Official profiles, used for schema.org `sameAs`. This is one of the strongest
@@ -132,8 +142,13 @@ export function pageTitle(title) {
 export const BASE_KEYWORDS = [
   'LCPH Realty',
   'LCPH Realty Inc',
-  'Lakeshore Community Philippines',
+  'LCPH',
+  'Leisure Community Philippines',
+  'Leisure Community PH',
   'Lakeshore Community North',
+  'lots available in North',
+  'available lots Lakeshore Community North',
+  'leisure community Nueva Ecija',
   'lot for sale Nueva Ecija',
   'subdivision Nueva Ecija',
   'Talugtug Nueva Ecija real estate',
@@ -161,17 +176,17 @@ export const STATIC_ROUTES = [
     path: '/',
     title: `${SITE_NAME} | Lakeside Master-Planned Communities in Nueva Ecija`,
     description:
-      'Residential and commercial lots for sale at Lakeshore Community North, a master-planned lakeside community in Talugtug, Nueva Ecija. LCPH Realty Inc. — a VHBC subsidiary with offices in San Fernando, Pampanga.',
-    keywords: keywordsFor(['lot for sale Philippines','residential lots for sale','investment property Central Luzon','lakeside subdivision']),
+      'LCPH Realty Inc. (Leisure Community Philippines), a VHBC subsidiary, sells residential and commercial lots at Lakeshore Community North in Talugtug, Nueva Ecija.',
+    keywords: keywordsFor(['Leisure Community Philippines','LCPH meaning','lot for sale Philippines','residential lots for sale','investment property Central Luzon','lakeside subdivision']),
     priority: 1.0,
     changefreq: 'weekly',
   },
   {
     path: '/about',
-    title: pageTitle('About Us'),
+    title: pageTitle('About Leisure Community Philippines (LCPH)'),
     description:
-      'LCPH Realty Inc. is a VHBC subsidiary building master-planned lakeside estates in Nueva Ecija, with its corporate office in San Fernando, Pampanga. Our story, pillars and commitment to heritage quality.',
-    keywords: keywordsFor(['about LCPH Realty','VHBC subsidiary','property developer Central Luzon','real estate company Pampanga']),
+      'LCPH Realty Inc. — Leisure Community Philippines — is a VHBC subsidiary building master-planned leisure and lakeside estates in Nueva Ecija, with its office in San Fernando, Pampanga.',
+    keywords: keywordsFor(['about LCPH Realty','what is LCPH','Leisure Community Philippines Realty Inc','VHBC subsidiary','property developer Central Luzon','real estate company Pampanga']),
     priority: 0.7,
     changefreq: 'monthly',
   },
@@ -260,7 +275,7 @@ export const STATIC_ROUTES = [
     path: '/partner-with-us',
     title: pageTitle('Partner With Us'),
     description:
-      'Broker, landowner and institutional partnership opportunities with LCPH Realty Inc., a VHBC subsidiary developing lakeside communities in Nueva Ecija.',
+      'Broker, landowner and institutional partnership opportunities with LCPH Realty Inc. (Leisure Community Philippines), a VHBC subsidiary developing lakeside communities in Nueva Ecija.',
     keywords: keywordsFor(['broker partnership','real estate brokers Philippines','landowner joint venture']),
     priority: 0.5,
     changefreq: 'monthly',
@@ -304,6 +319,8 @@ export function organizationLd() {
     '@id': `${SITE_URL}/#organization`,
     name: ORGANIZATION.name,
     legalName: ORGANIZATION.legalName,
+    description: ORGANIZATION.description,
+    slogan: ORGANIZATION.slogan,
     // "LCPH" is a contested acronym (a hospital, a league of cities, two churches all
     // use it), so every name this company is known by is declared explicitly. This is
     // how Google learns which entity a bare "LCPH" query might mean.
@@ -354,6 +371,7 @@ export function websiteLd() {
     '@id': `${SITE_URL}/#website`,
     url: SITE_URL,
     name: SITE_NAME,
+    alternateName: ['LCPH', BRAND_EXPANSION],
     inLanguage: 'en-PH',
     publisher: { '@id': `${SITE_URL}/#organization` },
   };
