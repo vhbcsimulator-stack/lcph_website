@@ -59,7 +59,7 @@ export const ORGANIZATION = {
    * YouTube, LinkedIn) as they exist; empty entries are omitted from the output.
    */
   sameAs: [
-    // 'https://www.facebook.com/<page>',
+    'https://www.facebook.com/LCPHRealtyInc',
     // 'https://www.youtube.com/@<channel>',
     // 'https://www.linkedin.com/company/<company>',
   ].filter(Boolean),
